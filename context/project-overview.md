@@ -10,36 +10,37 @@
 
 ---
 
-## 📌 Problem (Core Idea)
 
-Developers keep their essentials scattered:
+## 🎯 Problem Statement
 
-- Code snippets in VS Code or Notion
-- AI prompts in chats
-- Context files buried in projects
-- Useful links in bookmarks
-- Docs in random folders
-- Commands in .txt files
-- Project templates in GitHub gists
-- Terminal commands in bash history
+Developers keep their essentials scattered across multiple tools and locations:
 
-This creates **context switching, lost knowledge** and **inconsistent workflows**.
+| Resource      | Common Location          |
+| ------------- | ------------------------ |
+| Code snippets | VS Code, Notion, Gists   |
+| AI prompts    | Chat histories           |
+| Context files | Buried in projects       |
+| Useful links  | Browser bookmarks        |
+| Documentation | Random folders           |
+| Commands      | .txt files, bash history |
+| Templates     | GitHub Gists             |
 
-➡️ **DevStash provides ONE searchable, AI‑enhanced hub for all dev knowledge & resources.**
+**The Result:** Context switching, lost knowledge, and inconsistent workflows.
 
----
-
-## 🧑‍💻 Users
-
-| Persona                    | Needs                                     |
-| -------------------------- | ----------------------------------------- |
-| Everyday Developer         | Quick access to snippets, commands, links |
-| AI‑First Developer         | Store prompts, workflows, contexts        |
-| Content Creator / Educator | Save course notes, reusable code          |
-| Full‑Stack Builder         | Patterns, boilerplates, API references    |
+**The Solution:** DevStash provides ONE fast, searchable, AI-enhanced hub for all developer knowledge & resources.
 
 ---
 
+## 👥 Target Users
+
+| User Type                      | Primary Needs                                      |
+| ------------------------------ | -------------------------------------------------- |
+| **Everyday Developer**         | Fast access to snippets, prompts, commands, links  |
+| **AI-First Developer**         | Save prompts, contexts, workflows, system messages |
+| **Content Creator / Educator** | Store code blocks, explanations, course notes      |
+| **Full-Stack Builder**         | Collect patterns, boilerplates, API examples       |
+
+---
 ## ✨ Core Features
 
 ### A) Items & System Item Types
@@ -227,12 +228,28 @@ model ItemTag {
 
 ---
 
-## 🎨 UI / UX
+## 🎨 UI/UX Guidelines
 
-- Dark mode first
-- Minimal, developer‑friendly UI
-- Syntax highlighting for code
-- Inspired by **Notion, Linear, Raycast**
+### Design Principles
+
+- **Modern & Minimal** - Developer-focused aesthetic
+- **Dark Mode Default** - Light mode optional
+- **Clean Typography** - Generous whitespace
+- **Subtle Accents** - Borders and shadows used sparingly
+- **Syntax Highlighting** - For all code blocks
+
+### Design References
+
+- [Notion](https://notion.so) - Clean organization
+- [Linear](https://linear.app) - Modern dev aesthetic
+- [Raycast](https://raycast.com) - Quick access patterns
+
+### Screenshots
+
+Refer to the screenshots below as a base for the dashboard UI. It does not have to be exact. Use it as a reference:
+
+- @context/screenshots/dashboard-ui-main.png
+- @context/screenshots/dashboard-ui-drawer.png
 
 ### Layout
 

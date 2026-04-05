@@ -1,63 +1,58 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Code,
   Sparkles,
-  FileText,
+  StickyNote,
   Terminal,
   File,
   Image,
   Link as LinkIcon,
   Star,
   Clock,
-  ChevronRight,
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { mockUser, mockItemTypes, mockCollections, mockItems } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
+import type { ItemTypeWithCount } from "@/lib/db/items";
+import type { CollectionWithMeta } from "@/lib/db/collections";
 
 const TYPE_ICONS: Record<string, React.ElementType> = {
-  code: Code,
-  sparkles: Sparkles,
-  "file-text": FileText,
-  terminal: Terminal,
-  file: File,
-  image: Image,
-  link: LinkIcon,
+  Code,
+  Sparkles,
+  StickyNote,
+  Terminal,
+  File,
+  Image,
+  Link: LinkIcon,
 };
 
 const TYPE_SLUGS: Record<string, string> = {
-  Snippet: "snippets",
-  Prompt: "prompts",
-  Note: "notes",
-  Command: "commands",
-  File: "files",
-  Image: "images",
-  URL: "urls",
+  snippet: "snippets",
+  prompt: "prompts",
+  note: "notes",
+  command: "commands",
+  file: "files",
+  image: "images",
+  link: "links",
 };
-
-function getItemCountForType(typeId: string) {
-  return mockItems.filter((item) => item.typeId === typeId).length;
-}
 
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  itemTypes: ItemTypeWithCount[];
+  collections: CollectionWithMeta[];
 }
 
-export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export function Sidebar({ collapsed, onToggle, itemTypes, collections }: SidebarProps) {
   const pathname = usePathname();
 
-  const favoriteCollections = mockCollections.filter((c) => c.isFavorite);
-  const recentCollections = [...mockCollections]
-    .sort((a, b) => b.id.localeCompare(a.id))
-    .slice(0, 3);
+  const favoriteCollections = collections.filter((c) => c.isFavorite);
+  const recentCollections = collections.slice(0, 3);
 
   return (
     <aside
@@ -114,20 +109,19 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         )}
         {collapsed && <div className="h-3" />}
 
-        {mockItemTypes.map((type) => {
+        {itemTypes.map((type) => {
           const Icon = TYPE_ICONS[type.icon] ?? File;
           const slug = TYPE_SLUGS[type.name] ?? type.name.toLowerCase() + "s";
-          const count = getItemCountForType(type.id);
           return (
             <NavItem
               key={type.id}
               icon={Icon}
               iconColor={type.color}
-              label={type.name}
+              label={type.name.charAt(0).toUpperCase() + type.name.slice(1)}
               href={`/items/${slug}`}
               pathname={pathname}
               collapsed={collapsed}
-              count={count}
+              count={type.itemCount}
             />
           );
         })}
@@ -144,9 +138,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         {favoriteCollections.length > 0 && (
           <>
             {!collapsed && (
-              <p className="px-3 pb-1 text-xs text-foreground/40">
-                Favorites
-              </p>
+              <p className="px-3 pb-1 text-xs text-foreground/40">Favorites</p>
             )}
             {favoriteCollections.map((col) => (
               <NavItem
@@ -164,22 +156,35 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         )}
 
         {/* Recent collections */}
-        {!collapsed && (
-          <p className="px-3 pt-3 pb-1 text-xs text-foreground/40">
-            Recent
-          </p>
+        {!collapsed && recentCollections.length > 0 && (
+          <p className="px-3 pt-3 pb-1 text-xs text-foreground/40">Recent</p>
         )}
-        {recentCollections.map((col) => (
-          <NavItem
-            key={col.id}
-            icon={ChevronRight}
-            label={col.name}
-            href={`/dashboard/collections/${col.id}`}
-            pathname={pathname}
-            collapsed={collapsed}
-            count={col.itemCount}
-          />
-        ))}
+        {recentCollections.map((col) => {
+          const dominantColor = col.dominantColor;
+          return (
+            <NavItem
+              key={col.id}
+              icon={File}
+              iconColor={dominantColor}
+              label={col.name}
+              href={`/dashboard/collections/${col.id}`}
+              pathname={pathname}
+              collapsed={collapsed}
+              count={col.itemCount}
+              dotColor={dominantColor}
+            />
+          );
+        })}
+
+        {/* View all collections */}
+        {!collapsed && (
+          <Link
+            href="/collections"
+            className="flex items-center px-3 py-1.5 mx-1 mt-1 text-xs text-foreground/40 hover:text-foreground/70 transition-colors"
+          >
+            View all collections
+          </Link>
+        )}
       </div>
 
       {/* User avatar area */}
@@ -190,18 +195,13 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         )}
       >
         <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-          <span className="text-xs font-semibold text-primary">
-            {mockUser.name
-              .split(" ")
-              .map((n) => n[0])
-              .join("")}
-          </span>
+          <span className="text-xs font-semibold text-primary">D</span>
         </div>
         {!collapsed && (
           <>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{mockUser.name}</p>
-              <p className="text-xs text-foreground/50 truncate">{mockUser.email}</p>
+              <p className="text-sm font-medium text-foreground truncate">Demo User</p>
+              <p className="text-xs text-foreground/50 truncate">demo@devhub.dev</p>
             </div>
             <Button
               variant="ghost"
@@ -225,9 +225,10 @@ interface NavItemProps {
   pathname: string;
   collapsed: boolean;
   count?: number;
+  dotColor?: string;
 }
 
-function NavItem({ icon: Icon, iconColor, label, href, pathname, collapsed, count }: NavItemProps) {
+function NavItem({ icon: Icon, iconColor, label, href, pathname, collapsed, count, dotColor }: NavItemProps) {
   const isActive = pathname === href;
 
   return (
@@ -241,10 +242,17 @@ function NavItem({ icon: Icon, iconColor, label, href, pathname, collapsed, coun
         collapsed && "justify-center"
       )}
     >
-      <Icon
-        className="h-4 w-4 shrink-0"
-        style={iconColor ? { color: iconColor } : undefined}
-      />
+      {dotColor ? (
+        <span
+          className="h-2 w-2 rounded-full shrink-0"
+          style={{ backgroundColor: dotColor }}
+        />
+      ) : (
+        <Icon
+          className="h-4 w-4 shrink-0"
+          style={iconColor ? { color: iconColor } : undefined}
+        />
+      )}
       {!collapsed && (
         <>
           <span className="flex-1 truncate text-sm">{label}</span>

@@ -5,12 +5,16 @@ import { Menu } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import type { ItemTypeWithCount } from "@/lib/db/items";
+import type { CollectionWithMeta } from "@/lib/db/collections";
 
 interface DashboardShellProps {
   children: React.ReactNode;
+  itemTypes: ItemTypeWithCount[];
+  collections: CollectionWithMeta[];
 }
 
-export function DashboardShell({ children }: DashboardShellProps) {
+export function DashboardShell({ children, itemTypes, collections }: DashboardShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -18,13 +22,23 @@ export function DashboardShell({ children }: DashboardShellProps) {
     <div className="flex flex-1 overflow-hidden">
       {/* Desktop sidebar */}
       <div className="hidden md:flex h-full">
-        <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />
+        <Sidebar
+          collapsed={collapsed}
+          onToggle={() => setCollapsed((v) => !v)}
+          itemTypes={itemTypes}
+          collections={collections}
+        />
       </div>
 
       {/* Mobile drawer via Sheet */}
       <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
         <SheetContent side="left" className="p-0 w-56">
-          <Sidebar collapsed={false} onToggle={() => setDrawerOpen(false)} />
+          <Sidebar
+            collapsed={false}
+            onToggle={() => setDrawerOpen(false)}
+            itemTypes={itemTypes}
+            collections={collections}
+          />
         </SheetContent>
       </Sheet>
 

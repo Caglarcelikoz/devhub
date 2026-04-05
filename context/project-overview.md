@@ -1,10 +1,10 @@
-## DevStash Project Specifications
+## DevHub Project Specifications
 
 🚀 Centralized Developer Knowledge Hub
 
 ---
 
-## DevStash Project Specifications
+## DevHub Project Specifications
 
 🚀 **Centralized Developer Knowledge Hub** for code snippets, AI prompts, docs, commands & more.
 
@@ -27,7 +27,7 @@ Developers keep their essentials scattered across multiple tools and locations:
 
 **The Result:** Context switching, lost knowledge, and inconsistent workflows.
 
-**The Solution:** DevStash provides ONE fast, searchable, AI-enhanced hub for all developer knowledge & resources.
+**The Solution:** DevHub provides ONE fast, searchable, AI-enhanced hub for all developer knowledge & resources.
 
 ---
 
@@ -352,4 +352,4 @@ git switch -c lesson-01-setup
 
 ---
 
-🏗️ **DevStash — Store Smarter. Build Faster.**
+🏗️ **DevHub — Store Smarter. Build Faster.**

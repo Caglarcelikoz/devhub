@@ -1,4 +1,4 @@
-## DevStash Project Specifications
+## DevHub Project Specifications
 
 ## Problem (Core Idea)
 
@@ -13,7 +13,7 @@ Developers keep their essentials scattered:
 - Project templates in GitHu gists
 - Terminal commands in bash history
 
-This creates context switching, lost knowledge, and inconsistent workflows. DevStash provides ONE fast, searchable, AI-enhanced hub for all dev knowledge & resources.
+This creates context switching, lost knowledge, and inconsistent workflows. DevHub provides ONE fast, searchable, AI-enhanced hub for all dev knowledge & resources.
 
 ## Users
 
@@ -30,7 +30,7 @@ This creates context switching, lost knowledge, and inconsistent workflows. DevS
   Collects patterns, boilerplates, API examples.
 
 ## Features
-Here is a list of features for DevStash.
+Here is a list of features for DevHub.
 
 A. **Items/Item Types**
 Items can have types. Users will be able to create custom types, but we will start with the following system types that can not be changed:

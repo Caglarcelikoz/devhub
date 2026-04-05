@@ -1,28 +1,26 @@
-import {
-  mockCollections,
-  mockItems,
-  mockItemTypes,
-} from "@/lib/mock-data";
+import { mockItems, mockItemTypes } from "@/lib/mock-data";
+import { getCollectionsWithMeta } from "@/lib/db/collections";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { CollectionsRow } from "@/components/dashboard/CollectionsRow";
 import { ItemsGrid } from "@/components/dashboard/ItemsGrid";
 import { Pin, Clock } from "lucide-react";
 
-export default function DashboardPage() {
+// TODO: replace with session user ID once auth is set up
+const DEMO_USER_ID = "cmnm8t5ha0000xyuibvonf4vz";
+
+export default async function DashboardPage() {
+  const collections = await getCollectionsWithMeta(DEMO_USER_ID);
+
   const pinnedItems = mockItems.filter((item) => item.isPinned);
   const recentItems = [...mockItems]
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .slice(0, 10);
 
-  const recentCollections = [...mockCollections]
-    .sort((a, b) => b.id.localeCompare(a.id))
-    .slice(0, 3);
-
   const stats = {
     totalItems: mockItems.length,
-    totalCollections: mockCollections.length,
+    totalCollections: collections.length,
     favoriteItems: mockItems.filter((i) => i.isFavorite).length,
-    favoriteCollections: mockCollections.filter((c) => c.isFavorite).length,
+    favoriteCollections: collections.filter((c) => c.isFavorite).length,
   };
 
   return (
@@ -30,10 +28,10 @@ export default function DashboardPage() {
       {/* Stats */}
       <StatsCards stats={stats} />
 
-      {/* Recent Collections */}
+      {/* Collections */}
       <section>
         <SectionHeading label="Collections" />
-        <CollectionsRow collections={recentCollections} itemTypes={mockItemTypes} allItems={mockItems} />
+        <CollectionsRow collections={collections} />
       </section>
 
       {/* Pinned Items */}

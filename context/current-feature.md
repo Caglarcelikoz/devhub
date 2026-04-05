@@ -2,28 +2,19 @@
 
 <!-- Feature Name -->
 
-## Dashboard Collections — Real Data
-
 ## Status
 
 <!-- Not Started|In Progress|Completed -->
 
-In Progress
+Not Started
 
 ## Goals
 
-Replace mock collection data on the dashboard with real data from Neon/Prisma.
-
-- Create `src/lib/db/collections.ts` with data fetching functions
-- Fetch collections directly in the dashboard server component
-- Collection card border color derived from the most-used item type in that collection
-- Show small color dots for all types present in the collection
-- Keep existing design intact; no items underneath yet
+<!-- Goals & requirements -->
 
 ## Notes
 
-- No auth yet — hardcode demo user ID for now
-- Use existing `prisma` singleton from `src/lib/prisma.ts`
+<!-- Any extra notes -->
 
 ## History
 
@@ -35,3 +26,4 @@ Replace mock collection data on the dashboard with real data from Neon/Prisma.
 - Dashboard UI Phase 3: Stats cards, recent collections row, pinned items grid, 10 most recent items grid
 - Database Phase 1: Prisma 7 ORM + Neon PostgreSQL setup, full schema with all models, initial migration, system item types seeded
 - Database Phase 2: Seed script with demo user (bcryptjs), 5 collections, and 18 items across all system types
+- Dashboard Collections: Real data from Neon/Prisma replacing mock collections; dominant-color border, type dots, live item counts

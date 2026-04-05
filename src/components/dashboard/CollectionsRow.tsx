@@ -46,26 +46,26 @@ export function CollectionsRow({ collections, itemTypes, allItems }: Collections
             className="group rounded-lg border border-border bg-card p-4 hover:border-primary/40 transition-colors"
           >
             <div className="flex items-start justify-between gap-2 mb-2">
-              <h3 className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+              <h3 className="text-[15px] font-medium text-foreground group-hover:text-primary transition-colors">
                 {col.name}
               </h3>
-              {col.isFavorite && <Star className="h-3.5 w-3.5 text-amber-400 shrink-0 fill-amber-400" />}
+              {col.isFavorite && <Star className="h-4 w-4 text-amber-400 shrink-0 fill-amber-400" />}
             </div>
-            <p className="text-xs text-muted-foreground line-clamp-1 mb-3">
+            <p className="text-sm text-foreground/55 line-clamp-1 mb-3">
               {col.description}
             </p>
             <div className="flex items-center justify-between">
-              <div className="flex gap-1">
+              <div className="flex gap-1.5">
                 {typeBreakdown.map((t) => (
                   <span
                     key={t.id}
-                    className="w-2 h-2 rounded-full"
+                    className="w-2.5 h-2.5 rounded-full"
                     style={{ backgroundColor: t.color }}
                     title={`${t.count} ${t.name}`}
                   />
                 ))}
               </div>
-              <span className="text-[10px] text-muted-foreground tabular-nums">
+              <span className="text-sm text-foreground/50 tabular-nums">
                 {col.itemCount} items
               </span>
             </div>

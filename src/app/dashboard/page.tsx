@@ -39,14 +39,14 @@ export default function DashboardPage() {
       {/* Pinned Items */}
       {pinnedItems.length > 0 && (
         <section>
-          <SectionHeading label="Pinned" icon={<Pin className="h-3.5 w-3.5" />} />
+          <SectionHeading label="Pinned" icon={<Pin className="h-4 w-4" />} />
           <ItemsGrid items={pinnedItems} itemTypes={mockItemTypes} />
         </section>
       )}
 
       {/* Recent Items */}
       <section>
-        <SectionHeading label="All Items" icon={<Clock className="h-3.5 w-3.5" />} />
+        <SectionHeading label="All Items" icon={<Clock className="h-4 w-4" />} />
         <ItemsGrid items={recentItems} itemTypes={mockItemTypes} />
       </section>
     </div>
@@ -61,9 +61,9 @@ function SectionHeading({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-1.5 mb-3">
-      {icon && <span className="text-muted-foreground">{icon}</span>}
-      <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+    <div className="flex items-center gap-2 mb-4">
+      {icon && <span className="text-foreground/40">{icon}</span>}
+      <h2 className="text-xs font-semibold uppercase tracking-wider text-foreground/50">
         {label}
       </h2>
     </div>

@@ -43,28 +43,28 @@ function ItemCard({ item, type }: { item: Item; type: ItemType }) {
   const timeAgo = formatTimeAgo(updatedAt);
 
   return (
-    <div className="group rounded-lg border border-border bg-card p-3.5 flex flex-col gap-2.5 hover:border-primary/40 transition-colors cursor-pointer">
+    <div className="group rounded-lg border border-border bg-card p-4 flex flex-col gap-3 hover:border-primary/40 transition-colors cursor-pointer">
       {/* Header row */}
       <div className="flex items-start justify-between gap-2">
         <span
-          className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium"
+          className="inline-flex items-center px-2 py-1 rounded text-sm font-medium"
           style={{ backgroundColor: `${type?.color}22`, color: type?.color }}
         >
           {type?.name ?? "Item"}
         </span>
-        <div className="flex items-center gap-1 text-muted-foreground/60 shrink-0">
-          {item.isFavorite && <Star className="h-3 w-3 fill-amber-400 text-amber-400" />}
-          {item.isPinned && <Pin className="h-3 w-3" />}
+        <div className="flex items-center gap-1.5 text-muted-foreground/60 shrink-0">
+          {item.isFavorite && <Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
+          {item.isPinned && <Pin className="h-4 w-4" />}
         </div>
       </div>
 
       {/* Title */}
       <div>
-        <h3 className="text-xs font-semibold text-foreground leading-snug line-clamp-1">
+        <h3 className="text-[15px] font-semibold text-foreground leading-snug line-clamp-1">
           {item.title}
         </h3>
         {item.description && (
-          <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-snug">
+          <p className="text-sm text-foreground/60 mt-1 line-clamp-2 leading-snug">
             {item.description}
           </p>
         )}
@@ -72,25 +72,25 @@ function ItemCard({ item, type }: { item: Item; type: ItemType }) {
 
       {/* Content preview */}
       {item.content && (
-        <pre className="text-[10px] text-muted-foreground bg-muted rounded px-2 py-1.5 overflow-hidden line-clamp-3 font-mono leading-relaxed whitespace-pre-wrap">
+        <pre className="text-sm text-foreground/55 bg-muted rounded px-3 py-2 overflow-hidden line-clamp-3 font-mono leading-relaxed whitespace-pre-wrap">
           {item.content}
         </pre>
       )}
 
       {/* Tags + timestamp */}
       <div className="flex items-center justify-between gap-2 mt-auto">
-        <div className="flex flex-wrap gap-1 min-w-0">
+        <div className="flex flex-wrap gap-1.5 min-w-0">
           {item.tags.slice(0, 3).map((tag) => (
             <Badge
               key={tag}
               variant="secondary"
-              className="text-[9px] px-1.5 py-0 h-4 font-normal"
+              className="text-xs px-2 py-1 h-auto font-normal rounded-md"
             >
               {tag}
             </Badge>
           ))}
         </div>
-        <span className="text-[10px] text-muted-foreground/60 shrink-0 tabular-nums">
+        <span className="text-xs text-foreground/40 shrink-0 tabular-nums">
           {timeAgo}
         </span>
       </div>

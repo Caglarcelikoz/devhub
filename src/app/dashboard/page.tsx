@@ -1,5 +1,5 @@
-import { mockItems, mockItemTypes } from "@/lib/mock-data";
 import { getCollectionsWithMeta } from "@/lib/db/collections";
+import { getPinnedItems, getRecentItems, getItemStats } from "@/lib/db/items";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { CollectionsRow } from "@/components/dashboard/CollectionsRow";
 import { ItemsGrid } from "@/components/dashboard/ItemsGrid";
@@ -9,17 +9,17 @@ import { Pin, Clock } from "lucide-react";
 const DEMO_USER_ID = "cmnm8t5ha0000xyuibvonf4vz";
 
 export default async function DashboardPage() {
-  const collections = await getCollectionsWithMeta(DEMO_USER_ID);
-
-  const pinnedItems = mockItems.filter((item) => item.isPinned);
-  const recentItems = [...mockItems]
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-    .slice(0, 10);
+  const [collections, pinnedItems, recentItems, itemStats] = await Promise.all([
+    getCollectionsWithMeta(DEMO_USER_ID),
+    getPinnedItems(DEMO_USER_ID),
+    getRecentItems(DEMO_USER_ID, 10),
+    getItemStats(DEMO_USER_ID),
+  ]);
 
   const stats = {
-    totalItems: mockItems.length,
+    totalItems: itemStats.totalItems,
     totalCollections: collections.length,
-    favoriteItems: mockItems.filter((i) => i.isFavorite).length,
+    favoriteItems: itemStats.favoriteItems,
     favoriteCollections: collections.filter((c) => c.isFavorite).length,
   };
 
@@ -38,14 +38,14 @@ export default async function DashboardPage() {
       {pinnedItems.length > 0 && (
         <section>
           <SectionHeading label="Pinned" icon={<Pin className="h-4 w-4" />} />
-          <ItemsGrid items={pinnedItems} itemTypes={mockItemTypes} />
+          <ItemsGrid items={pinnedItems} />
         </section>
       )}
 
       {/* Recent Items */}
       <section>
         <SectionHeading label="All Items" icon={<Clock className="h-4 w-4" />} />
-        <ItemsGrid items={recentItems} itemTypes={mockItemTypes} />
+        <ItemsGrid items={recentItems} />
       </section>
     </div>
   );

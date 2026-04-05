@@ -2,19 +2,27 @@
 
 <!-- Feature Name -->
 
+## Dashboard Items — Real Data
+
 ## Status
 
-<!-- Not Started|In Progress|Completed -->
-
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Goals & requirements -->
+Replace mock item data on the dashboard with real data from Neon/Prisma.
+
+- Create `src/lib/db/items.ts` with fetching functions for pinned and recent items
+- Fetch items directly in the dashboard server component
+- Item card border/icon color derived from item type
+- Show type badge, tags, timestamp — matching current design
+- Hide pinned section entirely if no pinned items exist
+- Update stats (totalItems, favoriteItems) from real data
 
 ## Notes
 
-<!-- Any extra notes -->
+- No auth yet — use hardcoded demo user ID
+- Tags not in schema — omit tag display for now
 
 ## History
 

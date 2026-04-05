@@ -1,56 +1,42 @@
 import { Star, Pin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
-interface Item {
-  id: string;
-  title: string;
-  description: string;
-  content: string;
-  typeId: string;
-  tags: string[];
-  isFavorite: boolean;
-  isPinned: boolean;
-  language: string | null;
-  updatedAt: string;
-}
-
-interface ItemType {
-  id: string;
-  name: string;
-  color: string;
-}
+import type { ItemWithMeta } from "@/lib/db/items";
 
 interface ItemsGridProps {
-  items: Item[];
-  itemTypes: ItemType[];
+  items: ItemWithMeta[];
 }
 
-export function ItemsGrid({ items, itemTypes }: ItemsGridProps) {
-  const typeMap = Object.fromEntries(itemTypes.map((t) => [t.id, t]));
+export function ItemsGrid({ items }: ItemsGridProps) {
+  if (items.length === 0) {
+    return <p className="text-sm text-foreground/40">No items yet.</p>;
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-      {items.map((item) => {
-        const type = typeMap[item.typeId];
-        return <ItemCard key={item.id} item={item} type={type} />;
-      })}
+      {items.map((item) => (
+        <ItemCard key={item.id} item={item} />
+      ))}
     </div>
   );
 }
 
-function ItemCard({ item, type }: { item: Item; type: ItemType }) {
-  const updatedAt = new Date(item.updatedAt);
-  const timeAgo = formatTimeAgo(updatedAt);
+function ItemCard({ item }: { item: ItemWithMeta }) {
+  const { itemType } = item;
+  const timeAgo = formatTimeAgo(item.updatedAt);
+  const preview = item.contentType === "URL" ? item.url : item.content;
 
   return (
-    <div className="group rounded-lg border border-border bg-card p-4 flex flex-col gap-3 hover:border-primary/40 transition-colors cursor-pointer">
+    <div
+      className="group rounded-lg border bg-card p-4 flex flex-col gap-3 hover:opacity-90 transition-opacity cursor-pointer"
+      style={{ borderColor: `${itemType.color}55` }}
+    >
       {/* Header row */}
       <div className="flex items-start justify-between gap-2">
         <span
-          className="inline-flex items-center px-2 py-1 rounded text-sm font-medium"
-          style={{ backgroundColor: `${type?.color}22`, color: type?.color }}
+          className="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
+          style={{ backgroundColor: `${itemType.color}22`, color: itemType.color }}
         >
-          {type?.name ?? "Item"}
+          {itemType.name}
         </span>
         <div className="flex items-center gap-1.5 text-muted-foreground/60 shrink-0">
           {item.isFavorite && <Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
@@ -58,7 +44,7 @@ function ItemCard({ item, type }: { item: Item; type: ItemType }) {
         </div>
       </div>
 
-      {/* Title */}
+      {/* Title + description */}
       <div>
         <h3 className="text-[15px] font-semibold text-foreground leading-snug line-clamp-1">
           {item.title}
@@ -71,9 +57,9 @@ function ItemCard({ item, type }: { item: Item; type: ItemType }) {
       </div>
 
       {/* Content preview */}
-      {item.content && (
+      {preview && (
         <pre className="text-sm text-foreground/55 bg-muted rounded px-3 py-2 overflow-hidden line-clamp-3 font-mono leading-relaxed whitespace-pre-wrap">
-          {item.content}
+          {preview}
         </pre>
       )}
 

@@ -1,7 +1,7 @@
 import { TopBar } from "@/components/dashboard/TopBar";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 
-export default function DashboardLayout({
+export default function ItemsLayout({
   children,
 }: {
   children: React.ReactNode;

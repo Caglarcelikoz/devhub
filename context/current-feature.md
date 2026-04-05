@@ -1,24 +1,18 @@
 # Current Feature
 
-Stats & Sidebar: Real Data Integration
+<!-- Feature Name -->
 
 ## Status
 
-Completed
+Not Started
 
 ## Goals
 
-- Display stats from database data (total items, collections, favorites), keeping current design/layout
-- Display system item types in sidebar with their icons, linking to /items/[typename]
-- Add "View all collections" link under the collections list pointing to /collections
-- For favorite collections keep star icons; for recent collections show a colored circle based on the most-used item type
-- Create `src/lib/db/items.ts` with database functions (already exists — verify/extend as needed)
-- Remove remaining mock-data usage from Sidebar
+<!-- Goals & requirements -->
 
 ## Notes
 
-- Reference: `src/lib/db/collections.ts` for DB function patterns
-- Sidebar is a client component — needs data passed via props from the server layout
+<!-- Any extra notes -->
 
 ## History
 

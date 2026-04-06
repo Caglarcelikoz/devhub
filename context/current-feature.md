@@ -1,51 +1,20 @@
-# Current Feature: Auth Setup - NextAuth + GitHub Provider
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Install NextAuth v5 (`next-auth@beta`) and `@auth/prisma-adapter`
-- Set up split auth config pattern for edge compatibility
-- Add GitHub OAuth provider
-- Protect `/dashboard/*` routes using Next.js middleware (proxy)
-- Redirect unauthenticated users to sign-in
-- Use NextAuth's default sign-in page (no custom pages)
+<!-- Goals & requirements -->
 
 ## Notes
 
-- Use `next-auth@beta` (not `@latest` which installs v4)
-- Split config pattern: `src/auth.config.ts` (edge-safe, providers only) + `src/auth.ts` (full config with Prisma adapter)
-- Proxy file must be at `src/proxy.ts` (same level as `app/`)
-- Use named export: `export const proxy = auth(...)` — not default export
-- Use `session: { strategy: 'jwt' }` with split config pattern
-- Extend Session type with `user.id` via `src/types/next-auth.d.ts`
-- Use Context7 to verify the newest NextAuth v5 config and conventions
-
-### Files to Create
-
-1. `src/auth.config.ts` — Edge-compatible config (providers only, no adapter)
-2. `src/auth.ts` — Full config with Prisma adapter and JWT strategy
-3. `src/app/api/auth/[...nextauth]/route.ts` — Export handlers from auth.ts
-4. `src/proxy.ts` — Route protection with redirect logic
-5. `src/types/next-auth.d.ts` — Extend Session type with user.id
-
-### Environment Variables Needed
-
-```
-AUTH_SECRET=
-AUTH_GITHUB_ID=
-AUTH_GITHUB_SECRET=
-```
-
-### Testing
-
-1. Go to `/dashboard` — should redirect to sign-in
-2. Click "Sign in with GitHub"
-3. Verify redirect back to `/dashboard` after auth
+<!-- Any extra notes -->
 
 ## History
+
+<!-- Keep this updated. Earliest to latest -->
 
 - Project setup and boilerplate cleanup
 - Dashboard UI Phase 1: ShadCN init, /dashboard route, dark mode theme, TopBar with search and new item button, sidebar/main placeholders
@@ -58,3 +27,4 @@ AUTH_GITHUB_SECRET=
 - Stats & Sidebar: Real item types with counts in sidebar; favorite collections keep star icons; recent collections show dominant-color dot; "View all collections" link added; getItemTypesWithCount() added to items.ts; all mock-data removed from Sidebar
 - Pro Badge Sidebar: Subtle ShadCN PRO badge added to "file" and "image" item types in the sidebar; hidden when collapsed
 - Code Scanner Quick Wins: React cache() deduplication for getCollectionsWithMeta, slim collections query (select only itemType fields), composite (userId, updatedAt DESC) index migration on items table, item content capped at 500 chars in mapItem
+- Auth Setup Phase 1: NextAuth v5 with GitHub OAuth; split config pattern for edge compatibility; Prisma adapter with JWT strategy; proxy.ts protecting /dashboard/*; Session extended with user.id

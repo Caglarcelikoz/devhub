@@ -2,22 +2,15 @@
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-Fix quick-win issues identified by code scanner (low risk, no UI changes):
-
-1. **Fix double DB fetch** — `getCollectionsWithMeta()` is called in both `dashboard/layout.tsx` and `dashboard/page.tsx` on every page load. Move the call to the page only and pass data via props, or deduplicate with `unstable_cache`.
-2. **Slim down `getCollectionsWithMeta`** — Currently fetches full `Item` rows (including content) just to compute a count and color list. Replace with a selective `include` that only fetches `itemType.id/name/color` fields.
-3. **Add missing DB index** — `items` table is missing a composite `(userId, updatedAt DESC)` index. `getRecentItems` sorts by `updatedAt` on every dashboard load. Add via Prisma migration.
-4. **Cap item content in `mapItem`** — Full `item.content` is serialized into SSR HTML even though only 3 lines are visible. Truncate to 500 chars in `mapItem` to reduce payload size.
+<!-- Goals & requirements -->
 
 ## Notes
 
-- No UI changes required for any of these
-- #3 requires a new Prisma migration (`npx prisma migrate dev`)
-- All other fixes are code-only
+<!-- Any extra notes -->
 
 ## History
 
@@ -33,3 +26,4 @@ Fix quick-win issues identified by code scanner (low risk, no UI changes):
 - Dashboard Items: Real pinned and recent items from database; type-colored borders, tags, timestamps; all stats live; mock-data.ts fully removed from dashboard
 - Stats & Sidebar: Real item types with counts in sidebar; favorite collections keep star icons; recent collections show dominant-color dot; "View all collections" link added; getItemTypesWithCount() added to items.ts; all mock-data removed from Sidebar
 - Pro Badge Sidebar: Subtle ShadCN PRO badge added to "file" and "image" item types in the sidebar; hidden when collapsed
+- Code Scanner Quick Wins: React cache() deduplication for getCollectionsWithMeta, slim collections query (select only itemType fields), composite (userId, updatedAt DESC) index migration on items table, item content capped at 500 chars in mapItem

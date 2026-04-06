@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { prisma } from '@/lib/prisma'
 
 export interface CollectionWithMeta {
@@ -17,15 +18,17 @@ export interface CollectionWithMeta {
   dominantColor: string | undefined
 }
 
-export async function getCollectionsWithMeta(userId: string): Promise<CollectionWithMeta[]> {
+export const getCollectionsWithMeta = cache(async function getCollectionsWithMeta(userId: string): Promise<CollectionWithMeta[]> {
   const collections = await prisma.collection.findMany({
     where: { userId },
     orderBy: { createdAt: 'desc' },
     include: {
       items: {
-        include: {
+        select: {
           item: {
-            include: { itemType: true },
+            select: {
+              itemType: { select: { id: true, name: true, color: true } },
+            },
           },
         },
       },
@@ -58,4 +61,4 @@ export async function getCollectionsWithMeta(userId: string): Promise<Collection
       dominantColor: typeBreakdown[0]?.color,
     }
   })
-}
+})

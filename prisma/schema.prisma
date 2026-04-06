@@ -111,6 +111,7 @@ model Item {
   @@index([userId])
   @@index([itemTypeId])
   @@index([createdAt])
+  @@index([userId, updatedAt(sort: Desc)])
   @@map("items")
 }
 

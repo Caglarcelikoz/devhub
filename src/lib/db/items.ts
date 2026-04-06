@@ -52,6 +52,7 @@ function mapItem(raw: {
   return {
     ...raw,
     contentType: raw.contentType as 'TEXT' | 'FILE' | 'URL',
+    content: raw.content?.slice(0, 500) ?? null,
     tags: raw.tags.map((t) => t.name),
   }
 }

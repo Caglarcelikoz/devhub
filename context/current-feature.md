@@ -28,3 +28,4 @@ Not Started
 - Pro Badge Sidebar: Subtle ShadCN PRO badge added to "file" and "image" item types in the sidebar; hidden when collapsed
 - Code Scanner Quick Wins: React cache() deduplication for getCollectionsWithMeta, slim collections query (select only itemType fields), composite (userId, updatedAt DESC) index migration on items table, item content capped at 500 chars in mapItem
 - Auth Setup Phase 1: NextAuth v5 with GitHub OAuth; split config pattern for edge compatibility; Prisma adapter with JWT strategy; proxy.ts protecting /dashboard/*; Session extended with user.id
+- Auth Credentials Phase 2: Credentials provider with bcrypt validation; edge-safe placeholder in auth.config.ts; POST /api/auth/register endpoint with validation, duplicate check, and password hashing

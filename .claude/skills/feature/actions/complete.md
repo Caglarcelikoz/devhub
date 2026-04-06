@@ -10,3 +10,7 @@
 4. Delete the local feature branch
 5. Push main to origin once
 6. If feature branch was previously pushed to origin, delete it from origin
+
+## Notes
+
+- Never delete files in `context/features/` — leave spec files in place

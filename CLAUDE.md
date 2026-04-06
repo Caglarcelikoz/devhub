@@ -17,3 +17,9 @@ Read the following to get the full context of the project:
 - **Build**: `npm run build`
 - **Production server**: `npm run start`
 - **Lint**: `npm run lint`
+
+## Neon Database
+
+- Project: `devhub` (ID: `little-bird-64824203`)
+- **Always use the `development` branch** (ID: `br-tiny-forest-alqgryxk`) for all Neon MCP queries
+- **Never query the `production` branch** unless explicitly instructed

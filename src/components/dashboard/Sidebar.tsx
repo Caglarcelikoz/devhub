@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import type { ItemTypeWithCount } from "@/lib/db/items";
 import type { CollectionWithMeta } from "@/lib/db/collections";
 
@@ -112,6 +113,7 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections }: Sidebar
         {itemTypes.map((type) => {
           const Icon = TYPE_ICONS[type.icon] ?? File;
           const slug = TYPE_SLUGS[type.name] ?? type.name.toLowerCase() + "s";
+          const isPro = type.name === "file" || type.name === "image";
           return (
             <NavItem
               key={type.id}
@@ -122,6 +124,7 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections }: Sidebar
               pathname={pathname}
               collapsed={collapsed}
               count={type.itemCount}
+              isPro={isPro}
             />
           );
         })}
@@ -226,9 +229,10 @@ interface NavItemProps {
   collapsed: boolean;
   count?: number;
   dotColor?: string;
+  isPro?: boolean;
 }
 
-function NavItem({ icon: Icon, iconColor, label, href, pathname, collapsed, count, dotColor }: NavItemProps) {
+function NavItem({ icon: Icon, iconColor, label, href, pathname, collapsed, count, dotColor, isPro }: NavItemProps) {
   const isActive = pathname === href;
 
   return (
@@ -256,6 +260,11 @@ function NavItem({ icon: Icon, iconColor, label, href, pathname, collapsed, coun
       {!collapsed && (
         <>
           <span className="flex-1 truncate text-sm">{label}</span>
+          {isPro && (
+            <Badge variant="secondary" className="h-4 px-1 text-[10px] font-semibold tracking-wide text-foreground/50">
+              PRO
+            </Badge>
+          )}
           {count !== undefined && count > 0 && (
             <span className="text-xs text-foreground/40 tabular-nums">{count}</span>
           )}

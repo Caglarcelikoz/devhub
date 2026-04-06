@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Code,
   Sparkles,
@@ -12,15 +12,31 @@ import {
   Link as LinkIcon,
   Star,
   Clock,
-  Settings,
   PanelLeftClose,
   PanelLeftOpen,
+  LogOut,
+  User,
 } from "lucide-react";
+import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import type { ItemTypeWithCount } from "@/lib/db/items";
 import type { CollectionWithMeta } from "@/lib/db/collections";
+
+interface SessionUser {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
 
 const TYPE_ICONS: Record<string, React.ElementType> = {
   Code,
@@ -47,10 +63,12 @@ interface SidebarProps {
   onToggle: () => void;
   itemTypes: ItemTypeWithCount[];
   collections: CollectionWithMeta[];
+  user?: SessionUser;
 }
 
-export function Sidebar({ collapsed, onToggle, itemTypes, collections }: SidebarProps) {
+export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
   const favoriteCollections = collections.filter((c) => c.isFavorite);
   const recentCollections = collections.slice(0, 3);
@@ -191,31 +209,43 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections }: Sidebar
       </div>
 
       {/* User avatar area */}
-      <div
-        className={cn(
-          "border-t border-border flex items-center gap-3 p-3 shrink-0",
-          collapsed ? "justify-center" : ""
-        )}
-      >
-        <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-          <span className="text-xs font-semibold text-primary">D</span>
-        </div>
-        {!collapsed && (
-          <>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">Demo User</p>
-              <p className="text-xs text-foreground/50 truncate">demo@devhub.dev</p>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          className={cn(
+            "border-t border-border flex items-center gap-3 p-3 shrink-0 w-full cursor-pointer hover:bg-sidebar-accent transition-colors outline-none",
+            collapsed ? "justify-center" : ""
+          )}
+        >
+          <UserAvatar name={user?.name} image={user?.image} size={32} className="shrink-0" />
+          {!collapsed && (
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-sm font-medium text-foreground truncate">
+                {user?.name ?? "User"}
+              </p>
+              <p className="text-xs text-foreground/50 truncate">
+                {user?.email ?? ""}
+              </p>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-foreground shrink-0"
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-          </>
-        )}
-      </div>
+          )}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side="top" align={collapsed ? "center" : "start"} className="w-48">
+          <DropdownMenuItem
+            className="flex items-center gap-2 cursor-pointer"
+            onSelect={() => router.push("/profile")}
+          >
+            <User className="h-4 w-4" />
+            Profile
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+            onClick={() => signOut({ callbackUrl: "/sign-in" })}
+          >
+            <LogOut className="h-4 w-4" />
+            Sign out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </aside>
   );
 }

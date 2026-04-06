@@ -8,13 +8,20 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import type { ItemTypeWithCount } from "@/lib/db/items";
 import type { CollectionWithMeta } from "@/lib/db/collections";
 
+interface SessionUser {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
 interface DashboardShellProps {
   children: React.ReactNode;
   itemTypes: ItemTypeWithCount[];
   collections: CollectionWithMeta[];
+  user?: SessionUser;
 }
 
-export function DashboardShell({ children, itemTypes, collections }: DashboardShellProps) {
+export function DashboardShell({ children, itemTypes, collections, user }: DashboardShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -27,6 +34,7 @@ export function DashboardShell({ children, itemTypes, collections }: DashboardSh
           onToggle={() => setCollapsed((v) => !v)}
           itemTypes={itemTypes}
           collections={collections}
+          user={user}
         />
       </div>
 
@@ -38,6 +46,7 @@ export function DashboardShell({ children, itemTypes, collections }: DashboardSh
             onToggle={() => setDrawerOpen(false)}
             itemTypes={itemTypes}
             collections={collections}
+            user={user}
           />
         </SheetContent>
       </Sheet>

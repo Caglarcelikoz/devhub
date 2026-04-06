@@ -12,7 +12,7 @@ export const proxy = auth(async function proxy(req: NextRequest) {
   const isDashboard = req.nextUrl.pathname.startsWith('/dashboard')
 
   if (isDashboard && !isLoggedIn) {
-    const signInUrl = new URL('/api/auth/signin', req.nextUrl.origin)
+    const signInUrl = new URL('/sign-in', req.nextUrl.origin)
     signInUrl.searchParams.set('callbackUrl', req.nextUrl.pathname)
     return NextResponse.redirect(signInUrl)
   }

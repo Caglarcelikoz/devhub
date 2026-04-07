@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { randomBytes } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { sendVerificationEmail } from '@/lib/resend'
+import { ENABLE_EMAIL_VERIFICATION } from '@/lib/flags'
 
 export async function POST(request: Request) {
   try {
@@ -24,20 +25,29 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(password, 10)
 
     await prisma.user.create({
-      data: { name, email, password: hashedPassword },
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        // Mark as verified immediately when verification is disabled
+        emailVerified: ENABLE_EMAIL_VERIFICATION ? null : new Date(),
+      },
     })
 
-    // Generate a verification token (expires in 24 hours)
-    const token = randomBytes(32).toString('hex')
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000)
+    if (ENABLE_EMAIL_VERIFICATION) {
+      const token = randomBytes(32).toString('hex')
+      const expires = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
-    await prisma.verificationToken.create({
-      data: { identifier: email, token, expires },
-    })
+      await prisma.verificationToken.create({
+        data: { identifier: email, token, expires },
+      })
 
-    await sendVerificationEmail(email, token)
+      await sendVerificationEmail(email, token)
 
-    return NextResponse.json({ success: true })
+      return NextResponse.json({ success: true, requiresVerification: true })
+    }
+
+    return NextResponse.json({ success: true, requiresVerification: false })
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

@@ -11,6 +11,7 @@ export function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+  const verified = searchParams.get("verified") === "1";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +32,7 @@ export function SignInForm() {
     setLoading(false);
 
     if (result?.error) {
-      setError("Invalid email or password.");
+      setError("Invalid credentials or email not yet verified.");
     } else {
       router.push(callbackUrl);
     }
@@ -79,6 +80,11 @@ export function SignInForm() {
 
       {/* Email/password form */}
       <form onSubmit={handleSubmit} className="space-y-4">
+        {verified && (
+          <p className="text-sm text-green-500 text-center">
+            Email verified! You can now sign in.
+          </p>
+        )}
         {error && (
           <p className="text-sm text-destructive text-center">{error}</p>
         )}

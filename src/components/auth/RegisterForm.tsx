@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function RegisterForm() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,7 +40,7 @@ export function RegisterForm() {
       return;
     }
 
-    await signIn("credentials", { email, password, callbackUrl: "/dashboard" });
+    router.push("/verify-email");
   }
 
   return (

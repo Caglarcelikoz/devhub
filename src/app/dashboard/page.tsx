@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { getCollectionsWithMeta } from "@/lib/db/collections";
 import { getPinnedItems, getRecentItems, getItemStats } from "@/lib/db/items";
 import { StatsCards } from "@/components/dashboard/StatsCards";
@@ -5,15 +7,20 @@ import { CollectionsRow } from "@/components/dashboard/CollectionsRow";
 import { ItemsGrid } from "@/components/dashboard/ItemsGrid";
 import { Pin, Clock } from "lucide-react";
 
-// TODO: replace with session user ID once auth is set up
-const DEMO_USER_ID = "cmnm8t5ha0000xyuibvonf4vz";
-
 export default async function DashboardPage() {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect("/sign-in");
+  }
+
+  const userId = session.user.id;
+
   const [collections, pinnedItems, recentItems, itemStats] = await Promise.all([
-    getCollectionsWithMeta(DEMO_USER_ID),
-    getPinnedItems(DEMO_USER_ID),
-    getRecentItems(DEMO_USER_ID, 10),
-    getItemStats(DEMO_USER_ID),
+    getCollectionsWithMeta(userId),
+    getPinnedItems(userId),
+    getRecentItems(userId, 10),
+    getItemStats(userId),
   ]);
 
   const stats = {

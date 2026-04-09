@@ -1,0 +1,1 @@
+- [DevHub Architecture Snapshot](project_arch.md) — Early-stage app, key patterns and anti-patterns found in first audit

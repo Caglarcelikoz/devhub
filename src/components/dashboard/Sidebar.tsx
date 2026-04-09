@@ -231,7 +231,7 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
         <DropdownMenuContent side="top" align={collapsed ? "center" : "start"} className="w-48">
           <DropdownMenuItem
             className="flex items-center gap-2 cursor-pointer"
-            onSelect={() => router.push("/profile")}
+            onClick={() => router.push("/profile")}
           >
             <User className="h-4 w-4" />
             Profile

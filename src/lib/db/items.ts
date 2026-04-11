@@ -128,6 +128,68 @@ export async function getItemById(
   }
 }
 
+export interface UpdateItemData {
+  title: string
+  description: string | null
+  content: string | null
+  url: string | null
+  language: string | null
+  tags: string[]
+}
+
+export async function updateItem(
+  id: string,
+  userId: string,
+  data: UpdateItemData,
+): Promise<ItemDetail | null> {
+  // Verify ownership
+  const existing = await prisma.item.findFirst({ where: { id, userId }, select: { id: true } })
+  if (!existing) return null
+
+  const row = await prisma.item.update({
+    where: { id },
+    data: {
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      url: data.url,
+      language: data.language,
+      tags: {
+        set: [],
+        connectOrCreate: data.tags.map((name) => ({
+          where: { name },
+          create: { name },
+        })),
+      },
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      content: true,
+      contentType: true,
+      url: true,
+      language: true,
+      isFavorite: true,
+      isPinned: true,
+      createdAt: true,
+      updatedAt: true,
+      tags: { select: { name: true } },
+      itemType: { select: { id: true, name: true, color: true, icon: true } },
+      collections: {
+        select: { collection: { select: { id: true, name: true } } },
+      },
+    },
+  })
+
+  return {
+    ...row,
+    contentType: row.contentType as 'TEXT' | 'FILE' | 'URL',
+    tags: row.tags.map((t) => t.name),
+    collections: row.collections.map((c) => c.collection),
+  }
+}
+
 export async function getItemStats(userId: string) {
   const [totalItems, favoriteItems] = await Promise.all([
     prisma.item.count({ where: { userId } }),

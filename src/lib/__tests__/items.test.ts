@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getItemById } from '@/lib/db/items'
+import { getItemById, updateItem } from '@/lib/db/items'
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     item: {
       findFirst: vi.fn(),
+      update: vi.fn(),
     },
   },
 }))
@@ -12,6 +13,7 @@ vi.mock('@/lib/prisma', () => ({
 import { prisma } from '@/lib/prisma'
 
 const mockFindFirst = vi.mocked(prisma.item.findFirst)
+const mockUpdate = vi.mocked(prisma.item.update)
 
 // Minimal raw row shape returned by Prisma
 function makeRow(overrides: Partial<ReturnType<typeof baseRow>> = {}) {
@@ -96,5 +98,101 @@ describe('getItemById', () => {
     const result = await getItemById('item-1', 'user-1')
     expect(result?.tags).toEqual([])
     expect(result?.collections).toEqual([])
+  })
+})
+
+describe('updateItem', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns null when item does not belong to user', async () => {
+    mockFindFirst.mockResolvedValue(null)
+    const result = await updateItem('item-1', 'user-1', {
+      title: 'New Title',
+      description: null,
+      content: null,
+      url: null,
+      language: null,
+      tags: [],
+    })
+    expect(result).toBeNull()
+    expect(mockUpdate).not.toHaveBeenCalled()
+  })
+
+  it('calls prisma.item.update with correct data', async () => {
+    mockFindFirst.mockResolvedValue({ id: 'item-1' })
+    mockUpdate.mockResolvedValue(makeRow({ title: 'Updated Title', tags: [{ name: 'ts' }], collections: [] }))
+
+    await updateItem('item-1', 'user-1', {
+      title: 'Updated Title',
+      description: 'desc',
+      content: 'const y = 2',
+      url: null,
+      language: 'typescript',
+      tags: ['ts'],
+    })
+
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'item-1' },
+        data: expect.objectContaining({
+          title: 'Updated Title',
+          description: 'desc',
+          content: 'const y = 2',
+          language: 'typescript',
+          tags: expect.objectContaining({
+            set: [],
+            connectOrCreate: [
+              { where: { name: 'ts' }, create: { name: 'ts' } },
+            ],
+          }),
+        }),
+      }),
+    )
+  })
+
+  it('maps returned tags and collections correctly', async () => {
+    mockFindFirst.mockResolvedValue({ id: 'item-1' })
+    mockUpdate.mockResolvedValue(
+      makeRow({
+        tags: [{ name: 'react' }],
+        collections: [{ collection: { id: 'col-2', name: 'My Collection' } }],
+      }),
+    )
+
+    const result = await updateItem('item-1', 'user-1', {
+      title: 'T',
+      description: null,
+      content: null,
+      url: null,
+      language: null,
+      tags: ['react'],
+    })
+
+    expect(result?.tags).toEqual(['react'])
+    expect(result?.collections).toEqual([{ id: 'col-2', name: 'My Collection' }])
+  })
+
+  it('disconnects all tags when tags array is empty', async () => {
+    mockFindFirst.mockResolvedValue({ id: 'item-1' })
+    mockUpdate.mockResolvedValue(makeRow({ tags: [], collections: [] }))
+
+    await updateItem('item-1', 'user-1', {
+      title: 'T',
+      description: null,
+      content: null,
+      url: null,
+      language: null,
+      tags: [],
+    })
+
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          tags: { set: [], connectOrCreate: [] },
+        }),
+      }),
+    )
   })
 })

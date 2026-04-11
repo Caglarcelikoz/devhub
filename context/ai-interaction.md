@@ -15,7 +15,7 @@ This is the common workflow that we will use for every single feature/fix:
 1. **Document** - Document the feature in @context/current-feature.md.
 2. **Branch** - Create new branch for feature, fix, etc
 3. **Implement** - Implement the feature/fix that I create in @context/current-feature.md
-4. **Test** - Verify it works in the browser. Implement unit testing later. Run `npm run build` and fix any errors
+4. **Test** - Verify it works in the browser. Write unit tests for server actions and utilities (`npm test`). Run `npm run build` and fix any errors
 5. **Iterate** - Iterate and change things if needed
 6. **Commit** - Only after build passes and everything works
 7. **Merge** - Merge to main
@@ -48,6 +48,16 @@ We will create a new branch for every feature/fix. Name branch **feature/[featur
 - Don't refactor unrelated code unless asked
 - Don't add "nice to have" features
 - Preserve existing patterns in the codebase
+
+## Testing
+
+We use Vitest for unit tests. Tests cover **server actions and utilities only** — no component tests.
+
+- Test files: `src/**/__tests__/*.test.ts` or `src/**/*.test.ts`
+- Run: `npm test` (single run), `npm run test:watch` (watch mode), `npm run test:coverage` (coverage)
+- Mock Prisma and external services (Resend, Redis) with `vi.mock()`
+- Test pure logic (mappers, validators, utilities) without mocking where possible
+- Do NOT write tests for React components or Next.js pages
 
 ## Code Review
 

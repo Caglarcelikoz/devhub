@@ -54,6 +54,7 @@ Example v4 configuration:
 - Server Actions: `src/actions/[feature].ts`
 - Types: `src/types/[feature].ts`
 - Lib/Utils: `src/lib/[utility].ts`
+- Tests: `src/lib/__tests__/[utility].test.ts` or `src/actions/__tests__/[action].test.ts`
 
 ## Naming
 

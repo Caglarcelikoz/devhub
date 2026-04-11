@@ -1,6 +1,13 @@
 import Link from "next/link";
+import { ResendVerificationButton } from "@/components/auth/ResendVerificationButton";
 
-export default function VerifyEmailPage() {
+interface Props {
+  searchParams: Promise<{ email?: string }>;
+}
+
+export default async function VerifyEmailPage({ searchParams }: Props) {
+  const { email } = await searchParams;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-6 text-center">
@@ -14,16 +21,20 @@ export default function VerifyEmailPage() {
           </p>
         </div>
 
-        <p className="text-xs text-muted-foreground">
-          Didn&apos;t receive it? Check your spam folder or{" "}
-          <Link
-            href="/register"
-            className="text-foreground underline underline-offset-4 hover:text-primary"
-          >
-            try again
-          </Link>
-          .
-        </p>
+        {email ? (
+          <ResendVerificationButton email={email} />
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Didn&apos;t receive it? Check your spam folder or{" "}
+            <Link
+              href="/register"
+              className="text-foreground underline underline-offset-4 hover:text-primary"
+            >
+              try again
+            </Link>
+            .
+          </p>
+        )}
 
         <Link
           href="/sign-in"

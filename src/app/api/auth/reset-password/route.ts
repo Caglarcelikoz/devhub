@@ -1,8 +1,12 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
+import { checkResetPasswordRateLimit } from '@/lib/rate-limit'
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const rl = await checkResetPasswordRateLimit(request)
+  if (rl.limited) return rl.response
+
   try {
     const { token, password, confirmPassword } = await request.json()
 

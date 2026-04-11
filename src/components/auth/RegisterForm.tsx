@@ -42,7 +42,7 @@ export function RegisterForm() {
     }
 
     if (data.requiresVerification) {
-      router.push("/verify-email");
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } else {
       await signIn("credentials", { email, password, callbackUrl: "/dashboard" });
     }

@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { randomBytes } from 'crypto'
 import { prisma } from '@/lib/prisma'
-import { sendPasswordResetEmail } from '@/lib/resend'
-import { checkForgotPasswordRateLimit } from '@/lib/rate-limit'
+import { sendVerificationEmail } from '@/lib/resend'
+import { ENABLE_EMAIL_VERIFICATION } from '@/lib/flags'
+import { checkResendVerificationRateLimit } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
-  const rl = await checkForgotPasswordRateLimit(request)
-  if (rl.limited) return rl.response
-
   try {
     const { email } = await request.json()
 
@@ -15,26 +13,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
+    if (!ENABLE_EMAIL_VERIFICATION) {
+      return NextResponse.json({ error: 'Email verification is not enabled' }, { status: 400 })
+    }
+
+    const rl = await checkResendVerificationRateLimit(request, email)
+    if (rl.limited) return rl.response
+
     const user = await prisma.user.findUnique({ where: { email } })
 
     // Always return success to avoid user enumeration
-    if (!user || !user.password) {
+    if (!user || user.emailVerified) {
       return NextResponse.json({ success: true })
     }
 
-    // Delete any existing reset token for this email
+    // Delete any existing verification token
     await prisma.verificationToken.deleteMany({
-      where: { identifier: `password-reset:${email}` },
+      where: { identifier: email },
     })
 
     const token = randomBytes(32).toString('hex')
-    const expires = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
     await prisma.verificationToken.create({
-      data: { identifier: `password-reset:${email}`, token, expires },
+      data: { identifier: email, token, expires },
     })
 
-    await sendPasswordResetEmail(email, token)
+    await sendVerificationEmail(email, token)
 
     return NextResponse.json({ success: true })
   } catch {

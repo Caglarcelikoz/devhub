@@ -24,6 +24,19 @@ export function SignInForm() {
     setError(null);
     setLoading(true);
 
+    const check = await fetch("/api/auth/login-check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    if (check.status === 429) {
+      const data = await check.json();
+      setError(data.error ?? "Too many sign-in attempts. Please try again later.");
+      setLoading(false);
+      return;
+    }
+
     const result = await signIn("credentials", {
       email,
       password,

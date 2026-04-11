@@ -1,11 +1,15 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { randomBytes } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { sendVerificationEmail } from '@/lib/resend'
 import { ENABLE_EMAIL_VERIFICATION } from '@/lib/flags'
+import { checkRegisterRateLimit } from '@/lib/rate-limit'
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const rl = await checkRegisterRateLimit(request)
+  if (rl.limited) return rl.response
+
   try {
     const { name, email, password, confirmPassword } = await request.json()
 

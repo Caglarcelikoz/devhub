@@ -20,8 +20,19 @@ import {
   SheetContent,
   SheetHeader,
 } from '@/components/ui/sheet'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
-import { updateItem } from '@/actions/items'
+import { updateItem, deleteItem } from '@/actions/items'
 import type { ItemDetail } from '@/lib/db/items'
 
 interface ItemDrawerProps {
@@ -98,6 +109,7 @@ function DrawerBody({
   const [copied, setCopied] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   // Edit form state
   const [title, setTitle] = useState(item.title)
@@ -128,6 +140,19 @@ function DrawerBody({
 
   const handleCancel = () => {
     setIsEditing(false)
+  }
+
+  const handleDelete = async () => {
+    setDeleting(true)
+    const result = await deleteItem(item.id)
+    setDeleting(false)
+    if (!result.success) {
+      toast.error(result.error)
+      return
+    }
+    toast.success('Item deleted')
+    onClose()
+    router.refresh()
   }
 
   const handleSave = async () => {
@@ -239,11 +264,30 @@ function DrawerBody({
             onClick={handleEditStart}
           />
           <div className="ml-auto shrink-0">
-            <ActionButton
-              icon={<Trash2 className="h-4 w-4 text-destructive/70 hover:text-destructive" />}
-              label="Delete"
-              destructive
-            />
+            <AlertDialog>
+              <AlertDialogTrigger className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+                <Trash2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Delete</span>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete item?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    <strong>{item.title}</strong> will be permanently deleted. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleting ? 'Deleting…' : 'Delete'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       )}

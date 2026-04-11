@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getItemById, updateItem } from '@/lib/db/items'
+import { getItemById, updateItem, deleteItem } from '@/lib/db/items'
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     item: {
       findFirst: vi.fn(),
       update: vi.fn(),
+      delete: vi.fn(),
     },
   },
 }))
@@ -14,6 +15,7 @@ import { prisma } from '@/lib/prisma'
 
 const mockFindFirst = vi.mocked(prisma.item.findFirst)
 const mockUpdate = vi.mocked(prisma.item.update)
+const mockDelete = vi.mocked(prisma.item.delete)
 
 // Minimal raw row shape returned by Prisma
 function makeRow(overrides: Partial<ReturnType<typeof baseRow>> = {}) {
@@ -193,6 +195,35 @@ describe('updateItem', () => {
           tags: { set: [], connectOrCreate: [] },
         }),
       }),
+    )
+  })
+})
+
+describe('deleteItem', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns false when item does not belong to user', async () => {
+    mockFindFirst.mockResolvedValue(null)
+    const result = await deleteItem('item-1', 'user-1')
+    expect(result).toBe(false)
+    expect(mockDelete).not.toHaveBeenCalled()
+  })
+
+  it('deletes the item and returns true when ownership is confirmed', async () => {
+    mockFindFirst.mockResolvedValue({ id: 'item-1' } as never)
+    mockDelete.mockResolvedValue({} as never)
+    const result = await deleteItem('item-1', 'user-1')
+    expect(result).toBe(true)
+    expect(mockDelete).toHaveBeenCalledWith({ where: { id: 'item-1' } })
+  })
+
+  it('checks ownership with both id and userId', async () => {
+    mockFindFirst.mockResolvedValue(null)
+    await deleteItem('item-99', 'user-42')
+    expect(mockFindFirst).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'item-99', userId: 'user-42' } }),
     )
   })
 })

@@ -5,9 +5,10 @@ import type { ItemWithMeta } from "@/lib/db/items";
 interface ItemsGridProps {
   items: ItemWithMeta[];
   columns?: "auto" | "two";
+  onItemClick?: (id: string) => void;
 }
 
-export function ItemsGrid({ items, columns = "auto" }: ItemsGridProps) {
+export function ItemsGrid({ items, columns = "auto", onItemClick }: ItemsGridProps) {
   if (items.length === 0) {
     return <p className="text-sm text-foreground/40">No items yet.</p>;
   }
@@ -20,19 +21,20 @@ export function ItemsGrid({ items, columns = "auto" }: ItemsGridProps) {
   return (
     <div className={gridClass}>
       {items.map((item) => (
-        <ItemCard key={item.id} item={item} />
+        <ItemCard key={item.id} item={item} onItemClick={onItemClick} />
       ))}
     </div>
   );
 }
 
-function ItemCard({ item }: { item: ItemWithMeta }) {
+function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id: string) => void }) {
   const { itemType } = item;
   const timeAgo = formatTimeAgo(item.updatedAt);
   const preview = item.contentType === "URL" ? item.url : item.content;
 
   return (
     <div
+      onClick={() => onItemClick?.(item.id)}
       className="group relative rounded-lg border bg-card p-4 flex flex-col gap-3 cursor-pointer transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md"
       style={{ borderColor: `${itemType.color}40` }}
     >

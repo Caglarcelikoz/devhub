@@ -4,7 +4,7 @@ import { getCollectionsWithMeta } from "@/lib/db/collections";
 import { getPinnedItems, getRecentItems, getItemStats } from "@/lib/db/items";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { CollectionsRow } from "@/components/dashboard/CollectionsRow";
-import { ItemsGrid } from "@/components/dashboard/ItemsGrid";
+import { ItemsGridClient } from "@/components/dashboard/ItemsGridClient";
 import { Pin, Clock } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -45,14 +45,14 @@ export default async function DashboardPage() {
       {pinnedItems.length > 0 && (
         <section>
           <SectionHeading label="Pinned" icon={<Pin className="h-4 w-4" />} />
-          <ItemsGrid items={pinnedItems} />
+          <ItemsGridClient items={pinnedItems} />
         </section>
       )}
 
       {/* Recent Items */}
       <section>
         <SectionHeading label="All Items" icon={<Clock className="h-4 w-4" />} />
-        <ItemsGrid items={recentItems} />
+        <ItemsGridClient items={recentItems} />
       </section>
     </div>
   );

@@ -11,7 +11,7 @@ import {
   Link as LinkIcon,
   type LucideIcon,
 } from "lucide-react";
-import { ItemsGrid } from "@/components/dashboard/ItemsGrid";
+import { ItemsGridClient } from "@/components/dashboard/ItemsGridClient";
 
 const VALID_TYPES = [
   "snippet",
@@ -95,7 +95,7 @@ export default async function ItemsPage({ params }: ItemsPageProps) {
           <p className="text-sm text-foreground/40">No {typeName}s yet.</p>
         </div>
       ) : (
-        <ItemsGrid items={items} columns="two" />
+        <ItemsGridClient items={items} columns="two" />
       )}
     </div>
   );

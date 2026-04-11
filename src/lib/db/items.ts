@@ -20,6 +20,12 @@ export interface ItemWithMeta {
   }
 }
 
+export interface ItemDetail extends Omit<ItemWithMeta, 'content'> {
+  content: string | null // full content, not truncated
+  createdAt: Date
+  collections: { id: string; name: string }[]
+}
+
 const itemSelect = {
   id: true,
   title: true,
@@ -86,6 +92,40 @@ export async function getItemsByType(
     select: itemSelect,
   })
   return rows.map(mapItem)
+}
+
+export async function getItemById(
+  id: string,
+  userId: string,
+): Promise<ItemDetail | null> {
+  const row = await prisma.item.findFirst({
+    where: { id, userId },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      content: true,
+      contentType: true,
+      url: true,
+      language: true,
+      isFavorite: true,
+      isPinned: true,
+      createdAt: true,
+      updatedAt: true,
+      tags: { select: { name: true } },
+      itemType: { select: { id: true, name: true, color: true, icon: true } },
+      collections: {
+        select: { collection: { select: { id: true, name: true } } },
+      },
+    },
+  })
+  if (!row) return null
+  return {
+    ...row,
+    contentType: row.contentType as 'TEXT' | 'FILE' | 'URL',
+    tags: row.tags.map((t) => t.name),
+    collections: row.collections.map((c) => c.collection),
+  }
 }
 
 export async function getItemStats(userId: string) {

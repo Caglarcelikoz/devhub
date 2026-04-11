@@ -4,15 +4,21 @@ import type { ItemWithMeta } from "@/lib/db/items";
 
 interface ItemsGridProps {
   items: ItemWithMeta[];
+  columns?: "auto" | "two";
 }
 
-export function ItemsGrid({ items }: ItemsGridProps) {
+export function ItemsGrid({ items, columns = "auto" }: ItemsGridProps) {
   if (items.length === 0) {
     return <p className="text-sm text-foreground/40">No items yet.</p>;
   }
 
+  const gridClass =
+    columns === "two"
+      ? "grid grid-cols-1 md:grid-cols-2 gap-3"
+      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3";
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+    <div className={gridClass}>
       {items.map((item) => (
         <ItemCard key={item.id} item={item} />
       ))}
@@ -27,20 +33,26 @@ function ItemCard({ item }: { item: ItemWithMeta }) {
 
   return (
     <div
-      className="group rounded-lg border bg-card p-4 flex flex-col gap-3 hover:opacity-90 transition-opacity cursor-pointer"
-      style={{ borderColor: `${itemType.color}55` }}
+      className="group relative rounded-lg border bg-card p-4 flex flex-col gap-3 cursor-pointer transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md"
+      style={{ borderColor: `${itemType.color}40` }}
     >
+      {/* Top accent bar */}
+      <div
+        className="absolute top-0 left-4 right-4 h-0.5 rounded-b-full opacity-60"
+        style={{ backgroundColor: itemType.color }}
+      />
+
       {/* Header row */}
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-start justify-between gap-2 pt-1">
         <span
           className="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
-          style={{ backgroundColor: `${itemType.color}22`, color: itemType.color }}
+          style={{ backgroundColor: `${itemType.color}18`, color: itemType.color }}
         >
           {itemType.name}
         </span>
         <div className="flex items-center gap-1.5 text-muted-foreground/60 shrink-0">
-          {item.isFavorite && <Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
-          {item.isPinned && <Pin className="h-4 w-4" />}
+          {item.isFavorite && <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />}
+          {item.isPinned && <Pin className="h-3.5 w-3.5" />}
         </div>
       </div>
 
@@ -50,7 +62,7 @@ function ItemCard({ item }: { item: ItemWithMeta }) {
           {item.title}
         </h3>
         {item.description && (
-          <p className="text-sm text-foreground/60 mt-1 line-clamp-2 leading-snug">
+          <p className="text-sm text-foreground/55 mt-1 line-clamp-2 leading-snug">
             {item.description}
           </p>
         )}
@@ -58,9 +70,14 @@ function ItemCard({ item }: { item: ItemWithMeta }) {
 
       {/* Content preview */}
       {preview && (
-        <pre className="text-sm text-foreground/55 bg-muted rounded px-3 py-2 overflow-hidden line-clamp-3 font-mono leading-relaxed whitespace-pre-wrap">
-          {preview}
-        </pre>
+        <div
+          className="flex min-w-0"
+          style={{ borderLeft: `2px solid ${itemType.color}50` }}
+        >
+          <pre className="text-xs text-foreground/50 overflow-hidden line-clamp-3 font-mono leading-relaxed whitespace-pre-wrap pl-2.5">
+            {preview}
+          </pre>
+        </div>
       )}
 
       {/* Tags + timestamp */}
@@ -70,13 +87,13 @@ function ItemCard({ item }: { item: ItemWithMeta }) {
             <Badge
               key={tag}
               variant="secondary"
-              className="text-xs px-2 py-1 h-auto font-normal rounded-md"
+              className="text-xs px-2 py-0.5 h-auto font-normal rounded-md"
             >
               {tag}
             </Badge>
           ))}
         </div>
-        <span className="text-xs text-foreground/40 shrink-0 tabular-nums">
+        <span className="text-xs text-foreground/35 shrink-0 tabular-nums">
           {timeAgo}
         </span>
       </div>

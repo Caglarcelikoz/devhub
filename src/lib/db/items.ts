@@ -76,6 +76,18 @@ export async function getRecentItems(userId: string, limit = 10): Promise<ItemWi
   return rows.map(mapItem)
 }
 
+export async function getItemsByType(
+  userId: string,
+  typeName: string,
+): Promise<ItemWithMeta[]> {
+  const rows = await prisma.item.findMany({
+    where: { userId, itemType: { name: typeName } },
+    orderBy: { updatedAt: 'desc' },
+    select: itemSelect,
+  })
+  return rows.map(mapItem)
+}
+
 export async function getItemStats(userId: string) {
   const [totalItems, favoriteItems] = await Promise.all([
     prisma.item.count({ where: { userId } }),

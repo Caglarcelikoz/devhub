@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-
 vi.mock('@/auth', () => ({
   auth: vi.fn(),
 }))
@@ -15,7 +14,7 @@ import { createItem as dbCreateItem, updateItem as dbUpdateItem, deleteItem as d
 import { createItem, updateItem, deleteItem } from '@/actions/items'
 import type { ItemDetail } from '@/lib/db/items'
 
-const mockAuth = vi.mocked(auth)
+const mockAuth = auth as unknown as { mockResolvedValue: (v: unknown) => void }
 const mockDbCreateItem = vi.mocked(dbCreateItem)
 const mockDbUpdateItem = vi.mocked(dbUpdateItem)
 const mockDbDeleteItem = vi.mocked(dbDeleteItem)
@@ -196,7 +195,7 @@ describe('updateItem action', () => {
     mockAuth.mockResolvedValue(null)
     const result = await updateItem('item-1', validInput)
     expect(result.success).toBe(false)
-    expect(result.error).toBe('Unauthorized')
+    if (!result.success) expect(result.error).toBe('Unauthorized')
     expect(mockDbUpdateItem).not.toHaveBeenCalled()
   })
 
@@ -204,21 +203,21 @@ describe('updateItem action', () => {
     mockAuth.mockResolvedValue({ user: {} } as never)
     const result = await updateItem('item-1', validInput)
     expect(result.success).toBe(false)
-    expect(result.error).toBe('Unauthorized')
+    if (!result.success) expect(result.error).toBe('Unauthorized')
   })
 
   it('returns error when title is empty', async () => {
     mockAuth.mockResolvedValue(makeSession())
     const result = await updateItem('item-1', { ...validInput, title: '   ' })
     expect(result.success).toBe(false)
-    expect(result.error).toContain('Title is required')
+    if (!result.success) expect(result.error).toContain('Title is required')
   })
 
   it('returns error when url is invalid', async () => {
     mockAuth.mockResolvedValue(makeSession())
     const result = await updateItem('item-1', { ...validInput, url: 'not-a-url' })
     expect(result.success).toBe(false)
-    expect(result.error).toContain('valid URL')
+    if (!result.success) expect(result.error).toContain('valid URL')
   })
 
   it('accepts null url', async () => {
@@ -233,7 +232,7 @@ describe('updateItem action', () => {
     mockDbUpdateItem.mockResolvedValue(null)
     const result = await updateItem('item-1', validInput)
     expect(result.success).toBe(false)
-    expect(result.error).toBe('Item not found')
+    if (!result.success) expect(result.error).toBe('Item not found')
   })
 
   it('returns updated item on success', async () => {
@@ -281,7 +280,7 @@ describe('updateItem action', () => {
 
     const result = await updateItem('item-1', validInput)
     expect(result.success).toBe(false)
-    expect(result.error).toBe('Failed to update item')
+    if (!result.success) expect(result.error).toBe('Failed to update item')
   })
 })
 

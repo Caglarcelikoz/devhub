@@ -1,13 +1,15 @@
+"use client";
+
 import { Star, Pin } from "lucide-react";
 import type { ItemWithMeta } from "@/lib/db/items";
 
 interface ImageThumbnailCardProps {
   item: ItemWithMeta;
   onItemClick?: (id: string) => void;
+  thumbnailUrl?: string;
 }
 
-export function ImageThumbnailCard({ item, onItemClick }: ImageThumbnailCardProps) {
-  const { itemType } = item;
+export function ImageThumbnailCard({ item, onItemClick, thumbnailUrl }: ImageThumbnailCardProps) {
   const imageColor = "#ec4899"; // image type pink
 
   return (
@@ -18,8 +20,9 @@ export function ImageThumbnailCard({ item, onItemClick }: ImageThumbnailCardProp
     >
       {/* Thumbnail */}
       <div className="aspect-video overflow-hidden bg-muted relative">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={`/api/items/${item.id}/download`}
+          src={thumbnailUrl ?? `/api/items/${item.id}/download`}
           alt={item.title}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />

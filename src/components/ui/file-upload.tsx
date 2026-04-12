@@ -135,6 +135,7 @@ export function FileUpload({ itemType, onUploaded, onClear, uploaded }: FileUplo
     return (
       <div className="flex items-center gap-3 rounded-md border border-border bg-muted/30 px-3 py-2.5">
         <div className="shrink-0 text-muted-foreground">
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
           {isImage ? <Image className="h-4 w-4" /> : <File className="h-4 w-4" />}
         </div>
         <div className="flex-1 min-w-0">

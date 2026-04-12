@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
+import { z } from 'zod'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1).max(72),
+  newPassword: z.string().min(8).max(72),
+  confirmPassword: z.string(),
+})
 
 export async function POST(request: Request) {
   try {
@@ -11,18 +18,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { currentPassword, newPassword, confirmPassword } = await request.json()
+    const body = await request.json()
+    const parsed = changePasswordSchema.safeParse(body)
 
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 })
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? 'Invalid input'
+      return NextResponse.json({ error: message }, { status: 400 })
     }
+
+    const { currentPassword, newPassword, confirmPassword } = parsed.data
 
     if (newPassword !== confirmPassword) {
       return NextResponse.json({ error: 'Passwords do not match' }, { status: 400 })
-    }
-
-    if (newPassword.length < 8) {
-      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
     }
 
     const user = await prisma.user.findUnique({

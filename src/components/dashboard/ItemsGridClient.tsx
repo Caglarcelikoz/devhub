@@ -10,9 +10,10 @@ interface ItemsGridClientProps {
   items: ItemWithMeta[]
   columns?: 'auto' | 'two' | 'three'
   layout?: 'grid' | 'list'
+  thumbnailUrls?: Record<string, string>
 }
 
-export function ItemsGridClient({ items, columns, layout = 'grid' }: ItemsGridClientProps) {
+export function ItemsGridClient({ items, columns, layout = 'grid', thumbnailUrls }: ItemsGridClientProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   return (
@@ -24,6 +25,7 @@ export function ItemsGridClient({ items, columns, layout = 'grid' }: ItemsGridCl
           items={items}
           columns={columns}
           onItemClick={(id) => setSelectedId(id)}
+          thumbnailUrls={thumbnailUrls}
         />
       )}
       <ItemDrawer

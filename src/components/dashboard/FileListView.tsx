@@ -30,7 +30,6 @@ function FileListRow({
   onItemClick?: (id: string) => void
 }) {
   const extension = getExtension(item.fileName)
-  const FileIcon = getFileIcon(extension)
   const iconColor = '#6b7280'
 
   function handleDownload(e: React.MouseEvent) {
@@ -51,7 +50,7 @@ function FileListRow({
         className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0"
         style={{ backgroundColor: `${iconColor}18` }}
       >
-        <FileIcon className="w-4 h-4" style={{ color: iconColor }} />
+        {getFileIcon(extension, iconColor)}
       </div>
 
       {/* Main info */}
@@ -99,14 +98,15 @@ function getExtension(fileName: string | null): string {
   return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : ''
 }
 
-function getFileIcon(ext: string) {
-  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico', 'bmp'].includes(ext)) return FileImage
-  if (['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a'].includes(ext)) return FileAudio
-  if (['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext)) return FileVideo
-  if (['zip', 'tar', 'gz', 'rar', '7z'].includes(ext)) return FileArchive
-  if (['js', 'ts', 'tsx', 'jsx', 'py', 'rb', 'go', 'rs', 'java', 'c', 'cpp', 'cs', 'php', 'html', 'css', 'json', 'yaml', 'yml', 'toml', 'sh', 'bash'].includes(ext)) return FileCode
-  if (['pdf', 'doc', 'docx', 'txt', 'md', 'rtf', 'csv', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext)) return FileText
-  return File
+function getFileIcon(ext: string, color: string) {
+  const props = { className: 'w-4 h-4', style: { color } }
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico', 'bmp'].includes(ext)) return <FileImage {...props} />
+  if (['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a'].includes(ext)) return <FileAudio {...props} />
+  if (['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext)) return <FileVideo {...props} />
+  if (['zip', 'tar', 'gz', 'rar', '7z'].includes(ext)) return <FileArchive {...props} />
+  if (['js', 'ts', 'tsx', 'jsx', 'py', 'rb', 'go', 'rs', 'java', 'c', 'cpp', 'cs', 'php', 'html', 'css', 'json', 'yaml', 'yml', 'toml', 'sh', 'bash'].includes(ext)) return <FileCode {...props} />
+  if (['pdf', 'doc', 'docx', 'txt', 'md', 'rtf', 'csv', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext)) return <FileText {...props} />
+  return <File {...props} />
 }
 
 function formatFileSize(bytes: number): string {

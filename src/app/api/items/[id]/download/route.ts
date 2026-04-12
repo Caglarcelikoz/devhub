@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
+import { Readable } from 'stream'
 import { auth } from '@/auth'
 import { getItemById } from '@/lib/db/items'
 import { s3, S3_BUCKET } from '@/lib/s3'
-import type { Readable } from 'stream'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(
   _req: NextRequest,
@@ -27,26 +29,23 @@ export async function GET(
 
   const command = new GetObjectCommand({
     Bucket: S3_BUCKET,
-    Key: item.fileUrl, // stored as S3 key
+    Key: item.fileUrl,
   })
 
   const s3Response = await s3.send(command)
-  const stream = s3Response.Body as Readable
-
-  const chunks: Uint8Array[] = []
-  for await (const chunk of stream) {
-    chunks.push(chunk as Uint8Array)
-  }
-  const buffer = Buffer.concat(chunks)
+  const nodeStream = s3Response.Body as Readable
+  const webStream = Readable.toWeb(nodeStream) as ReadableStream
 
   const contentType = s3Response.ContentType ?? 'application/octet-stream'
   const fileName = item.fileName ?? 'download'
 
-  return new NextResponse(buffer, {
+  return new NextResponse(webStream, {
     headers: {
       'Content-Type': contentType,
       'Content-Disposition': `attachment; filename="${fileName}"`,
-      'Content-Length': buffer.length.toString(),
+      ...(s3Response.ContentLength != null && {
+        'Content-Length': s3Response.ContentLength.toString(),
+      }),
     },
   })
 }

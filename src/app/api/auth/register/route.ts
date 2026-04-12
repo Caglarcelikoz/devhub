@@ -1,21 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { randomBytes } from 'crypto'
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { sendVerificationEmail } from '@/lib/resend'
 import { ENABLE_EMAIL_VERIFICATION } from '@/lib/flags'
 import { checkRegisterRateLimit } from '@/lib/rate-limit'
+
+const registerSchema = z.object({
+  name: z.string().min(1).max(100),
+  email: z.string().email().max(254),
+  password: z.string().min(8).max(72),
+  confirmPassword: z.string(),
+})
 
 export async function POST(request: NextRequest) {
   const rl = await checkRegisterRateLimit(request)
   if (rl.limited) return rl.response
 
   try {
-    const { name, email, password, confirmPassword } = await request.json()
+    const body = await request.json()
+    const parsed = registerSchema.safeParse(body)
 
-    if (!name || !email || !password || !confirmPassword) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 })
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? 'Invalid input'
+      return NextResponse.json({ error: message }, { status: 400 })
     }
+
+    const { name, email, password, confirmPassword } = parsed.data
 
     if (password !== confirmPassword) {
       return NextResponse.json({ error: 'Passwords do not match' }, { status: 400 })

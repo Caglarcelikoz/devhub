@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 export function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+  const rawCallbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+  const callbackUrl = rawCallbackUrl.startsWith("/") ? rawCallbackUrl : "/dashboard";
   const verified = searchParams.get("verified") === "1";
   const reset = searchParams.get("reset") === "1";
 

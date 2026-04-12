@@ -15,14 +15,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: '/sign-in',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       // On sign-in, `user` is present — persist fields into the token
       if (user) {
         token.name = user.name
         token.picture = user.image
       }
-      // On subsequent requests, re-hydrate from DB so name/image stay fresh
-      if (!user && token.sub) {
+      // Re-hydrate from DB only when the session is explicitly updated
+      // (e.g. after a profile name/avatar change via useSession().update())
+      if (trigger === 'update' && token.sub) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.sub },
           select: { name: true, image: true },
@@ -32,6 +33,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.picture = dbUser.image
         }
       }
+      void session // unused except on trigger==='update'
       return token
     },
     session({ session, token }) {

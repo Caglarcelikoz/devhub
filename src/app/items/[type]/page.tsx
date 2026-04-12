@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { getItemsByType } from "@/lib/db/items";
+import { getSignedDownloadUrl } from "@/lib/s3";
 import {
   Code,
   Sparkles,
@@ -49,10 +50,18 @@ const TYPE_COLORS: Record<ValidType, string> = {
   link: "#10b981",
 };
 
-function typeSlugToName(slug: string): string {
-  if (slug === "images") return "image";
-  if (slug.endsWith("s")) return slug.slice(0, -1);
-  return slug;
+const SLUG_TO_TYPE: Record<string, ValidType> = {
+  snippets: "snippet",
+  prompts: "prompt",
+  commands: "command",
+  notes: "note",
+  files: "file",
+  images: "image",
+  links: "link",
+}
+
+function typeSlugToName(slug: string): ValidType | undefined {
+  return SLUG_TO_TYPE[slug]
 }
 
 interface ItemsPageProps {
@@ -61,9 +70,9 @@ interface ItemsPageProps {
 
 export default async function ItemsPage({ params }: ItemsPageProps) {
   const { type: slug } = await params;
-  const typeName = typeSlugToName(slug) as ValidType;
+  const typeName = typeSlugToName(slug);
 
-  if (!VALID_TYPES.includes(typeName)) {
+  if (!typeName) {
     notFound();
   }
 
@@ -73,6 +82,20 @@ export default async function ItemsPage({ params }: ItemsPageProps) {
   }
 
   const items = await getItemsByType(session.user.id, typeName);
+
+  // For image items, pre-generate short-lived signed URLs server-side so
+  // thumbnails don't go through the buffering download proxy.
+  const thumbnailUrls: Record<string, string> = {};
+  if (typeName === "image") {
+    await Promise.all(
+      items
+        .filter((item) => item.fileUrl)
+        .map(async (item) => {
+          thumbnailUrls[item.id] = await getSignedDownloadUrl(item.fileUrl!, 300);
+        })
+    );
+  }
+
   const label = typeName.charAt(0).toUpperCase() + typeName.slice(1) + "s";
   const Icon = TYPE_ICONS[typeName];
   const typeColor = TYPE_COLORS[typeName];
@@ -125,6 +148,7 @@ export default async function ItemsPage({ params }: ItemsPageProps) {
           items={items}
           columns={typeName === "image" ? "three" : "two"}
           layout={typeName === "file" ? "list" : "grid"}
+          thumbnailUrls={thumbnailUrls}
         />
       )}
     </div>

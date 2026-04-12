@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { prisma } from '@/lib/prisma'
 import { deleteFromS3 } from '@/lib/s3'
 
@@ -279,7 +280,7 @@ export interface ItemTypeWithCount {
   itemCount: number
 }
 
-export async function getItemTypesWithCount(userId: string): Promise<ItemTypeWithCount[]> {
+export const getItemTypesWithCount = cache(async function getItemTypesWithCount(userId: string): Promise<ItemTypeWithCount[]> {
   const types = await prisma.itemType.findMany({
     where: { isSystem: true },
     include: {
@@ -297,4 +298,4 @@ export async function getItemTypesWithCount(userId: string): Promise<ItemTypeWit
     color: t.color,
     itemCount: t._count.items,
   }))
-}
+})

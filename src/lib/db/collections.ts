@@ -23,6 +23,7 @@ export const getCollectionsWithMeta = cache(async function getCollectionsWithMet
     where: { userId },
     orderBy: { createdAt: 'desc' },
     include: {
+      _count: { select: { items: true } },
       items: {
         select: {
           item: {
@@ -36,7 +37,6 @@ export const getCollectionsWithMeta = cache(async function getCollectionsWithMet
   })
 
   return collections.map((col) => {
-    // Count items per type
     const typeCounts = new Map<string, { id: string; name: string; color: string; count: number }>()
 
     for (const ic of col.items) {
@@ -56,7 +56,7 @@ export const getCollectionsWithMeta = cache(async function getCollectionsWithMet
       name: col.name,
       description: col.description,
       isFavorite: col.isFavorite,
-      itemCount: col.items.length,
+      itemCount: col._count.items,
       typeBreakdown,
       dominantColor: typeBreakdown[0]?.color,
     }

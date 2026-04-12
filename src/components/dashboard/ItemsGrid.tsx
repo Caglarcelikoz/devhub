@@ -10,9 +10,10 @@ interface ItemsGridProps {
   items: ItemWithMeta[];
   columns?: "auto" | "two" | "three";
   onItemClick?: (id: string) => void;
+  thumbnailUrls?: Record<string, string>;
 }
 
-export function ItemsGrid({ items, columns = "auto", onItemClick }: ItemsGridProps) {
+export function ItemsGrid({ items, columns = "auto", onItemClick, thumbnailUrls }: ItemsGridProps) {
   if (items.length === 0) {
     return <p className="text-sm text-foreground/40">No items yet.</p>;
   }
@@ -28,7 +29,7 @@ export function ItemsGrid({ items, columns = "auto", onItemClick }: ItemsGridPro
     <div className={gridClass}>
       {items.map((item) =>
         item.itemType.name === "image" ? (
-          <ImageThumbnailCard key={item.id} item={item} onItemClick={onItemClick} />
+          <ImageThumbnailCard key={item.id} item={item} onItemClick={onItemClick} thumbnailUrl={thumbnailUrls?.[item.id]} />
         ) : (
           <ItemCard key={item.id} item={item} onItemClick={onItemClick} />
         )

@@ -1,6 +1,34 @@
 import { cache } from 'react'
 import { prisma } from '@/lib/prisma'
 
+export interface CreatedCollection {
+  id: string
+  name: string
+  description: string | null
+  isFavorite: boolean
+  createdAt: Date
+}
+
+export async function createCollection(
+  userId: string,
+  data: { name: string; description: string | null },
+): Promise<CreatedCollection> {
+  return prisma.collection.create({
+    data: {
+      name: data.name,
+      description: data.description,
+      userId,
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      isFavorite: true,
+      createdAt: true,
+    },
+  })
+}
+
 export interface CollectionWithMeta {
   id: string
   name: string

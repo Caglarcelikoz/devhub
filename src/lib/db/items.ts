@@ -128,6 +128,75 @@ export async function getItemById(
   }
 }
 
+export interface CreateItemData {
+  title: string
+  description: string | null
+  content: string | null
+  url: string | null
+  language: string | null
+  tags: string[]
+  itemTypeName: string
+}
+
+export async function createItem(
+  userId: string,
+  data: CreateItemData,
+): Promise<ItemDetail | null> {
+  // Look up the item type
+  const itemType = await prisma.itemType.findFirst({
+    where: { name: data.itemTypeName, isSystem: true },
+    select: { id: true, name: true },
+  })
+  if (!itemType) return null
+
+  // Determine content type
+  const contentType = data.itemTypeName === 'link' ? 'URL' : 'TEXT'
+
+  const row = await prisma.item.create({
+    data: {
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      url: data.url,
+      language: data.language,
+      contentType,
+      userId,
+      itemTypeId: itemType.id,
+      tags: {
+        connectOrCreate: data.tags.map((name) => ({
+          where: { name },
+          create: { name },
+        })),
+      },
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      content: true,
+      contentType: true,
+      url: true,
+      language: true,
+      isFavorite: true,
+      isPinned: true,
+      createdAt: true,
+      updatedAt: true,
+      tags: { select: { name: true } },
+      itemType: { select: { id: true, name: true, color: true, icon: true } },
+      collections: {
+        select: { collection: { select: { id: true, name: true } } },
+      },
+    },
+  })
+
+  return {
+    ...row,
+    contentType: row.contentType as 'TEXT' | 'FILE' | 'URL',
+    tags: row.tags.map((t) => t.name),
+    collections: [],
+  }
+}
+
 export interface UpdateItemData {
   title: string
   description: string | null

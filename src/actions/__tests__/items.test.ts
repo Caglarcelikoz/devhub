@@ -5,16 +5,18 @@ vi.mock('@/auth', () => ({
 }))
 
 vi.mock('@/lib/db/items', () => ({
+  createItem: vi.fn(),
   updateItem: vi.fn(),
   deleteItem: vi.fn(),
 }))
 
 import { auth } from '@/auth'
-import { updateItem as dbUpdateItem, deleteItem as dbDeleteItem } from '@/lib/db/items'
-import { updateItem, deleteItem } from '@/actions/items'
+import { createItem as dbCreateItem, updateItem as dbUpdateItem, deleteItem as dbDeleteItem } from '@/lib/db/items'
+import { createItem, updateItem, deleteItem } from '@/actions/items'
 import type { ItemDetail } from '@/lib/db/items'
 
 const mockAuth = vi.mocked(auth)
+const mockDbCreateItem = vi.mocked(dbCreateItem)
 const mockDbUpdateItem = vi.mocked(dbUpdateItem)
 const mockDbDeleteItem = vi.mocked(dbDeleteItem)
 
@@ -41,6 +43,103 @@ function makeItemDetail(overrides: Partial<ItemDetail> = {}): ItemDetail {
     ...overrides,
   }
 }
+
+const validCreateInput = {
+  itemTypeName: 'snippet' as const,
+  title: 'New Snippet',
+  description: null,
+  content: 'const x = 1',
+  url: null,
+  language: 'typescript',
+  tags: ['react'],
+}
+
+describe('createItem action', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns error when not authenticated', async () => {
+    mockAuth.mockResolvedValue(null)
+    const result = await createItem(validCreateInput)
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toBe('Unauthorized')
+    expect(mockDbCreateItem).not.toHaveBeenCalled()
+  })
+
+  it('returns error when session has no user id', async () => {
+    mockAuth.mockResolvedValue({ user: {} } as never)
+    const result = await createItem(validCreateInput)
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toBe('Unauthorized')
+  })
+
+  it('returns error when title is empty', async () => {
+    mockAuth.mockResolvedValue(makeSession())
+    const result = await createItem({ ...validCreateInput, title: '   ' })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toContain('Title is required')
+  })
+
+  it('returns error when itemTypeName is invalid', async () => {
+    mockAuth.mockResolvedValue(makeSession())
+    const result = await createItem({ ...validCreateInput, itemTypeName: 'file' as never })
+    expect(result.success).toBe(false)
+  })
+
+  it('returns error when link is missing a URL', async () => {
+    mockAuth.mockResolvedValue(makeSession())
+    const result = await createItem({ ...validCreateInput, itemTypeName: 'link', url: null })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toContain('URL is required')
+  })
+
+  it('returns error when url is malformed', async () => {
+    mockAuth.mockResolvedValue(makeSession())
+    const result = await createItem({ ...validCreateInput, itemTypeName: 'link', url: 'not-a-url' })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toContain('valid URL')
+  })
+
+  it('returns error when item type not found in db', async () => {
+    mockAuth.mockResolvedValue(makeSession())
+    mockDbCreateItem.mockResolvedValue(null)
+    const result = await createItem(validCreateInput)
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toBe('Item type not found')
+  })
+
+  it('returns created item on success', async () => {
+    const created = makeItemDetail({ title: 'New Snippet' })
+    mockAuth.mockResolvedValue(makeSession())
+    mockDbCreateItem.mockResolvedValue(created)
+
+    const result = await createItem(validCreateInput)
+    expect(result.success).toBe(true)
+    if (result.success) expect(result.data.title).toBe('New Snippet')
+  })
+
+  it('calls db createItem with correct userId from session', async () => {
+    mockAuth.mockResolvedValue(makeSession('user-42'))
+    mockDbCreateItem.mockResolvedValue(makeItemDetail())
+
+    await createItem(validCreateInput)
+
+    expect(mockDbCreateItem).toHaveBeenCalledWith(
+      'user-42',
+      expect.objectContaining({ title: 'New Snippet', itemTypeName: 'snippet' }),
+    )
+  })
+
+  it('returns error on unexpected db failure', async () => {
+    mockAuth.mockResolvedValue(makeSession())
+    mockDbCreateItem.mockRejectedValue(new Error('DB error'))
+
+    const result = await createItem(validCreateInput)
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toBe('Failed to create item')
+  })
+})
 
 const validInput = {
   title: 'Updated Title',

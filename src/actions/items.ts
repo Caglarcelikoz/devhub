@@ -2,8 +2,76 @@
 
 import { z } from 'zod'
 import { auth } from '@/auth'
-import { updateItem as dbUpdateItem, deleteItem as dbDeleteItem } from '@/lib/db/items'
+import {
+  createItem as dbCreateItem,
+  updateItem as dbUpdateItem,
+  deleteItem as dbDeleteItem,
+} from '@/lib/db/items'
 import type { ItemDetail } from '@/lib/db/items'
+
+const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link'] as const
+
+const createItemSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required'),
+  itemTypeName: z.enum(CREATABLE_TYPES, { error: 'Invalid item type' }),
+  description: z.string().trim().nullable().optional().transform((v) => v ?? null),
+  content: z.string().nullable().optional().transform((v) => v ?? null),
+  url: z
+    .string()
+    .trim()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null)
+    .refine((v) => !v || z.string().url().safeParse(v).success, {
+      message: 'Must be a valid URL',
+    }),
+  language: z.string().trim().nullable().optional().transform((v) => v ?? null),
+  tags: z.array(z.string().trim().min(1)).default([]),
+})
+
+type CreateItemInput = z.input<typeof createItemSchema>
+
+export async function createItem(
+  input: CreateItemInput,
+): Promise<ActionResult<ItemDetail>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  const parsed = createItemSchema.safeParse(input)
+  if (!parsed.success) {
+    const message = parsed.error.issues.map((e) => e.message).join(', ')
+    return { success: false, error: message }
+  }
+
+  const data = parsed.data
+
+  // link requires a URL
+  if (data.itemTypeName === 'link' && !data.url) {
+    return { success: false, error: 'URL is required for link items' }
+  }
+
+  try {
+    const created = await dbCreateItem(session.user.id, {
+      title: data.title,
+      description: data.description ?? null,
+      content: data.content ?? null,
+      url: data.url ?? null,
+      language: data.language ?? null,
+      tags: data.tags,
+      itemTypeName: data.itemTypeName,
+    })
+
+    if (!created) {
+      return { success: false, error: 'Item type not found' }
+    }
+
+    return { success: true, data: created }
+  } catch {
+    return { success: false, error: 'Failed to create item' }
+  }
+}
 
 const updateItemSchema = z.object({
   title: z.string().trim().min(1, 'Title is required'),

@@ -7,7 +7,7 @@ import type { ItemWithMeta } from '@/lib/db/items'
 
 interface ItemsGridClientProps {
   items: ItemWithMeta[]
-  columns?: 'auto' | 'two'
+  columns?: 'auto' | 'two' | 'three'
 }
 
 export function ItemsGridClient({ items, columns }: ItemsGridClientProps) {

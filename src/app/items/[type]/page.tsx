@@ -25,7 +25,7 @@ const VALID_TYPES = [
   "link",
 ] as const;
 
-const CREATABLE_TYPES: readonly string[] = ["snippet", "prompt", "command", "note", "link"];
+const CREATABLE_TYPES: readonly string[] = ["snippet", "prompt", "command", "note", "link", "file", "image"];
 
 type ValidType = (typeof VALID_TYPES)[number];
 
@@ -37,6 +37,16 @@ const TYPE_ICONS: Record<ValidType, LucideIcon> = {
   file: File,
   image: Image,
   link: LinkIcon,
+};
+
+const TYPE_COLORS: Record<ValidType, string> = {
+  snippet: "#3b82f6",
+  prompt: "#8b5cf6",
+  command: "#f97316",
+  note: "#fde047",
+  file: "#6b7280",
+  image: "#ec4899",
+  link: "#10b981",
 };
 
 function typeSlugToName(slug: string): string {
@@ -65,7 +75,7 @@ export default async function ItemsPage({ params }: ItemsPageProps) {
   const items = await getItemsByType(session.user.id, typeName);
   const label = typeName.charAt(0).toUpperCase() + typeName.slice(1) + "s";
   const Icon = TYPE_ICONS[typeName];
-  const typeColor = items[0]?.itemType.color ?? "#6b7280";
+  const typeColor = TYPE_COLORS[typeName];
 
   return (
     <div className="space-y-6">
@@ -103,9 +113,15 @@ export default async function ItemsPage({ params }: ItemsPageProps) {
             <Icon className="w-5 h-5" style={{ color: typeColor }} />
           </div>
           <p className="text-sm text-foreground/40">No {typeName}s yet.</p>
+          {CREATABLE_TYPES.includes(typeName) && (
+            <NewItemButton
+              defaultType={typeName as CreatableType}
+              label={`New ${typeName.charAt(0).toUpperCase() + typeName.slice(1)}`}
+            />
+          )}
         </div>
       ) : (
-        <ItemsGridClient items={items} columns="two" />
+        <ItemsGridClient items={items} columns={typeName === "image" ? "three" : "two"} />
       )}
     </div>
   );

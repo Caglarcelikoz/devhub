@@ -1,10 +1,11 @@
 import { Star, Pin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ImageThumbnailCard } from "@/components/dashboard/ImageThumbnailCard";
 import type { ItemWithMeta } from "@/lib/db/items";
 
 interface ItemsGridProps {
   items: ItemWithMeta[];
-  columns?: "auto" | "two";
+  columns?: "auto" | "two" | "three";
   onItemClick?: (id: string) => void;
 }
 
@@ -16,13 +17,19 @@ export function ItemsGrid({ items, columns = "auto", onItemClick }: ItemsGridPro
   const gridClass =
     columns === "two"
       ? "grid grid-cols-1 md:grid-cols-2 gap-3"
+      : columns === "three"
+      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
       : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3";
 
   return (
     <div className={gridClass}>
-      {items.map((item) => (
-        <ItemCard key={item.id} item={item} onItemClick={onItemClick} />
-      ))}
+      {items.map((item) =>
+        item.itemType.name === "image" ? (
+          <ImageThumbnailCard key={item.id} item={item} onItemClick={onItemClick} />
+        ) : (
+          <ItemCard key={item.id} item={item} onItemClick={onItemClick} />
+        )
+      )}
     </div>
   );
 }

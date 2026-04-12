@@ -155,6 +155,7 @@ export interface CreateItemData {
   language: string | null
   tags: string[]
   itemTypeName: string
+  collectionIds: string[]
 }
 
 export async function createItem(
@@ -189,6 +190,9 @@ export async function createItem(
           create: { name },
         })),
       },
+      collections: {
+        create: data.collectionIds.map((collectionId) => ({ collectionId })),
+      },
     },
     select: itemDetailSelect,
   })
@@ -197,7 +201,7 @@ export async function createItem(
     ...row,
     contentType: row.contentType as 'TEXT' | 'FILE' | 'URL',
     tags: row.tags.map((t) => t.name),
-    collections: [],
+    collections: row.collections.map((c) => c.collection),
   }
 }
 
@@ -208,6 +212,7 @@ export interface UpdateItemData {
   url: string | null
   language: string | null
   tags: string[]
+  collectionIds: string[]
 }
 
 export async function updateItem(
@@ -217,6 +222,9 @@ export async function updateItem(
 ): Promise<ItemDetail | null> {
   const existing = await prisma.item.findFirst({ where: { id, userId }, select: { id: true } })
   if (!existing) return null
+
+  // Sync collections: delete all existing, then recreate
+  await prisma.itemCollection.deleteMany({ where: { itemId: id } })
 
   const row = await prisma.item.update({
     where: { id },
@@ -232,6 +240,9 @@ export async function updateItem(
           where: { name },
           create: { name },
         })),
+      },
+      collections: {
+        create: data.collectionIds.map((collectionId) => ({ collectionId })),
       },
     },
     select: itemDetailSelect,

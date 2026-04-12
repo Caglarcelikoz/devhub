@@ -30,6 +30,7 @@ const createItemSchema = z.object({
     }),
   language: z.string().trim().nullable().optional().transform((v) => v ?? null),
   tags: z.array(z.string().trim().min(1)).default([]),
+  collectionIds: z.array(z.string()).default([]),
 })
 
 type CreateItemInput = z.input<typeof createItemSchema>
@@ -70,6 +71,7 @@ export async function createItem(
       language: data.language ?? null,
       tags: data.tags,
       itemTypeName: data.itemTypeName,
+      collectionIds: data.collectionIds,
     })
 
     if (!created) {
@@ -99,6 +101,7 @@ const updateItemSchema = z.object({
   tags: z
     .array(z.string().trim().min(1))
     .default([]),
+  collectionIds: z.array(z.string()).default([]),
 })
 
 type UpdateItemInput = z.input<typeof updateItemSchema>
@@ -132,6 +135,7 @@ export async function updateItem(
       url: data.url ?? null,
       language: data.language ?? null,
       tags: data.tags,
+      collectionIds: data.collectionIds,
     })
 
     if (!updated) {

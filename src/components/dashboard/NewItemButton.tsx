@@ -5,13 +5,15 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CreateItemDialog } from '@/components/dashboard/CreateItemDialog'
 import type { CreatableType } from '@/components/dashboard/CreateItemDialog'
+import type { CollectionOption } from '@/lib/db/collections'
 
 interface NewItemButtonProps {
   defaultType?: CreatableType
   label?: string
+  collections?: CollectionOption[]
 }
 
-export function NewItemButton({ defaultType, label = 'New Item' }: NewItemButtonProps) {
+export function NewItemButton({ defaultType, label = 'New Item', collections = [] }: NewItemButtonProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -24,7 +26,7 @@ export function NewItemButton({ defaultType, label = 'New Item' }: NewItemButton
         <Plus className="h-3.5 w-3.5" />
         {label}
       </Button>
-      <CreateItemDialog open={open} onOpenChange={setOpen} defaultType={defaultType} />
+      <CreateItemDialog open={open} onOpenChange={setOpen} defaultType={defaultType} collections={collections} />
     </>
   )
 }

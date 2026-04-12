@@ -9,10 +9,12 @@ import { ItemDrawerView } from './ItemDrawerView'
 import { ItemDrawerEdit } from './ItemDrawerEdit'
 import { updateItem, deleteItem } from '@/actions/items'
 import type { ItemDetail } from '@/lib/db/items'
+import type { CollectionOption } from '@/lib/db/collections'
 
 interface ItemDrawerProps {
   itemId: string | null
   onClose: () => void
+  collections?: CollectionOption[]
 }
 
 async function fetchItem(id: string): Promise<ItemDetail> {
@@ -21,7 +23,7 @@ async function fetchItem(id: string): Promise<ItemDetail> {
   return res.json()
 }
 
-export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
+export function ItemDrawer({ itemId, onClose, collections = [] }: ItemDrawerProps) {
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -42,6 +44,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const [url, setUrl] = useState('')
   const [language, setLanguage] = useState('')
   const [tagsInput, setTagsInput] = useState('')
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([])
 
   const handleEditStart = useCallback(() => {
     if (!item) return
@@ -51,6 +54,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
     setUrl(item.url ?? '')
     setLanguage(item.language ?? '')
     setTagsInput(item.tags.join(', '))
+    setSelectedCollections(item.collections.map((c) => c.id))
     setIsEditing(true)
   }, [item])
 
@@ -77,6 +81,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
       url: url.trim() || null,
       language: language.trim() || null,
       tags,
+      collectionIds: selectedCollections,
     })
 
     setSaving(false)
@@ -88,7 +93,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
     setIsEditing(false)
     toast.success('Item updated')
     router.refresh()
-  }, [item, title, description, content, url, language, tagsInput, router])
+  }, [item, title, description, content, url, language, tagsInput, selectedCollections, router])
 
   const handleDelete = useCallback(async () => {
     if (!item) return
@@ -157,6 +162,8 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 url={url}
                 language={language}
                 tagsInput={tagsInput}
+                selectedCollections={selectedCollections}
+                collections={collections}
                 saving={saving}
                 onTitleChange={setTitle}
                 onDescriptionChange={setDescription}
@@ -164,6 +171,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 onUrlChange={setUrl}
                 onLanguageChange={setLanguage}
                 onTagsInputChange={setTagsInput}
+                onSelectedCollectionsChange={setSelectedCollections}
                 onSave={handleSave}
                 onCancel={handleCancel}
               />

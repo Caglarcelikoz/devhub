@@ -1,10 +1,11 @@
 'use client'
 
-import { Check, X, FolderOpen, Calendar } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { Check, X, Calendar } from 'lucide-react'
 import { CodeEditor } from '@/components/ui/code-editor'
 import { MarkdownEditor } from '@/components/ui/markdown-editor'
+import { CollectionSelector } from '@/components/ui/collection-selector'
 import type { ItemDetail } from '@/lib/db/items'
+import type { CollectionOption } from '@/lib/db/collections'
 
 const LANGUAGE_TYPES = ['snippet', 'command']
 const MARKDOWN_TYPES = ['note', 'prompt']
@@ -18,6 +19,8 @@ interface ItemDrawerEditProps {
   url: string
   language: string
   tagsInput: string
+  selectedCollections: string[]
+  collections: CollectionOption[]
   saving: boolean
   onTitleChange: (v: string) => void
   onDescriptionChange: (v: string) => void
@@ -25,6 +28,7 @@ interface ItemDrawerEditProps {
   onUrlChange: (v: string) => void
   onLanguageChange: (v: string) => void
   onTagsInputChange: (v: string) => void
+  onSelectedCollectionsChange: (ids: string[]) => void
   onSave: () => void
   onCancel: () => void
 }
@@ -37,6 +41,8 @@ export function ItemDrawerEdit({
   url,
   language,
   tagsInput,
+  selectedCollections,
+  collections,
   saving,
   onTitleChange,
   onDescriptionChange,
@@ -44,6 +50,7 @@ export function ItemDrawerEdit({
   onUrlChange,
   onLanguageChange,
   onTagsInputChange,
+  onSelectedCollectionsChange,
   onSave,
   onCancel,
 }: ItemDrawerEditProps) {
@@ -141,17 +148,13 @@ export function ItemDrawerEdit({
           />
         </EditSection>
 
-        {item.collections.length > 0 && (
-          <Section label="Collections" icon={<FolderOpen className="h-3.5 w-3.5" />}>
-            <div className="flex flex-wrap gap-1.5">
-              {item.collections.map((col) => (
-                <Badge key={col.id} variant="outline" className="text-xs px-2 py-0.5 h-auto font-normal rounded-md">
-                  {col.name}
-                </Badge>
-              ))}
-            </div>
-          </Section>
-        )}
+        <EditSection label="Collections">
+          <CollectionSelector
+            collections={collections}
+            selected={selectedCollections}
+            onChange={onSelectedCollectionsChange}
+          />
+        </EditSection>
 
         <Section label="Details" icon={<Calendar className="h-3.5 w-3.5" />}>
           <div className="space-y-1.5 text-sm">

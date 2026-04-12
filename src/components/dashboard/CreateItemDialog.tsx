@@ -24,6 +24,8 @@ import { MarkdownEditor } from '@/components/ui/markdown-editor'
 import { FileUpload } from '@/components/ui/file-upload'
 import type { UploadedFile } from '@/components/ui/file-upload'
 import { createItem } from '@/actions/items'
+import { CollectionSelector } from '@/components/ui/collection-selector'
+import type { CollectionOption } from '@/lib/db/collections'
 
 export type CreatableType = 'snippet' | 'prompt' | 'command' | 'note' | 'link' | 'file' | 'image'
 
@@ -46,9 +48,10 @@ interface CreateItemDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   defaultType?: CreatableType
+  collections?: CollectionOption[]
 }
 
-export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItemDialogProps) {
+export function CreateItemDialog({ open, onOpenChange, defaultType, collections = [] }: CreateItemDialogProps) {
   const router = useRouter()
 
   const [itemTypeName, setItemTypeName] = useState<CreatableType>(defaultType ?? 'snippet')
@@ -58,6 +61,7 @@ export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItem
   const [url, setUrl] = useState('')
   const [language, setLanguage] = useState('')
   const [tagsInput, setTagsInput] = useState('')
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([])
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -75,6 +79,7 @@ export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItem
     setUrl('')
     setLanguage('')
     setTagsInput('')
+    setSelectedCollections([])
     setUploadedFile(null)
   }
 
@@ -110,6 +115,7 @@ export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItem
       url: url.trim() || null,
       language: language.trim() || null,
       tags,
+      collectionIds: selectedCollections,
     })
     setSaving(false)
 
@@ -252,6 +258,18 @@ export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItem
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
               placeholder="react, hooks, auth (comma-separated)"
+            />
+          </div>
+
+          {/* Collections */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wider text-foreground/40">
+              Collections
+            </label>
+            <CollectionSelector
+              collections={collections}
+              selected={selectedCollections}
+              onChange={setSelectedCollections}
             />
           </div>
 

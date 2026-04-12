@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { getCollectionsWithMeta } from "@/lib/db/collections";
+import { getCollectionsWithMeta, getCollections } from "@/lib/db/collections";
 import { getPinnedItems, getRecentItems, getItemStats } from "@/lib/db/items";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { CollectionsRow } from "@/components/dashboard/CollectionsRow";
@@ -16,8 +16,9 @@ export default async function DashboardPage() {
 
   const userId = session.user.id;
 
-  const [collections, pinnedItems, recentItems, itemStats] = await Promise.all([
+  const [collections, collectionOptions, pinnedItems, recentItems, itemStats] = await Promise.all([
     getCollectionsWithMeta(userId),
+    getCollections(userId),
     getPinnedItems(userId),
     getRecentItems(userId, 10),
     getItemStats(userId),
@@ -45,14 +46,14 @@ export default async function DashboardPage() {
       {pinnedItems.length > 0 && (
         <section>
           <SectionHeading label="Pinned" icon={<Pin className="h-4 w-4" />} />
-          <ItemsGridClient items={pinnedItems} />
+          <ItemsGridClient items={pinnedItems} collections={collectionOptions} />
         </section>
       )}
 
       {/* Recent Items */}
       <section>
         <SectionHeading label="All Items" icon={<Clock className="h-4 w-4" />} />
-        <ItemsGridClient items={recentItems} />
+        <ItemsGridClient items={recentItems} collections={collectionOptions} />
       </section>
     </div>
   );

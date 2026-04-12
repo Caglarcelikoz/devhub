@@ -6,8 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CreateItemDialog } from "@/components/dashboard/CreateItemDialog";
 import { CreateCollectionDialog } from "@/components/dashboard/CreateCollectionDialog";
+import type { CollectionOption } from "@/lib/db/collections";
 
-export function TopBar() {
+interface TopBarProps {
+  collections?: CollectionOption[]
+}
+
+export function TopBar({ collections = [] }: TopBarProps) {
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
   const [collectionDialogOpen, setCollectionDialogOpen] = useState(false);
 
@@ -51,7 +56,7 @@ export function TopBar() {
         </div>
       </header>
 
-      <CreateItemDialog open={itemDialogOpen} onOpenChange={setItemDialogOpen} />
+      <CreateItemDialog open={itemDialogOpen} onOpenChange={setItemDialogOpen} collections={collections} />
       <CreateCollectionDialog open={collectionDialogOpen} onOpenChange={setCollectionDialogOpen} />
     </>
   );

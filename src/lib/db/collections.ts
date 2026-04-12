@@ -1,6 +1,19 @@
 import { cache } from 'react'
 import { prisma } from '@/lib/prisma'
 
+export interface CollectionOption {
+  id: string
+  name: string
+}
+
+export async function getCollections(userId: string): Promise<CollectionOption[]> {
+  return prisma.collection.findMany({
+    where: { userId },
+    orderBy: { name: 'asc' },
+    select: { id: true, name: true },
+  })
+}
+
 export interface CreatedCollection {
   id: string
   name: string

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { createItem, getItemById, updateItem, deleteItem } from '@/lib/db/items'
+import { createItem, getItemById, updateItem, deleteItem, getSearchItems } from '@/lib/db/items'
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
@@ -9,6 +9,7 @@ vi.mock('@/lib/prisma', () => ({
     item: {
       create: vi.fn(),
       findFirst: vi.fn(),
+      findMany: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
     },
@@ -30,6 +31,7 @@ import { prisma } from '@/lib/prisma'
 const mockItemTypeFindFirst = vi.mocked(prisma.itemType.findFirst)
 const mockCreate = vi.mocked(prisma.item.create)
 const mockFindFirst = vi.mocked(prisma.item.findFirst)
+const mockFindMany = vi.mocked(prisma.item.findMany)
 const mockUpdate = vi.mocked(prisma.item.update)
 const mockDelete = vi.mocked(prisma.item.delete)
 
@@ -400,5 +402,87 @@ describe('deleteItem', () => {
     mockDelete.mockResolvedValue({} as never)
     await deleteItem('item-1', 'user-1')
     expect(mockDeleteFromS3).not.toHaveBeenCalled()
+  })
+})
+
+describe('getSearchItems', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns mapped search items with description and content preview', async () => {
+    mockFindMany.mockResolvedValue([
+      {
+        id: 'item-1',
+        title: 'useAuth hook',
+        description: 'Auth helper hook',
+        content: 'const useAuth = () => {}',
+        itemType: { name: 'snippet', color: '#3b82f6', icon: 'Code' },
+      },
+    ] as never)
+
+    const result = await getSearchItems('user-1')
+
+    expect(mockFindMany).toHaveBeenCalledWith({
+      where: { userId: 'user-1' },
+      orderBy: { updatedAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        content: true,
+        itemType: { select: { name: true, color: true, icon: true } },
+      },
+    })
+    expect(result).toEqual([
+      {
+        id: 'item-1',
+        title: 'useAuth hook',
+        description: 'Auth helper hook',
+        contentPreview: 'const useAuth = () => {}',
+        itemType: { name: 'snippet', color: '#3b82f6', icon: 'Code' },
+      },
+    ])
+  })
+
+  it('truncates content preview to 100 characters', async () => {
+    const longContent = 'a'.repeat(150)
+    mockFindMany.mockResolvedValue([
+      {
+        id: 'item-1',
+        title: 'Long snippet',
+        description: null,
+        content: longContent,
+        itemType: { name: 'snippet', color: '#3b82f6', icon: 'Code' },
+      },
+    ] as never)
+
+    const result = await getSearchItems('user-1')
+
+    expect(result[0].contentPreview).toHaveLength(100)
+  })
+
+  it('sets contentPreview to null when content is null', async () => {
+    mockFindMany.mockResolvedValue([
+      {
+        id: 'item-1',
+        title: 'A link',
+        description: null,
+        content: null,
+        itemType: { name: 'link', color: '#10b981', icon: 'Link' },
+      },
+    ] as never)
+
+    const result = await getSearchItems('user-1')
+
+    expect(result[0].contentPreview).toBeNull()
+  })
+
+  it('returns an empty array when user has no items', async () => {
+    mockFindMany.mockResolvedValue([])
+
+    const result = await getSearchItems('user-1')
+
+    expect(result).toEqual([])
   })
 })

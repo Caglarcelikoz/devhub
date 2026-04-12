@@ -303,6 +303,39 @@ export interface ItemTypeWithCount {
   itemCount: number
 }
 
+export interface SearchItem {
+  id: string
+  title: string
+  description: string | null
+  contentPreview: string | null
+  itemType: {
+    name: string
+    color: string
+    icon: string
+  }
+}
+
+export async function getSearchItems(userId: string): Promise<SearchItem[]> {
+  const rows = await prisma.item.findMany({
+    where: { userId },
+    orderBy: { updatedAt: 'desc' },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      content: true,
+      itemType: { select: { name: true, color: true, icon: true } },
+    },
+  })
+  return rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    contentPreview: row.content?.slice(0, 100) ?? null,
+    itemType: row.itemType,
+  }))
+}
+
 export const getItemTypesWithCount = cache(async function getItemTypesWithCount(userId: string): Promise<ItemTypeWithCount[]> {
   const types = await prisma.itemType.findMany({
     where: { isSystem: true },

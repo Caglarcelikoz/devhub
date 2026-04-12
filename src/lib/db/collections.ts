@@ -77,6 +77,61 @@ export async function getCollectionById(
   })
 }
 
+export async function updateCollection(
+  userId: string,
+  collectionId: string,
+  data: { name: string; description: string | null },
+): Promise<CollectionById | null> {
+  const existing = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    select: { id: true },
+  })
+  if (!existing) return null
+
+  return prisma.collection.update({
+    where: { id: collectionId },
+    data: { name: data.name, description: data.description },
+    select: { id: true, name: true, description: true, isFavorite: true, createdAt: true },
+  })
+}
+
+export async function deleteCollection(
+  userId: string,
+  collectionId: string,
+): Promise<boolean> {
+  const existing = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    select: { id: true },
+  })
+  if (!existing) return false
+
+  await prisma.collection.delete({ where: { id: collectionId } })
+  return true
+}
+
+export interface SearchCollection {
+  id: string
+  name: string
+  itemCount: number
+}
+
+export async function getSearchCollections(userId: string): Promise<SearchCollection[]> {
+  const rows = await prisma.collection.findMany({
+    where: { userId },
+    orderBy: { name: 'asc' },
+    select: {
+      id: true,
+      name: true,
+      _count: { select: { items: true } },
+    },
+  })
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    itemCount: row._count.items,
+  }))
+}
+
 export const getCollectionsWithMeta = cache(async function getCollectionsWithMeta(userId: string): Promise<CollectionWithMeta[]> {
   const collections = await prisma.collection.findMany({
     where: { userId },

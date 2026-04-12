@@ -4,6 +4,7 @@ import { Star, FolderOpen } from "lucide-react";
 import { getCollectionById, getCollections } from "@/lib/db/collections";
 import { getItemsByCollection } from "@/lib/db/items";
 import { ItemsGridClient } from "@/components/dashboard/ItemsGridClient";
+import { CollectionPageActions } from "@/components/dashboard/CollectionActions";
 
 interface CollectionPageProps {
   params: Promise<{ id: string }>;
@@ -51,6 +52,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
             {items.length} {items.length === 1 ? "item" : "items"}
           </p>
         </div>
+        <CollectionPageActions collection={collection} />
       </div>
 
       {/* Items */}

@@ -2,8 +2,12 @@
 
 import { z } from 'zod'
 import { auth } from '@/auth'
-import { createCollection as dbCreateCollection } from '@/lib/db/collections'
-import type { CreatedCollection } from '@/lib/db/collections'
+import {
+  createCollection as dbCreateCollection,
+  updateCollection as dbUpdateCollection,
+  deleteCollection as dbDeleteCollection,
+} from '@/lib/db/collections'
+import type { CreatedCollection, CollectionById } from '@/lib/db/collections'
 
 type ActionResult<T> =
   | { success: true; data: T }
@@ -43,5 +47,61 @@ export async function createCollection(
     return { success: true, data: created }
   } catch {
     return { success: false, error: 'Failed to create collection' }
+  }
+}
+
+const updateCollectionSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required'),
+  description: z
+    .string()
+    .trim()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
+})
+
+type UpdateCollectionInput = z.input<typeof updateCollectionSchema>
+
+export async function updateCollection(
+  collectionId: string,
+  input: UpdateCollectionInput,
+): Promise<ActionResult<CollectionById>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  const parsed = updateCollectionSchema.safeParse(input)
+  if (!parsed.success) {
+    const message = parsed.error.issues.map((e) => e.message).join(', ')
+    return { success: false, error: message }
+  }
+
+  try {
+    const updated = await dbUpdateCollection(session.user.id, collectionId, {
+      name: parsed.data.name,
+      description: parsed.data.description ?? null,
+    })
+    if (!updated) return { success: false, error: 'Collection not found' }
+    return { success: true, data: updated }
+  } catch {
+    return { success: false, error: 'Failed to update collection' }
+  }
+}
+
+export async function deleteCollection(
+  collectionId: string,
+): Promise<ActionResult<null>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const deleted = await dbDeleteCollection(session.user.id, collectionId)
+    if (!deleted) return { success: false, error: 'Collection not found' }
+    return { success: true, data: null }
+  } catch {
+    return { success: false, error: 'Failed to delete collection' }
   }
 }

@@ -6,11 +6,11 @@ Not Started
 
 ## Goals
 
-<!-- Goals & requirements -->
+<!-- Add goals here -->
 
 ## Notes
 
-<!-- Any extra notes -->
+<!-- Add notes here -->
 
 ## History
 
@@ -48,3 +48,4 @@ Not Started
 - Collection Create: "New Collection" outline button in TopBar (FolderPlus icon); shadcn Dialog with name (required) + description (optional) fields; createCollection server action with Zod validation + auth check; createCollection db function in collections.ts; sonner toast on success/error; router.refresh() syncs sidebar and collections display
 - Item Collection Assignment: CollectionSelector component (checkboxes-in-popover multi-select); getCollections slim helper; collectionIds added to createItem and updateItem actions + db functions; selector in CreateItemDialog (create flow) and ItemDrawerEdit (edit flow, pre-populated from item.collections); collections fetched server-side in layout/pages and passed as props through TopBar, NewItemButton, ItemsGridClient → ItemDrawer
 - Collections Pages: /collections page lists all user collections using CollectionsRow; /collections/[id] detail page shows items in a collection using ItemsGridClient; getCollectionById and getItemsByCollection added to db layer; sidebar and dashboard collection cards now link to /collections/[id]; "View all collections" links to /collections; 8 new unit tests; pre-existing test failures from collectionIds addition fixed
+- Global Search / Command Palette: shadcn cmdk Command component; Cmd+K / Ctrl+K opens palette from any page; TopBar search input replaced with clickable button showing ⌘K hint; fuzzy search over items (title + description + type) and collections (name); grouped Items/Collections results with type icons and item counts; item select opens ItemDrawer in TopBar; collection select navigates to /collections/[id]; getSearchItems() and getSearchCollections() db helpers; all 4 layouts fetch and pass search data; 6 new unit tests

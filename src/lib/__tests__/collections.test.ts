@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getCollectionById } from '@/lib/db/collections'
+import { getCollectionById, getSearchCollections } from '@/lib/db/collections'
 import { getItemsByCollection } from '@/lib/db/items'
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     collection: {
       findFirst: vi.fn(),
+      findMany: vi.fn(),
     },
     item: {
       findMany: vi.fn(),
@@ -20,6 +21,7 @@ vi.mock('@/lib/s3', () => ({
 import { prisma } from '@/lib/prisma'
 
 const mockCollectionFindFirst = vi.mocked(prisma.collection.findFirst)
+const mockCollectionFindMany = vi.mocked(prisma.collection.findMany)
 const mockItemFindMany = vi.mocked(prisma.item.findMany)
 
 function makeCollectionRow(overrides = {}) {
@@ -89,6 +91,43 @@ describe('getCollectionById', () => {
       expect.objectContaining({ where: { id: 'col-1', userId: 'other-user' } }),
     )
     expect(result).toBeNull()
+  })
+})
+
+describe('getSearchCollections', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns mapped collections with itemCount', async () => {
+    mockCollectionFindMany.mockResolvedValue([
+      { id: 'col-1', name: 'React Patterns', _count: { items: 5 } },
+      { id: 'col-2', name: 'Python Snippets', _count: { items: 0 } },
+    ] as never)
+
+    const result = await getSearchCollections('user-1')
+
+    expect(mockCollectionFindMany).toHaveBeenCalledWith({
+      where: { userId: 'user-1' },
+      orderBy: { name: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        _count: { select: { items: true } },
+      },
+    })
+    expect(result).toEqual([
+      { id: 'col-1', name: 'React Patterns', itemCount: 5 },
+      { id: 'col-2', name: 'Python Snippets', itemCount: 0 },
+    ])
+  })
+
+  it('returns an empty array when user has no collections', async () => {
+    mockCollectionFindMany.mockResolvedValue([])
+
+    const result = await getSearchCollections('user-1')
+
+    expect(result).toEqual([])
   })
 })
 

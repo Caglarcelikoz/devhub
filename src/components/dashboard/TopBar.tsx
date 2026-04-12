@@ -1,20 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Plus, FolderPlus, LayoutGrid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { CreateItemDialog } from "@/components/dashboard/CreateItemDialog";
 import { CreateCollectionDialog } from "@/components/dashboard/CreateCollectionDialog";
+import { CommandPalette } from "@/components/dashboard/CommandPalette";
+import { ItemDrawer } from "@/components/dashboard/ItemDrawer";
 import type { CollectionOption } from "@/lib/db/collections";
+import type { SearchItem } from "@/lib/db/items";
+import type { SearchCollection } from "@/lib/db/collections";
 
 interface TopBarProps {
-  collections?: CollectionOption[]
+  collections?: CollectionOption[];
+  searchItems?: SearchItem[];
+  searchCollections?: SearchCollection[];
 }
 
-export function TopBar({ collections = [] }: TopBarProps) {
+export function TopBar({
+  collections = [],
+  searchItems = [],
+  searchCollections = [],
+}: TopBarProps) {
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
   const [collectionDialogOpen, setCollectionDialogOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [drawerItemId, setDrawerItemId] = useState<string | null>(null);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setPaletteOpen((open) => !open);
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <>
@@ -22,11 +44,17 @@ export function TopBar({ collections = [] }: TopBarProps) {
         <span className="text-base font-semibold text-foreground mr-2">DevHub</span>
 
         <div className="flex-1 max-w-sm relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search items..."
-            className="pl-9 h-9 text-sm bg-muted border-transparent focus-visible:border-border"
-          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            className="w-full h-9 pl-9 pr-3 text-sm text-left text-muted-foreground bg-muted rounded-md border border-transparent hover:border-border transition-colors flex items-center justify-between"
+          >
+            <span>Search items...</span>
+            <kbd className="hidden sm:inline-flex items-center gap-0.5 text-xs text-muted-foreground/60 font-mono">
+              <span className="text-[11px]">⌘</span>K
+            </kbd>
+          </button>
         </div>
 
         <div className="ml-auto flex items-center gap-2">
@@ -58,6 +86,20 @@ export function TopBar({ collections = [] }: TopBarProps) {
 
       <CreateItemDialog open={itemDialogOpen} onOpenChange={setItemDialogOpen} collections={collections} />
       <CreateCollectionDialog open={collectionDialogOpen} onOpenChange={setCollectionDialogOpen} />
+
+      <CommandPalette
+        items={searchItems}
+        collections={searchCollections}
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        onItemSelect={(id) => setDrawerItemId(id)}
+      />
+
+      <ItemDrawer
+        itemId={drawerItemId}
+        onClose={() => setDrawerItemId(null)}
+        collections={collections}
+      />
     </>
   );
 }

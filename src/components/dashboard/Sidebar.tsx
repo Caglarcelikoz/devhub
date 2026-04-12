@@ -216,7 +216,7 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
             collapsed ? "justify-center" : ""
           )}
         >
-          <UserAvatar name={user?.name} image={user?.image} size={32} className="shrink-0" />
+          <UserAvatar name={user?.name ?? user?.email} image={user?.image} size={32} className="shrink-0" />
           {!collapsed && (
             <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-medium text-foreground truncate">

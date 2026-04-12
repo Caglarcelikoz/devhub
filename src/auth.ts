@@ -15,9 +15,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: '/sign-in',
   },
   callbacks: {
+    async jwt({ token, user }) {
+      // On sign-in, `user` is present — persist fields into the token
+      if (user) {
+        token.name = user.name
+        token.picture = user.image
+      }
+      // On subsequent requests, re-hydrate from DB so name/image stay fresh
+      if (!user && token.sub) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { name: true, image: true },
+        })
+        if (dbUser) {
+          token.name = dbUser.name
+          token.picture = dbUser.image
+        }
+      }
+      return token
+    },
     session({ session, token }) {
       if (token.sub) {
         session.user.id = token.sub
+      }
+      if (token.name) {
+        session.user.name = token.name
+      }
+      if (token.picture) {
+        session.user.image = token.picture as string
       }
       return session
     },

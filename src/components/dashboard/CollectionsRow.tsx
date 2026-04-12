@@ -18,7 +18,7 @@ export function CollectionsRow({ collections }: CollectionsRowProps) {
       {collections.map((col) => (
         <Link
           key={col.id}
-          href={`/dashboard/collections/${col.id}`}
+          href={`/collections/${col.id}`}
           className="group rounded-lg border bg-card p-4 hover:opacity-90 transition-opacity"
           style={{
             borderColor: col.dominantColor ?? "hsl(var(--border))",

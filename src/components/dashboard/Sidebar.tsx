@@ -167,7 +167,7 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
                 icon={Star}
                 iconColor="#f59e0b"
                 label={col.name}
-                href={`/dashboard/collections/${col.id}`}
+                href={`/collections/${col.id}`}
                 pathname={pathname}
                 collapsed={collapsed}
                 count={col.itemCount}
@@ -188,7 +188,7 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
               icon={File}
               iconColor={dominantColor}
               label={col.name}
-              href={`/dashboard/collections/${col.id}`}
+              href={`/collections/${col.id}`}
               pathname={pathname}
               collapsed={collapsed}
               count={col.itemCount}

@@ -59,6 +59,24 @@ export interface CollectionWithMeta {
   dominantColor: string | undefined
 }
 
+export interface CollectionById {
+  id: string
+  name: string
+  description: string | null
+  isFavorite: boolean
+  createdAt: Date
+}
+
+export async function getCollectionById(
+  userId: string,
+  collectionId: string,
+): Promise<CollectionById | null> {
+  return prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    select: { id: true, name: true, description: true, isFavorite: true, createdAt: true },
+  })
+}
+
 export const getCollectionsWithMeta = cache(async function getCollectionsWithMeta(userId: string): Promise<CollectionWithMeta[]> {
   const collections = await prisma.collection.findMany({
     where: { userId },

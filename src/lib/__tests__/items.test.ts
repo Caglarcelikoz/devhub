@@ -12,6 +12,9 @@ vi.mock('@/lib/prisma', () => ({
       update: vi.fn(),
       delete: vi.fn(),
     },
+    itemCollection: {
+      deleteMany: vi.fn(),
+    },
   },
 }))
 
@@ -75,6 +78,7 @@ describe('createItem', () => {
     language: 'typescript',
     tags: [] as string[],
     itemTypeName: 'snippet',
+    collectionIds: [] as string[],
   }
 
   it('returns null when item type is not found', async () => {
@@ -270,6 +274,7 @@ describe('updateItem', () => {
       url: null,
       language: null,
       tags: [],
+      collectionIds: [],
     })
     expect(result).toBeNull()
     expect(mockUpdate).not.toHaveBeenCalled()
@@ -286,6 +291,7 @@ describe('updateItem', () => {
       url: null,
       language: 'typescript',
       tags: ['ts'],
+      collectionIds: [],
     })
 
     expect(mockUpdate).toHaveBeenCalledWith(
@@ -323,6 +329,7 @@ describe('updateItem', () => {
       url: null,
       language: null,
       tags: ['react'],
+      collectionIds: [],
     })
 
     expect(result?.tags).toEqual(['react'])
@@ -340,6 +347,7 @@ describe('updateItem', () => {
       url: null,
       language: null,
       tags: [],
+      collectionIds: [],
     })
 
     expect(mockUpdate).toHaveBeenCalledWith(

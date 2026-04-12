@@ -20,6 +20,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CodeEditor } from '@/components/ui/code-editor'
+import { MarkdownEditor } from '@/components/ui/markdown-editor'
 import { createItem } from '@/actions/items'
 
 export type CreatableType = 'snippet' | 'prompt' | 'command' | 'note' | 'link'
@@ -34,6 +35,7 @@ const TYPES: { value: CreatableType; label: string }[] = [
 
 const TEXT_TYPES: CreatableType[] = ['snippet', 'prompt', 'command', 'note']
 const LANGUAGE_TYPES: CreatableType[] = ['snippet', 'command']
+const MARKDOWN_TYPES: CreatableType[] = ['note', 'prompt']
 
 interface CreateItemDialogProps {
   open: boolean
@@ -55,6 +57,7 @@ export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItem
 
   const showContent = TEXT_TYPES.includes(itemTypeName)
   const showLanguage = LANGUAGE_TYPES.includes(itemTypeName)
+  const showMarkdown = MARKDOWN_TYPES.includes(itemTypeName)
   const showUrl = itemTypeName === 'link'
 
   const resetForm = () => {
@@ -200,6 +203,11 @@ export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItem
                   value={content}
                   onChange={setContent}
                   language={language}
+                />
+              ) : showMarkdown ? (
+                <MarkdownEditor
+                  value={content}
+                  onChange={setContent}
                 />
               ) : (
                 <textarea

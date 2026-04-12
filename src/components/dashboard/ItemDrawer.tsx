@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { CodeEditor } from '@/components/ui/code-editor'
+import { MarkdownEditor } from '@/components/ui/markdown-editor'
 import { updateItem, deleteItem } from '@/actions/items'
 import type { ItemDetail } from '@/lib/db/items'
 
@@ -95,6 +96,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
 
 const TEXT_TYPES = ['snippet', 'prompt', 'command', 'note']
 const LANGUAGE_TYPES = ['snippet', 'command']
+const MARKDOWN_TYPES = ['note', 'prompt']
 
 function DrawerBody({
   item,
@@ -192,6 +194,7 @@ function DrawerBody({
   const preview = item.contentType === 'URL' ? item.url : item.content
   const showContent = TEXT_TYPES.includes(itemType.name)
   const showLanguage = LANGUAGE_TYPES.includes(itemType.name)
+  const showMarkdown = MARKDOWN_TYPES.includes(itemType.name)
   const showUrl = itemType.name === 'link'
 
   return (
@@ -343,6 +346,11 @@ function DrawerBody({
                     onChange={setContent}
                     language={language}
                   />
+                ) : showMarkdown ? (
+                  <MarkdownEditor
+                    value={content}
+                    onChange={setContent}
+                  />
                 ) : (
                   <textarea
                     value={content}
@@ -413,6 +421,11 @@ function DrawerBody({
                   <CodeEditor
                     value={item.content ?? ''}
                     language={item.language ?? ''}
+                    readOnly
+                  />
+                ) : showMarkdown ? (
+                  <MarkdownEditor
+                    value={item.content ?? ''}
                     readOnly
                   />
                 ) : (

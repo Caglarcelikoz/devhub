@@ -1,4 +1,7 @@
-import { Star, Pin } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Star, Pin, Copy, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ImageThumbnailCard } from "@/components/dashboard/ImageThumbnailCard";
 import type { ItemWithMeta } from "@/lib/db/items";
@@ -38,6 +41,17 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
   const { itemType } = item;
   const timeAgo = formatTimeAgo(item.updatedAt);
   const preview = item.contentType === "URL" ? item.url : item.content;
+  const copyText = item.contentType === "URL" ? item.url : item.content;
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!copyText) return;
+    navigator.clipboard.writeText(copyText).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }
 
   return (
     <div
@@ -62,6 +76,19 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
         <div className="flex items-center gap-1.5 text-muted-foreground/60 shrink-0">
           {item.isFavorite && <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />}
           {item.isPinned && <Pin className="h-3.5 w-3.5" />}
+          {copyText && (
+            <button
+              onClick={handleCopy}
+              className="p-0.5 rounded hover:text-foreground cursor-pointer"
+              title="Copy"
+            >
+              {copied ? (
+                <Check className="h-3.5 w-3.5 text-emerald-400" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
+            </button>
+          )}
         </div>
       </div>
 

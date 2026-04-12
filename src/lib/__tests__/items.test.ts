@@ -15,6 +15,13 @@ vi.mock('@/lib/prisma', () => ({
   },
 }))
 
+vi.mock('@/lib/s3', () => ({
+  deleteFromS3: vi.fn().mockResolvedValue(undefined),
+}))
+
+import { deleteFromS3 } from '@/lib/s3'
+const mockDeleteFromS3 = vi.mocked(deleteFromS3)
+
 import { prisma } from '@/lib/prisma'
 
 const mockItemTypeFindFirst = vi.mocked(prisma.itemType.findFirst)
@@ -35,6 +42,9 @@ function baseRow() {
     description: 'A useful snippet',
     content: 'const x = 1',
     contentType: 'TEXT',
+    fileUrl: null,
+    fileName: null,
+    fileSize: null,
     url: null,
     language: 'typescript',
     isFavorite: false,
@@ -54,37 +64,31 @@ describe('createItem', () => {
     vi.clearAllMocks()
   })
 
+  const baseCreateInput = {
+    title: 'New Snippet',
+    description: null,
+    content: 'const x = 1',
+    fileUrl: null,
+    fileName: null,
+    fileSize: null,
+    url: null,
+    language: 'typescript',
+    tags: [] as string[],
+    itemTypeName: 'snippet',
+  }
+
   it('returns null when item type is not found', async () => {
     mockItemTypeFindFirst.mockResolvedValue(null)
-    const result = await createItem('user-1', {
-      title: 'New Snippet',
-      description: null,
-      content: 'const x = 1',
-      url: null,
-      language: 'typescript',
-      tags: [],
-      itemTypeName: 'snippet',
-    })
+    const result = await createItem('user-1', baseCreateInput)
     expect(result).toBeNull()
     expect(mockCreate).not.toHaveBeenCalled()
   })
 
   it('calls prisma.item.create with correct data for a text type', async () => {
     mockItemTypeFindFirst.mockResolvedValue({ id: 'type-1', name: 'snippet' } as never)
-    mockCreate.mockResolvedValue({
-      ...baseRow(),
-      collections: [],
-    } as never)
+    mockCreate.mockResolvedValue({ ...baseRow(), collections: [] } as never)
 
-    await createItem('user-1', {
-      title: 'New Snippet',
-      description: 'desc',
-      content: 'const x = 1',
-      url: null,
-      language: 'typescript',
-      tags: ['react'],
-      itemTypeName: 'snippet',
-    })
+    await createItem('user-1', { ...baseCreateInput, description: 'desc', tags: ['react'] })
 
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -100,19 +104,12 @@ describe('createItem', () => {
 
   it('sets contentType to URL for link items', async () => {
     mockItemTypeFindFirst.mockResolvedValue({ id: 'type-link', name: 'link' } as never)
-    mockCreate.mockResolvedValue({
-      ...baseRow(),
-      contentType: 'URL',
-      collections: [],
-    } as never)
+    mockCreate.mockResolvedValue({ ...baseRow(), contentType: 'URL', collections: [] } as never)
 
     await createItem('user-1', {
-      title: 'My Link',
-      description: null,
+      ...baseCreateInput,
       content: null,
       url: 'https://example.com',
-      language: null,
-      tags: [],
       itemTypeName: 'link',
     })
 
@@ -123,23 +120,56 @@ describe('createItem', () => {
     )
   })
 
+  it('sets contentType to FILE for file items', async () => {
+    mockItemTypeFindFirst.mockResolvedValue({ id: 'type-file', name: 'file' } as never)
+    mockCreate.mockResolvedValue({ ...baseRow(), contentType: 'FILE', collections: [] } as never)
+
+    await createItem('user-1', {
+      ...baseCreateInput,
+      content: null,
+      fileUrl: 'user-1/files/uuid-report.pdf',
+      fileName: 'report.pdf',
+      fileSize: 204800,
+      itemTypeName: 'file',
+    })
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          contentType: 'FILE',
+          fileUrl: 'user-1/files/uuid-report.pdf',
+          fileName: 'report.pdf',
+          fileSize: 204800,
+        }),
+      }),
+    )
+  })
+
+  it('sets contentType to FILE for image items', async () => {
+    mockItemTypeFindFirst.mockResolvedValue({ id: 'type-image', name: 'image' } as never)
+    mockCreate.mockResolvedValue({ ...baseRow(), contentType: 'FILE', collections: [] } as never)
+
+    await createItem('user-1', {
+      ...baseCreateInput,
+      content: null,
+      fileUrl: 'user-1/images/uuid-photo.png',
+      fileName: 'photo.png',
+      fileSize: 512000,
+      itemTypeName: 'image',
+    })
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ contentType: 'FILE' }),
+      }),
+    )
+  })
+
   it('maps tags and returns empty collections array', async () => {
     mockItemTypeFindFirst.mockResolvedValue({ id: 'type-1', name: 'snippet' } as never)
-    mockCreate.mockResolvedValue({
-      ...baseRow(),
-      tags: [{ name: 'react' }],
-      collections: [],
-    } as never)
+    mockCreate.mockResolvedValue({ ...baseRow(), tags: [{ name: 'react' }], collections: [] } as never)
 
-    const result = await createItem('user-1', {
-      title: 'T',
-      description: null,
-      content: null,
-      url: null,
-      language: null,
-      tags: ['react'],
-      itemTypeName: 'snippet',
-    })
+    const result = await createItem('user-1', { ...baseCreateInput, tags: ['react'] })
 
     expect(result?.tags).toEqual(['react'])
     expect(result?.collections).toEqual([])
@@ -149,15 +179,7 @@ describe('createItem', () => {
     mockItemTypeFindFirst.mockResolvedValue({ id: 'type-1', name: 'snippet' } as never)
     mockCreate.mockResolvedValue({ ...baseRow(), collections: [] } as never)
 
-    await createItem('user-1', {
-      title: 'T',
-      description: null,
-      content: null,
-      url: null,
-      language: null,
-      tags: ['ts', 'react'],
-      itemTypeName: 'snippet',
-    })
+    await createItem('user-1', { ...baseCreateInput, tags: ['ts', 'react'] })
 
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -343,7 +365,7 @@ describe('deleteItem', () => {
   })
 
   it('deletes the item and returns true when ownership is confirmed', async () => {
-    mockFindFirst.mockResolvedValue({ id: 'item-1' } as never)
+    mockFindFirst.mockResolvedValue({ id: 'item-1', fileUrl: null } as never)
     mockDelete.mockResolvedValue({} as never)
     const result = await deleteItem('item-1', 'user-1')
     expect(result).toBe(true)
@@ -356,5 +378,19 @@ describe('deleteItem', () => {
     expect(mockFindFirst).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: 'item-99', userId: 'user-42' } }),
     )
+  })
+
+  it('calls deleteFromS3 when item has a fileUrl', async () => {
+    mockFindFirst.mockResolvedValue({ id: 'item-1', fileUrl: 'user-1/files/uuid-report.pdf' } as never)
+    mockDelete.mockResolvedValue({} as never)
+    await deleteItem('item-1', 'user-1')
+    expect(mockDeleteFromS3).toHaveBeenCalledWith('user-1/files/uuid-report.pdf')
+  })
+
+  it('does not call deleteFromS3 when item has no fileUrl', async () => {
+    mockFindFirst.mockResolvedValue({ id: 'item-1', fileUrl: null } as never)
+    mockDelete.mockResolvedValue({} as never)
+    await deleteItem('item-1', 'user-1')
+    expect(mockDeleteFromS3).not.toHaveBeenCalled()
   })
 })

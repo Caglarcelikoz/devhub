@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { deleteFromS3 } from '@/lib/s3'
 
 export interface ItemWithMeta {
   id: string
@@ -6,6 +7,9 @@ export interface ItemWithMeta {
   description: string | null
   content: string | null
   contentType: 'TEXT' | 'FILE' | 'URL'
+  fileUrl: string | null
+  fileName: string | null
+  fileSize: number | null
   url: string | null
   language: string | null
   isFavorite: boolean
@@ -32,6 +36,9 @@ const itemSelect = {
   description: true,
   content: true,
   contentType: true,
+  fileUrl: true,
+  fileName: true,
+  fileSize: true,
   url: true,
   language: true,
   isFavorite: true,
@@ -47,6 +54,9 @@ function mapItem(raw: {
   description: string | null
   content: string | null
   contentType: string
+  fileUrl: string | null
+  fileName: string | null
+  fileSize: number | null
   url: string | null
   language: string | null
   isFavorite: boolean
@@ -62,6 +72,28 @@ function mapItem(raw: {
     tags: raw.tags.map((t) => t.name),
   }
 }
+
+const itemDetailSelect = {
+  id: true,
+  title: true,
+  description: true,
+  content: true,
+  contentType: true,
+  fileUrl: true,
+  fileName: true,
+  fileSize: true,
+  url: true,
+  language: true,
+  isFavorite: true,
+  isPinned: true,
+  createdAt: true,
+  updatedAt: true,
+  tags: { select: { name: true } },
+  itemType: { select: { id: true, name: true, color: true, icon: true } },
+  collections: {
+    select: { collection: { select: { id: true, name: true } } },
+  },
+} as const
 
 export async function getPinnedItems(userId: string): Promise<ItemWithMeta[]> {
   const rows = await prisma.item.findMany({
@@ -100,24 +132,7 @@ export async function getItemById(
 ): Promise<ItemDetail | null> {
   const row = await prisma.item.findFirst({
     where: { id, userId },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      content: true,
-      contentType: true,
-      url: true,
-      language: true,
-      isFavorite: true,
-      isPinned: true,
-      createdAt: true,
-      updatedAt: true,
-      tags: { select: { name: true } },
-      itemType: { select: { id: true, name: true, color: true, icon: true } },
-      collections: {
-        select: { collection: { select: { id: true, name: true } } },
-      },
-    },
+    select: itemDetailSelect,
   })
   if (!row) return null
   return {
@@ -132,6 +147,9 @@ export interface CreateItemData {
   title: string
   description: string | null
   content: string | null
+  fileUrl: string | null
+  fileName: string | null
+  fileSize: number | null
   url: string | null
   language: string | null
   tags: string[]
@@ -142,21 +160,23 @@ export async function createItem(
   userId: string,
   data: CreateItemData,
 ): Promise<ItemDetail | null> {
-  // Look up the item type
   const itemType = await prisma.itemType.findFirst({
     where: { name: data.itemTypeName, isSystem: true },
     select: { id: true, name: true },
   })
   if (!itemType) return null
 
-  // Determine content type
-  const contentType = data.itemTypeName === 'link' ? 'URL' : 'TEXT'
+  const isFileType = data.itemTypeName === 'file' || data.itemTypeName === 'image'
+  const contentType = data.itemTypeName === 'link' ? 'URL' : isFileType ? 'FILE' : 'TEXT'
 
   const row = await prisma.item.create({
     data: {
       title: data.title,
       description: data.description,
       content: data.content,
+      fileUrl: data.fileUrl,
+      fileName: data.fileName,
+      fileSize: data.fileSize,
       url: data.url,
       language: data.language,
       contentType,
@@ -169,24 +189,7 @@ export async function createItem(
         })),
       },
     },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      content: true,
-      contentType: true,
-      url: true,
-      language: true,
-      isFavorite: true,
-      isPinned: true,
-      createdAt: true,
-      updatedAt: true,
-      tags: { select: { name: true } },
-      itemType: { select: { id: true, name: true, color: true, icon: true } },
-      collections: {
-        select: { collection: { select: { id: true, name: true } } },
-      },
-    },
+    select: itemDetailSelect,
   })
 
   return {
@@ -211,7 +214,6 @@ export async function updateItem(
   userId: string,
   data: UpdateItemData,
 ): Promise<ItemDetail | null> {
-  // Verify ownership
   const existing = await prisma.item.findFirst({ where: { id, userId }, select: { id: true } })
   if (!existing) return null
 
@@ -231,24 +233,7 @@ export async function updateItem(
         })),
       },
     },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      content: true,
-      contentType: true,
-      url: true,
-      language: true,
-      isFavorite: true,
-      isPinned: true,
-      createdAt: true,
-      updatedAt: true,
-      tags: { select: { name: true } },
-      itemType: { select: { id: true, name: true, color: true, icon: true } },
-      collections: {
-        select: { collection: { select: { id: true, name: true } } },
-      },
-    },
+    select: itemDetailSelect,
   })
 
   return {
@@ -263,8 +248,17 @@ export async function deleteItem(
   id: string,
   userId: string,
 ): Promise<boolean> {
-  const existing = await prisma.item.findFirst({ where: { id, userId }, select: { id: true } })
+  const existing = await prisma.item.findFirst({
+    where: { id, userId },
+    select: { id: true, fileUrl: true },
+  })
   if (!existing) return false
+
+  // Delete S3 file if present
+  if (existing.fileUrl) {
+    await deleteFromS3(existing.fileUrl)
+  }
+
   await prisma.item.delete({ where: { id } })
   return true
 }

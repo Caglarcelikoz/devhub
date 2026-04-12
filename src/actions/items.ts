@@ -9,13 +9,16 @@ import {
 } from '@/lib/db/items'
 import type { ItemDetail } from '@/lib/db/items'
 
-const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link'] as const
+const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image'] as const
 
 const createItemSchema = z.object({
   title: z.string().trim().min(1, 'Title is required'),
   itemTypeName: z.enum(CREATABLE_TYPES, { error: 'Invalid item type' }),
   description: z.string().trim().nullable().optional().transform((v) => v ?? null),
   content: z.string().nullable().optional().transform((v) => v ?? null),
+  fileUrl: z.string().nullable().optional().transform((v) => v ?? null),
+  fileName: z.string().nullable().optional().transform((v) => v ?? null),
+  fileSize: z.number().nullable().optional().transform((v) => v ?? null),
   url: z
     .string()
     .trim()
@@ -47,9 +50,12 @@ export async function createItem(
 
   const data = parsed.data
 
-  // link requires a URL
   if (data.itemTypeName === 'link' && !data.url) {
     return { success: false, error: 'URL is required for link items' }
+  }
+
+  if ((data.itemTypeName === 'file' || data.itemTypeName === 'image') && !data.fileUrl) {
+    return { success: false, error: 'A file must be uploaded first' }
   }
 
   try {
@@ -57,6 +63,9 @@ export async function createItem(
       title: data.title,
       description: data.description ?? null,
       content: data.content ?? null,
+      fileUrl: data.fileUrl ?? null,
+      fileName: data.fileName ?? null,
+      fileSize: data.fileSize ?? null,
       url: data.url ?? null,
       language: data.language ?? null,
       tags: data.tags,

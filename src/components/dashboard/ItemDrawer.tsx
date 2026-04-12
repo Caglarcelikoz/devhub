@@ -13,6 +13,8 @@ import {
   Calendar,
   Check,
   X,
+  Download,
+  File,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -97,6 +99,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
 const TEXT_TYPES = ['snippet', 'prompt', 'command', 'note']
 const LANGUAGE_TYPES = ['snippet', 'command']
 const MARKDOWN_TYPES = ['note', 'prompt']
+const FILE_TYPES = ['file', 'image']
 
 function DrawerBody({
   item,
@@ -196,6 +199,8 @@ function DrawerBody({
   const showLanguage = LANGUAGE_TYPES.includes(itemType.name)
   const showMarkdown = MARKDOWN_TYPES.includes(itemType.name)
   const showUrl = itemType.name === 'link'
+  const showFile = FILE_TYPES.includes(itemType.name)
+  const isImageType = itemType.name === 'image'
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -267,6 +272,17 @@ function DrawerBody({
             label="Edit"
             onClick={handleEditStart}
           />
+          {showFile && item.fileUrl && (
+            <a
+              href={`/api/items/${item.id}/download`}
+              download={item.fileName ?? undefined}
+              className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-accent"
+              title="Download"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Download</span>
+            </a>
+          )}
           <div className="ml-auto shrink-0">
             <AlertDialog>
               <AlertDialogTrigger className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors text-muted-foreground hover:text-destructive hover:bg-destructive/10">
@@ -441,6 +457,32 @@ function DrawerBody({
               </Section>
             )}
 
+            {/* File / Image */}
+            {showFile && item.fileUrl && (
+              <Section label={isImageType ? 'Image' : 'File'}>
+                {isImageType ? (
+                  <img
+                    src={`/api/items/${item.id}/download`}
+                    alt={item.fileName ?? item.title}
+                    className="rounded-md border border-border max-h-80 w-full object-contain bg-muted/20"
+                  />
+                ) : (
+                  <div
+                    className="flex items-center gap-3 rounded-md border p-3"
+                    style={{ borderColor: `${itemType.color}30`, backgroundColor: `${itemType.color}06` }}
+                  >
+                    <File className="h-5 w-5 shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{item.fileName ?? 'File'}</p>
+                      {item.fileSize && (
+                        <p className="text-xs text-muted-foreground">{formatBytes(item.fileSize)}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </Section>
+            )}
+
             {/* Tags */}
             {item.tags.length > 0 && (
               <Section label="Tags" icon={<Tag className="h-3.5 w-3.5" />}>
@@ -598,4 +640,10 @@ function formatDate(date: Date): string {
     month: 'long',
     day: 'numeric',
   })
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }

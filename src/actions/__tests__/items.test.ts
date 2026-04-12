@@ -31,6 +31,9 @@ function makeItemDetail(overrides: Partial<ItemDetail> = {}): ItemDetail {
     description: null,
     content: 'const x = 1',
     contentType: 'TEXT',
+    fileUrl: null,
+    fileName: null,
+    fileSize: null,
     url: null,
     language: 'typescript',
     isFavorite: false,
@@ -49,6 +52,9 @@ const validCreateInput = {
   title: 'New Snippet',
   description: null,
   content: 'const x = 1',
+  fileUrl: null,
+  fileName: null,
+  fileSize: null,
   url: null,
   language: 'typescript',
   tags: ['react'],
@@ -83,8 +89,39 @@ describe('createItem action', () => {
 
   it('returns error when itemTypeName is invalid', async () => {
     mockAuth.mockResolvedValue(makeSession())
-    const result = await createItem({ ...validCreateInput, itemTypeName: 'file' as never })
+    const result = await createItem({ ...validCreateInput, itemTypeName: 'custom' as never })
     expect(result.success).toBe(false)
+  })
+
+  it('returns error when file type is missing a fileUrl', async () => {
+    mockAuth.mockResolvedValue(makeSession())
+    const result = await createItem({ ...validCreateInput, itemTypeName: 'file', fileUrl: null })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toContain('file must be uploaded')
+  })
+
+  it('returns error when image type is missing a fileUrl', async () => {
+    mockAuth.mockResolvedValue(makeSession())
+    const result = await createItem({ ...validCreateInput, itemTypeName: 'image', fileUrl: null })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toContain('file must be uploaded')
+  })
+
+  it('creates a file item successfully when fileUrl is provided', async () => {
+    const created = makeItemDetail({ contentType: 'FILE', itemType: { id: 'type-file', name: 'file', color: '#6b7280', icon: 'File' } })
+    mockAuth.mockResolvedValue(makeSession())
+    mockDbCreateItem.mockResolvedValue(created)
+
+    const result = await createItem({
+      ...validCreateInput,
+      itemTypeName: 'file',
+      content: null,
+      fileUrl: 'user-1/files/uuid-report.pdf',
+      fileName: 'report.pdf',
+      fileSize: 204800,
+    })
+    expect(result.success).toBe(true)
+    if (result.success) expect(result.data.contentType).toBe('FILE')
   })
 
   it('returns error when link is missing a URL', async () => {

@@ -21,9 +21,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CodeEditor } from '@/components/ui/code-editor'
 import { MarkdownEditor } from '@/components/ui/markdown-editor'
+import { FileUpload } from '@/components/ui/file-upload'
+import type { UploadedFile } from '@/components/ui/file-upload'
 import { createItem } from '@/actions/items'
 
-export type CreatableType = 'snippet' | 'prompt' | 'command' | 'note' | 'link'
+export type CreatableType = 'snippet' | 'prompt' | 'command' | 'note' | 'link' | 'file' | 'image'
 
 const TYPES: { value: CreatableType; label: string }[] = [
   { value: 'snippet', label: 'Snippet' },
@@ -31,11 +33,14 @@ const TYPES: { value: CreatableType; label: string }[] = [
   { value: 'command', label: 'Command' },
   { value: 'note', label: 'Note' },
   { value: 'link', label: 'Link' },
+  { value: 'file', label: 'File' },
+  { value: 'image', label: 'Image' },
 ]
 
 const TEXT_TYPES: CreatableType[] = ['snippet', 'prompt', 'command', 'note']
 const LANGUAGE_TYPES: CreatableType[] = ['snippet', 'command']
 const MARKDOWN_TYPES: CreatableType[] = ['note', 'prompt']
+const FILE_TYPES: CreatableType[] = ['file', 'image']
 
 interface CreateItemDialogProps {
   open: boolean
@@ -53,12 +58,14 @@ export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItem
   const [url, setUrl] = useState('')
   const [language, setLanguage] = useState('')
   const [tagsInput, setTagsInput] = useState('')
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null)
   const [saving, setSaving] = useState(false)
 
   const showContent = TEXT_TYPES.includes(itemTypeName)
   const showLanguage = LANGUAGE_TYPES.includes(itemTypeName)
   const showMarkdown = MARKDOWN_TYPES.includes(itemTypeName)
   const showUrl = itemTypeName === 'link'
+  const showFileUpload = FILE_TYPES.includes(itemTypeName)
 
   const resetForm = () => {
     setItemTypeName(defaultType ?? 'snippet')
@@ -68,11 +75,18 @@ export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItem
     setUrl('')
     setLanguage('')
     setTagsInput('')
+    setUploadedFile(null)
   }
 
   const handleOpenChange = (open: boolean) => {
     if (!open) resetForm()
     onOpenChange(open)
+  }
+
+  const handleTypeChange = (v: string | null) => {
+    if (!v) return
+    setItemTypeName(v as CreatableType)
+    setUploadedFile(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,6 +104,9 @@ export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItem
       title: title.trim(),
       description: description.trim() || null,
       content: content || null,
+      fileUrl: uploadedFile?.key ?? null,
+      fileName: uploadedFile?.fileName ?? null,
+      fileSize: uploadedFile?.fileSize ?? null,
       url: url.trim() || null,
       language: language.trim() || null,
       tags,
@@ -119,10 +136,7 @@ export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItem
             <label className="text-xs font-semibold uppercase tracking-wider text-foreground/40">
               Type
             </label>
-            <Select
-              value={itemTypeName}
-              onValueChange={(v) => setItemTypeName(v as CreatableType)}
-            >
+            <Select value={itemTypeName} onValueChange={handleTypeChange}>
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -199,16 +213,9 @@ export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItem
                 Content
               </label>
               {showLanguage ? (
-                <CodeEditor
-                  value={content}
-                  onChange={setContent}
-                  language={language}
-                />
+                <CodeEditor value={content} onChange={setContent} language={language} />
               ) : showMarkdown ? (
-                <MarkdownEditor
-                  value={content}
-                  onChange={setContent}
-                />
+                <MarkdownEditor value={content} onChange={setContent} />
               ) : (
                 <textarea
                   value={content}
@@ -218,6 +225,21 @@ export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItem
                   className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm font-mono outline-none focus-visible:ring-1 focus-visible:ring-ring resize-y placeholder:text-muted-foreground"
                 />
               )}
+            </div>
+          )}
+
+          {/* File/image upload */}
+          {showFileUpload && (
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-foreground/40">
+                {itemTypeName === 'image' ? 'Image' : 'File'} <span className="text-destructive">*</span>
+              </label>
+              <FileUpload
+                itemType={itemTypeName as 'file' | 'image'}
+                uploaded={uploadedFile}
+                onUploaded={setUploadedFile}
+                onClear={() => setUploadedFile(null)}
+              />
             </div>
           )}
 
@@ -242,7 +264,14 @@ export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItem
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={!title.trim() || saving}>
+            <Button
+              type="submit"
+              disabled={
+                !title.trim() ||
+                saving ||
+                (showFileUpload && !uploadedFile)
+              }
+            >
               {saving ? 'Creating…' : 'Create Item'}
             </Button>
           </DialogFooter>

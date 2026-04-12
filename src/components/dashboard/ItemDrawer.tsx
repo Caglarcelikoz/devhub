@@ -32,6 +32,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
+import { CodeEditor } from '@/components/ui/code-editor'
 import { updateItem, deleteItem } from '@/actions/items'
 import type { ItemDetail } from '@/lib/db/items'
 
@@ -307,19 +308,6 @@ function DrawerBody({
               />
             </EditSection>
 
-            {/* Content (edit) — text types only */}
-            {showContent && (
-              <EditSection label="Content">
-                <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Content…"
-                  rows={8}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-mono text-foreground outline-none focus:ring-1 focus:ring-ring resize-y"
-                />
-              </EditSection>
-            )}
-
             {/* URL (edit) — link type only */}
             {showUrl && (
               <EditSection label="URL">
@@ -333,7 +321,7 @@ function DrawerBody({
               </EditSection>
             )}
 
-            {/* Language (edit) — snippet/command only */}
+            {/* Language (edit) — snippet/command only, before content */}
             {showLanguage && (
               <EditSection label="Language">
                 <input
@@ -343,6 +331,27 @@ function DrawerBody({
                   placeholder="e.g. typescript, bash…"
                   className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-ring"
                 />
+              </EditSection>
+            )}
+
+            {/* Content (edit) — text types only */}
+            {showContent && (
+              <EditSection label="Content">
+                {showLanguage ? (
+                  <CodeEditor
+                    value={content}
+                    onChange={setContent}
+                    language={language}
+                  />
+                ) : (
+                  <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Content…"
+                    rows={8}
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-mono text-foreground outline-none focus:ring-1 focus:ring-ring resize-y"
+                  />
+                )}
               </EditSection>
             )}
 
@@ -400,14 +409,22 @@ function DrawerBody({
             {/* Content */}
             {preview && (
               <Section label="Content">
-                <div
-                  className="rounded-md border p-3"
-                  style={{ borderColor: `${itemType.color}30`, backgroundColor: `${itemType.color}06` }}
-                >
-                  <pre className="text-xs text-foreground/80 font-mono leading-relaxed whitespace-pre-wrap wrap-break-word">
-                    {preview}
-                  </pre>
-                </div>
+                {showLanguage ? (
+                  <CodeEditor
+                    value={item.content ?? ''}
+                    language={item.language ?? ''}
+                    readOnly
+                  />
+                ) : (
+                  <div
+                    className="rounded-md border p-3"
+                    style={{ borderColor: `${itemType.color}30`, backgroundColor: `${itemType.color}06` }}
+                  >
+                    <pre className="text-xs text-foreground/80 font-mono leading-relaxed whitespace-pre-wrap wrap-break-word">
+                      {preview}
+                    </pre>
+                  </div>
+                )}
               </Section>
             )}
 

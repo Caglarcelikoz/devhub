@@ -12,6 +12,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { ItemsGridClient } from "@/components/dashboard/ItemsGridClient";
+import { NewItemButton } from "@/components/dashboard/NewItemButton";
+import type { CreatableType } from "@/components/dashboard/CreateItemDialog";
 
 const VALID_TYPES = [
   "snippet",
@@ -22,6 +24,8 @@ const VALID_TYPES = [
   "image",
   "link",
 ] as const;
+
+const CREATABLE_TYPES: readonly string[] = ["snippet", "prompt", "command", "note", "link"];
 
 type ValidType = (typeof VALID_TYPES)[number];
 
@@ -73,7 +77,7 @@ export default async function ItemsPage({ params }: ItemsPageProps) {
         >
           <Icon className="w-4 h-4" style={{ color: typeColor }} />
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-xl font-semibold text-foreground leading-none">
             {label}
           </h1>
@@ -81,6 +85,12 @@ export default async function ItemsPage({ params }: ItemsPageProps) {
             {items.length} {items.length === 1 ? "item" : "items"}
           </p>
         </div>
+        {CREATABLE_TYPES.includes(typeName) && (
+          <NewItemButton
+            defaultType={typeName as CreatableType}
+            label={`New ${typeName.charAt(0).toUpperCase() + typeName.slice(1)}`}
+          />
+        )}
       </div>
 
       {/* Grid */}

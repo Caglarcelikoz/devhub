@@ -19,9 +19,10 @@ import {
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { CodeEditor } from '@/components/ui/code-editor'
 import { createItem } from '@/actions/items'
 
-type CreatableType = 'snippet' | 'prompt' | 'command' | 'note' | 'link'
+export type CreatableType = 'snippet' | 'prompt' | 'command' | 'note' | 'link'
 
 const TYPES: { value: CreatableType; label: string }[] = [
   { value: 'snippet', label: 'Snippet' },
@@ -37,12 +38,13 @@ const LANGUAGE_TYPES: CreatableType[] = ['snippet', 'command']
 interface CreateItemDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  defaultType?: CreatableType
 }
 
-export function CreateItemDialog({ open, onOpenChange }: CreateItemDialogProps) {
+export function CreateItemDialog({ open, onOpenChange, defaultType }: CreateItemDialogProps) {
   const router = useRouter()
 
-  const [itemTypeName, setItemTypeName] = useState<CreatableType>('snippet')
+  const [itemTypeName, setItemTypeName] = useState<CreatableType>(defaultType ?? 'snippet')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [content, setContent] = useState('')
@@ -56,7 +58,7 @@ export function CreateItemDialog({ open, onOpenChange }: CreateItemDialogProps) 
   const showUrl = itemTypeName === 'link'
 
   const resetForm = () => {
-    setItemTypeName('snippet')
+    setItemTypeName(defaultType ?? 'snippet')
     setTitle('')
     setDescription('')
     setContent('')
@@ -173,23 +175,7 @@ export function CreateItemDialog({ open, onOpenChange }: CreateItemDialogProps) 
             </div>
           )}
 
-          {/* Content — text types */}
-          {showContent && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-foreground/40">
-                Content
-              </label>
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Content…"
-                rows={5}
-                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm font-mono outline-none focus-visible:ring-1 focus-visible:ring-ring resize-y placeholder:text-muted-foreground"
-              />
-            </div>
-          )}
-
-          {/* Language — snippet/command */}
+          {/* Language — snippet/command, before content */}
           {showLanguage && (
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-foreground/40">
@@ -200,6 +186,30 @@ export function CreateItemDialog({ open, onOpenChange }: CreateItemDialogProps) 
                 onChange={(e) => setLanguage(e.target.value)}
                 placeholder="e.g. typescript, bash…"
               />
+            </div>
+          )}
+
+          {/* Content — text types */}
+          {showContent && (
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-foreground/40">
+                Content
+              </label>
+              {showLanguage ? (
+                <CodeEditor
+                  value={content}
+                  onChange={setContent}
+                  language={language}
+                />
+              ) : (
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Content…"
+                  rows={5}
+                  className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm font-mono outline-none focus-visible:ring-1 focus-visible:ring-ring resize-y placeholder:text-muted-foreground"
+                />
+              )}
             </div>
           )}
 

@@ -121,7 +121,11 @@ export default async function ItemsPage({ params }: ItemsPageProps) {
           )}
         </div>
       ) : (
-        <ItemsGridClient items={items} columns={typeName === "image" ? "three" : "two"} />
+        <ItemsGridClient
+          items={items}
+          columns={typeName === "image" ? "three" : "two"}
+          layout={typeName === "file" ? "list" : "grid"}
+        />
       )}
     </div>
   );

@@ -26,7 +26,7 @@ export default async function ItemsLayout({
   return (
     <div className="flex flex-col h-screen bg-background">
       <TopBar />
-      <DashboardShell itemTypes={itemTypes} collections={collections}>
+      <DashboardShell itemTypes={itemTypes} collections={collections} user={session.user}>
         {children}
       </DashboardShell>
     </div>

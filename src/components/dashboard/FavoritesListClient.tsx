@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Star, FolderOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ItemDrawer } from "@/components/dashboard/ItemDrawer";
@@ -9,6 +9,16 @@ import type {
   FavoriteCollection,
   CollectionOption,
 } from "@/lib/db/collections";
+
+type SortKey = "date-desc" | "date-asc" | "name-asc" | "name-desc" | "type-asc";
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "date-desc", label: "Newest" },
+  { value: "date-asc", label: "Oldest" },
+  { value: "name-asc", label: "Name A→Z" },
+  { value: "name-desc", label: "Name Z→A" },
+  { value: "type-asc", label: "Type A→Z" },
+];
 
 function formatTimeAgo(date: Date): string {
   const diff = Date.now() - new Date(date).getTime();
@@ -33,7 +43,52 @@ export function FavoritesListClient({
   collectionOptions,
 }: FavoritesListClientProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortKey>("date-desc");
   const router = useRouter();
+
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => {
+      switch (sort) {
+        case "date-asc":
+          return (
+            new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+          );
+        case "date-desc":
+          return (
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          );
+        case "name-asc":
+          return a.title.localeCompare(b.title);
+        case "name-desc":
+          return b.title.localeCompare(a.title);
+        case "type-asc":
+          return (
+            a.itemType.name.localeCompare(b.itemType.name) ||
+            a.title.localeCompare(b.title)
+          );
+      }
+    });
+  }, [items, sort]);
+
+  const sortedCollections = useMemo(() => {
+    return [...collections].sort((a, b) => {
+      switch (sort) {
+        case "date-asc":
+          return (
+            new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+          );
+        case "date-desc":
+          return (
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          );
+        case "name-asc":
+        case "type-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+      }
+    });
+  }, [collections, sort]);
 
   const hasItems = items.length > 0;
   const hasCollections = collections.length > 0;
@@ -57,6 +112,22 @@ export function FavoritesListClient({
   return (
     <>
       <div className="space-y-8">
+        {/* Sort control */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-mono text-foreground/40">sort</span>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+            className="text-xs font-mono bg-transparent border border-border/50 rounded px-2 py-1 text-foreground/70 hover:border-border transition-colors outline-none cursor-pointer"
+          >
+            {SORT_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Items section */}
         {hasItems && (
           <section>
@@ -69,7 +140,7 @@ export function FavoritesListClient({
               </span>
             </div>
             <ul className="divide-y divide-border/30">
-              {items.map((item) => (
+              {sortedItems.map((item) => (
                 <li key={item.id}>
                   <button
                     type="button"
@@ -118,7 +189,7 @@ export function FavoritesListClient({
               </span>
             </div>
             <ul className="divide-y divide-border/30">
-              {collections.map((col) => (
+              {sortedCollections.map((col) => (
                 <li key={col.id}>
                   <button
                     type="button"

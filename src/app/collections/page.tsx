@@ -1,16 +1,31 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { FolderOpen } from "lucide-react";
-import { getCollectionsWithMeta } from "@/lib/db/collections";
+import { getCollectionsWithMetaPaginated } from "@/lib/db/collections";
 import { CollectionsRow } from "@/components/dashboard/CollectionsRow";
+import { Pagination } from "@/components/ui/Pagination";
+import { COLLECTIONS_PER_PAGE } from "@/lib/constants";
 
-export default async function CollectionsPage() {
+interface CollectionsPageProps {
+  searchParams: Promise<{ page?: string }>;
+}
+
+export default async function CollectionsPage({ searchParams }: CollectionsPageProps) {
   const session = await auth();
   if (!session?.user?.id) {
     redirect("/sign-in");
   }
 
-  const collections = await getCollectionsWithMeta(session.user.id);
+  const { page: pageParam } = await searchParams;
+  const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+
+  const { collections, totalCount } = await getCollectionsWithMetaPaginated(
+    session.user.id,
+    currentPage,
+    COLLECTIONS_PER_PAGE,
+  );
+
+  const totalPages = Math.ceil(totalCount / COLLECTIONS_PER_PAGE);
 
   return (
     <div className="space-y-6">
@@ -24,13 +39,13 @@ export default async function CollectionsPage() {
             Collections
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
-            {collections.length} {collections.length === 1 ? "collection" : "collections"}
+            {totalCount} {totalCount === 1 ? "collection" : "collections"}
           </p>
         </div>
       </div>
 
       {/* Collections grid */}
-      {collections.length === 0 ? (
+      {totalCount === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-foreground/8">
             <FolderOpen className="w-5 h-5 text-foreground/40" />
@@ -38,7 +53,14 @@ export default async function CollectionsPage() {
           <p className="text-sm text-foreground/40">No collections yet.</p>
         </div>
       ) : (
-        <CollectionsRow collections={collections} />
+        <>
+          <CollectionsRow collections={collections} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            buildHref={(page) => `/collections?page=${page}`}
+          />
+        </>
       )}
     </div>
   );

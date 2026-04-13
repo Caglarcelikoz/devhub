@@ -3,29 +3,37 @@ import { auth } from "@/auth";
 import { Star, FolderOpen } from "lucide-react";
 import { getCollectionById, getCollections } from "@/lib/db/collections";
 import { getItemsByCollection } from "@/lib/db/items";
+import { COLLECTIONS_PER_PAGE } from "@/lib/constants";
 import { ItemsGridClient } from "@/components/dashboard/ItemsGridClient";
 import { CollectionPageActions } from "@/components/dashboard/CollectionActions";
+import { Pagination } from "@/components/ui/Pagination";
 
 interface CollectionPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
-export default async function CollectionPage({ params }: CollectionPageProps) {
+export default async function CollectionPage({ params, searchParams }: CollectionPageProps) {
   const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) {
     redirect("/sign-in");
   }
 
-  const [collection, items, collectionOptions] = await Promise.all([
+  const { page: pageParam } = await searchParams;
+  const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+
+  const [collection, { items, totalCount }, collectionOptions] = await Promise.all([
     getCollectionById(session.user.id, id),
-    getItemsByCollection(session.user.id, id),
+    getItemsByCollection(session.user.id, id, currentPage, COLLECTIONS_PER_PAGE),
     getCollections(session.user.id),
   ]);
 
   if (!collection) {
     notFound();
   }
+
+  const totalPages = Math.ceil(totalCount / COLLECTIONS_PER_PAGE);
 
   return (
     <div className="space-y-6">
@@ -49,14 +57,14 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
             </p>
           )}
           <p className="text-xs text-muted-foreground mt-1">
-            {items.length} {items.length === 1 ? "item" : "items"}
+            {totalCount} {totalCount === 1 ? "item" : "items"}
           </p>
         </div>
         <CollectionPageActions collection={collection} />
       </div>
 
       {/* Items */}
-      {items.length === 0 ? (
+      {totalCount === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-foreground/8">
             <FolderOpen className="w-5 h-5 text-foreground/40" />
@@ -64,7 +72,14 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
           <p className="text-sm text-foreground/40">No items in this collection yet.</p>
         </div>
       ) : (
-        <ItemsGridClient items={items} columns="two" collections={collectionOptions} />
+        <>
+          <ItemsGridClient items={items} columns="two" collections={collectionOptions} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            buildHref={(page) => `/collections/${id}?page=${page}`}
+          />
+        </>
       )}
     </div>
   );

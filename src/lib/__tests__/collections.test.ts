@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getCollectionById, getSearchCollections } from '@/lib/db/collections'
+import { getCollectionById, getSearchCollections, getCollectionsWithMetaPaginated } from '@/lib/db/collections'
 import { getItemsByCollection } from '@/lib/db/items'
 
 vi.mock('@/lib/prisma', () => ({
@@ -7,9 +7,11 @@ vi.mock('@/lib/prisma', () => ({
     collection: {
       findFirst: vi.fn(),
       findMany: vi.fn(),
+      count: vi.fn(),
     },
     item: {
       findMany: vi.fn(),
+      count: vi.fn(),
     },
   },
 }))
@@ -22,7 +24,9 @@ import { prisma } from '@/lib/prisma'
 
 const mockCollectionFindFirst = vi.mocked(prisma.collection.findFirst)
 const mockCollectionFindMany = vi.mocked(prisma.collection.findMany)
+const mockCollectionCount = vi.mocked(prisma.collection.count)
 const mockItemFindMany = vi.mocked(prisma.item.findMany)
+const mockItemCount = vi.mocked(prisma.item.count)
 
 function makeCollectionRow(overrides = {}) {
   return {
@@ -134,11 +138,13 @@ describe('getSearchCollections', () => {
 describe('getItemsByCollection', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockItemCount.mockResolvedValue(0 as never)
   })
 
-  it('returns mapped items for the collection', async () => {
+  it('returns mapped items and totalCount for the collection', async () => {
     const row = makeItemRow()
     mockItemFindMany.mockResolvedValue([row] as never)
+    mockItemCount.mockResolvedValue(1 as never)
 
     const result = await getItemsByCollection('user-1', 'col-1')
 
@@ -148,35 +154,127 @@ describe('getItemsByCollection', () => {
         orderBy: { updatedAt: 'desc' },
       }),
     )
-    expect(result).toHaveLength(1)
-    expect(result[0].id).toBe('item-1')
-    expect(result[0].tags).toEqual([])
+    expect(result.items).toHaveLength(1)
+    expect(result.items[0].id).toBe('item-1')
+    expect(result.items[0].tags).toEqual([])
+    expect(result.totalCount).toBe(1)
   })
 
-  it('returns an empty array when collection has no items', async () => {
+  it('returns empty items and zero totalCount when collection has no items', async () => {
     mockItemFindMany.mockResolvedValue([])
+    mockItemCount.mockResolvedValue(0 as never)
 
     const result = await getItemsByCollection('user-1', 'col-1')
 
-    expect(result).toEqual([])
+    expect(result.items).toEqual([])
+    expect(result.totalCount).toBe(0)
   })
 
   it('truncates content to 500 characters', async () => {
     const longContent = 'x'.repeat(600)
     mockItemFindMany.mockResolvedValue([makeItemRow({ content: longContent })] as never)
+    mockItemCount.mockResolvedValue(1 as never)
 
     const result = await getItemsByCollection('user-1', 'col-1')
 
-    expect(result[0].content).toHaveLength(500)
+    expect(result.items[0].content).toHaveLength(500)
   })
 
   it('maps tag objects to tag name strings', async () => {
     mockItemFindMany.mockResolvedValue([
       makeItemRow({ tags: [{ name: 'react' }, { name: 'hooks' }] }),
     ] as never)
+    mockItemCount.mockResolvedValue(1 as never)
 
     const result = await getItemsByCollection('user-1', 'col-1')
 
-    expect(result[0].tags).toEqual(['react', 'hooks'])
+    expect(result.items[0].tags).toEqual(['react', 'hooks'])
+  })
+})
+
+describe('getCollectionsWithMetaPaginated', () => {
+  const makeCollectionWithItems = (overrides = {}) => ({
+    id: 'col-1',
+    name: 'React Patterns',
+    description: 'Useful patterns',
+    isFavorite: false,
+    _count: { items: 3 },
+    items: [
+      { item: { itemType: { id: 'type-1', name: 'snippet', color: '#3b82f6' } } },
+      { item: { itemType: { id: 'type-1', name: 'snippet', color: '#3b82f6' } } },
+      { item: { itemType: { id: 'type-2', name: 'note', color: '#fde047' } } },
+    ],
+    ...overrides,
+  })
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns collections and totalCount', async () => {
+    mockCollectionFindMany.mockResolvedValue([makeCollectionWithItems()] as never)
+    mockCollectionCount.mockResolvedValue(1 as never)
+
+    const result = await getCollectionsWithMetaPaginated('user-1')
+
+    expect(result.collections).toHaveLength(1)
+    expect(result.totalCount).toBe(1)
+  })
+
+  it('maps itemCount and typeBreakdown correctly', async () => {
+    mockCollectionFindMany.mockResolvedValue([makeCollectionWithItems()] as never)
+    mockCollectionCount.mockResolvedValue(1 as never)
+
+    const result = await getCollectionsWithMetaPaginated('user-1')
+    const col = result.collections[0]
+
+    expect(col.itemCount).toBe(3)
+    expect(col.typeBreakdown).toHaveLength(2)
+    // snippet appears twice so it should be first (sorted by count desc)
+    expect(col.typeBreakdown[0].name).toBe('snippet')
+    expect(col.typeBreakdown[0].count).toBe(2)
+    expect(col.typeBreakdown[1].name).toBe('note')
+    expect(col.typeBreakdown[1].count).toBe(1)
+  })
+
+  it('sets dominantColor to the most-used type color', async () => {
+    mockCollectionFindMany.mockResolvedValue([makeCollectionWithItems()] as never)
+    mockCollectionCount.mockResolvedValue(1 as never)
+
+    const result = await getCollectionsWithMetaPaginated('user-1')
+
+    expect(result.collections[0].dominantColor).toBe('#3b82f6')
+  })
+
+  it('sets dominantColor to undefined for empty collections', async () => {
+    mockCollectionFindMany.mockResolvedValue([
+      makeCollectionWithItems({ items: [], _count: { items: 0 } }),
+    ] as never)
+    mockCollectionCount.mockResolvedValue(1 as never)
+
+    const result = await getCollectionsWithMetaPaginated('user-1')
+
+    expect(result.collections[0].dominantColor).toBeUndefined()
+  })
+
+  it('applies skip and take for the given page', async () => {
+    mockCollectionFindMany.mockResolvedValue([] as never)
+    mockCollectionCount.mockResolvedValue(50 as never)
+
+    await getCollectionsWithMetaPaginated('user-1', 3, 21)
+
+    expect(mockCollectionFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 42, take: 21 }),
+    )
+  })
+
+  it('returns empty collections and zero totalCount when user has none', async () => {
+    mockCollectionFindMany.mockResolvedValue([] as never)
+    mockCollectionCount.mockResolvedValue(0 as never)
+
+    const result = await getCollectionsWithMetaPaginated('user-1')
+
+    expect(result.collections).toEqual([])
+    expect(result.totalCount).toBe(0)
   })
 })

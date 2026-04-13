@@ -132,6 +132,62 @@ export async function getSearchCollections(userId: string): Promise<SearchCollec
   }))
 }
 
+export interface PaginatedCollections {
+  collections: CollectionWithMeta[]
+  totalCount: number
+}
+
+export async function getCollectionsWithMetaPaginated(
+  userId: string,
+  page = 1,
+  pageSize = 21,
+): Promise<PaginatedCollections> {
+  const [collections, totalCount] = await Promise.all([
+    prisma.collection.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: {
+        _count: { select: { items: true } },
+        items: {
+          select: {
+            item: {
+              select: {
+                itemType: { select: { id: true, name: true, color: true } },
+              },
+            },
+          },
+        },
+      },
+    }),
+    prisma.collection.count({ where: { userId } }),
+  ])
+
+  return {
+    collections: collections.map((col) => {
+      const typeCounts = new Map<string, { id: string; name: string; color: string; count: number }>()
+      for (const ic of col.items) {
+        const t = ic.item.itemType
+        const existing = typeCounts.get(t.id)
+        if (existing) existing.count++
+        else typeCounts.set(t.id, { id: t.id, name: t.name, color: t.color, count: 1 })
+      }
+      const typeBreakdown = Array.from(typeCounts.values()).sort((a, b) => b.count - a.count)
+      return {
+        id: col.id,
+        name: col.name,
+        description: col.description,
+        isFavorite: col.isFavorite,
+        itemCount: col._count.items,
+        typeBreakdown,
+        dominantColor: typeBreakdown[0]?.color,
+      }
+    }),
+    totalCount,
+  }
+}
+
 export const getCollectionsWithMeta = cache(async function getCollectionsWithMeta(userId: string): Promise<CollectionWithMeta[]> {
   const collections = await prisma.collection.findMany({
     where: { userId },

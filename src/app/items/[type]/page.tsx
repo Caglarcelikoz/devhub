@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { getItemsByType } from "@/lib/db/items";
 import { getCollections } from "@/lib/db/collections";
 import { getSignedDownloadUrl } from "@/lib/s3";
+import { ITEMS_PER_PAGE } from "@/lib/constants";
 import {
   Code,
   Sparkles,
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 import { ItemsGridClient } from "@/components/dashboard/ItemsGridClient";
 import { NewItemButton } from "@/components/dashboard/NewItemButton";
+import { Pagination } from "@/components/ui/Pagination";
 import type { CreatableType } from "@/components/dashboard/CreateItemDialog";
 
 const VALID_TYPES = [
@@ -59,17 +61,18 @@ const SLUG_TO_TYPE: Record<string, ValidType> = {
   files: "file",
   images: "image",
   links: "link",
-}
+};
 
 function typeSlugToName(slug: string): ValidType | undefined {
-  return SLUG_TO_TYPE[slug]
+  return SLUG_TO_TYPE[slug];
 }
 
 interface ItemsPageProps {
   params: Promise<{ type: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
-export default async function ItemsPage({ params }: ItemsPageProps) {
+export default async function ItemsPage({ params, searchParams }: ItemsPageProps) {
   const { type: slug } = await params;
   const typeName = typeSlugToName(slug);
 
@@ -82,10 +85,15 @@ export default async function ItemsPage({ params }: ItemsPageProps) {
     redirect("/sign-in");
   }
 
-  const [items, collectionOptions] = await Promise.all([
-    getItemsByType(session.user.id, typeName),
+  const { page: pageParam } = await searchParams;
+  const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+
+  const [{ items, totalCount }, collectionOptions] = await Promise.all([
+    getItemsByType(session.user.id, typeName, currentPage, ITEMS_PER_PAGE),
     getCollections(session.user.id),
   ]);
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   // For image items, pre-generate short-lived signed URLs server-side so
   // thumbnails don't go through the buffering download proxy.
@@ -119,7 +127,7 @@ export default async function ItemsPage({ params }: ItemsPageProps) {
             {label}
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
-            {items.length} {items.length === 1 ? "item" : "items"}
+            {totalCount} {totalCount === 1 ? "item" : "items"}
           </p>
         </div>
         {CREATABLE_TYPES.includes(typeName) && (
@@ -132,7 +140,7 @@ export default async function ItemsPage({ params }: ItemsPageProps) {
       </div>
 
       {/* Grid */}
-      {items.length === 0 ? (
+      {totalCount === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
           <div
             className="flex items-center justify-center w-12 h-12 rounded-xl"
@@ -150,13 +158,20 @@ export default async function ItemsPage({ params }: ItemsPageProps) {
           )}
         </div>
       ) : (
-        <ItemsGridClient
-          items={items}
-          columns={typeName === "image" ? "three" : "two"}
-          layout={typeName === "file" ? "list" : "grid"}
-          thumbnailUrls={thumbnailUrls}
-          collections={collectionOptions}
-        />
+        <>
+          <ItemsGridClient
+            items={items}
+            columns={typeName === "file" ? "two" : "three"}
+            layout={typeName === "file" ? "list" : "grid"}
+            thumbnailUrls={thumbnailUrls}
+            collections={collectionOptions}
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            buildHref={(page) => `/items/${slug}?page=${page}`}
+          />
+        </>
       )}
     </div>
   );

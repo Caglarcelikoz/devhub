@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { createItem, getItemById, updateItem, deleteItem, getSearchItems } from '@/lib/db/items'
+import { createItem, getItemById, updateItem, deleteItem, getSearchItems, getItemsByType } from '@/lib/db/items'
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
@@ -10,6 +10,7 @@ vi.mock('@/lib/prisma', () => ({
       create: vi.fn(),
       findFirst: vi.fn(),
       findMany: vi.fn(),
+      count: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
     },
@@ -32,6 +33,7 @@ const mockItemTypeFindFirst = vi.mocked(prisma.itemType.findFirst)
 const mockCreate = vi.mocked(prisma.item.create)
 const mockFindFirst = vi.mocked(prisma.item.findFirst)
 const mockFindMany = vi.mocked(prisma.item.findMany)
+const mockCount = vi.mocked(prisma.item.count)
 const mockUpdate = vi.mocked(prisma.item.update)
 const mockDelete = vi.mocked(prisma.item.delete)
 
@@ -484,5 +486,95 @@ describe('getSearchItems', () => {
     const result = await getSearchItems('user-1')
 
     expect(result).toEqual([])
+  })
+})
+
+describe('getItemsByType', () => {
+  const itemRow = {
+    id: 'item-1',
+    title: 'useAuth hook',
+    description: null,
+    content: 'const x = 1',
+    contentType: 'TEXT',
+    fileUrl: null,
+    fileName: null,
+    fileSize: null,
+    url: null,
+    language: 'typescript',
+    isFavorite: false,
+    isPinned: false,
+    updatedAt: new Date('2024-01-15'),
+    tags: [],
+    itemType: { id: 'type-1', name: 'snippet', color: '#3b82f6', icon: 'Code' },
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns items and totalCount for the given type', async () => {
+    mockFindMany.mockResolvedValue([itemRow] as never)
+    mockCount.mockResolvedValue(1 as never)
+
+    const result = await getItemsByType('user-1', 'snippet')
+
+    expect(result.items).toHaveLength(1)
+    expect(result.items[0].id).toBe('item-1')
+    expect(result.totalCount).toBe(1)
+  })
+
+  it('passes correct where clause with userId and typeName', async () => {
+    mockFindMany.mockResolvedValue([itemRow] as never)
+    mockCount.mockResolvedValue(1 as never)
+
+    await getItemsByType('user-1', 'snippet')
+
+    const expectedWhere = { userId: 'user-1', itemType: { name: 'snippet' } }
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expectedWhere }),
+    )
+    expect(mockCount).toHaveBeenCalledWith({ where: expectedWhere })
+  })
+
+  it('applies skip and take for the given page', async () => {
+    mockFindMany.mockResolvedValue([] as never)
+    mockCount.mockResolvedValue(50 as never)
+
+    await getItemsByType('user-1', 'snippet', 3, 21)
+
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 42, take: 21 }),
+    )
+  })
+
+  it('defaults to page 1 when no page argument is given', async () => {
+    mockFindMany.mockResolvedValue([] as never)
+    mockCount.mockResolvedValue(0 as never)
+
+    await getItemsByType('user-1', 'snippet')
+
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 0 }),
+    )
+  })
+
+  it('truncates item content to 500 characters', async () => {
+    const longContent = 'x'.repeat(600)
+    mockFindMany.mockResolvedValue([{ ...itemRow, content: longContent }] as never)
+    mockCount.mockResolvedValue(1 as never)
+
+    const result = await getItemsByType('user-1', 'snippet')
+
+    expect(result.items[0].content).toHaveLength(500)
+  })
+
+  it('returns empty items and zero totalCount when no items exist', async () => {
+    mockFindMany.mockResolvedValue([] as never)
+    mockCount.mockResolvedValue(0 as never)
+
+    const result = await getItemsByType('user-1', 'prompt')
+
+    expect(result.items).toEqual([])
+    expect(result.totalCount).toBe(0)
   })
 })

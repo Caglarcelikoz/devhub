@@ -115,28 +115,68 @@ export async function getRecentItems(userId: string, limit = 10): Promise<ItemWi
   return rows.map(mapItem)
 }
 
+export async function getAllItemsPaginated(
+  userId: string,
+  page = 1,
+  pageSize = 12,
+): Promise<PaginatedItems> {
+  const where = { userId };
+  const [rows, totalCount] = await Promise.all([
+    prisma.item.findMany({
+      where,
+      orderBy: { updatedAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      select: itemSelect,
+    }),
+    prisma.item.count({ where }),
+  ]);
+  return { items: rows.map(mapItem), totalCount };
+}
+
+export interface PaginatedItems {
+  items: ItemWithMeta[];
+  totalCount: number;
+}
+
 export async function getItemsByType(
   userId: string,
   typeName: string,
-): Promise<ItemWithMeta[]> {
-  const rows = await prisma.item.findMany({
-    where: { userId, itemType: { name: typeName } },
-    orderBy: { updatedAt: 'desc' },
-    select: itemSelect,
-  })
-  return rows.map(mapItem)
+  page = 1,
+  pageSize = 21,
+): Promise<PaginatedItems> {
+  const where = { userId, itemType: { name: typeName } };
+  const [rows, totalCount] = await Promise.all([
+    prisma.item.findMany({
+      where,
+      orderBy: { updatedAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      select: itemSelect,
+    }),
+    prisma.item.count({ where }),
+  ]);
+  return { items: rows.map(mapItem), totalCount };
 }
 
 export async function getItemsByCollection(
   userId: string,
   collectionId: string,
-): Promise<ItemWithMeta[]> {
-  const rows = await prisma.item.findMany({
-    where: { userId, collections: { some: { collectionId } } },
-    orderBy: { updatedAt: 'desc' },
-    select: itemSelect,
-  })
-  return rows.map(mapItem)
+  page = 1,
+  pageSize = 21,
+): Promise<PaginatedItems> {
+  const where = { userId, collections: { some: { collectionId } } };
+  const [rows, totalCount] = await Promise.all([
+    prisma.item.findMany({
+      where,
+      orderBy: { updatedAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      select: itemSelect,
+    }),
+    prisma.item.count({ where }),
+  ]);
+  return { items: rows.map(mapItem), totalCount };
 }
 
 export async function getItemById(

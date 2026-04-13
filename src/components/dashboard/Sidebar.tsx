@@ -78,14 +78,14 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
     <aside
       className={cn(
         "flex flex-col h-full border-r border-border bg-sidebar transition-all duration-200 overflow-hidden shrink-0",
-        collapsed ? "w-14" : "w-60"
+        collapsed ? "w-14" : "w-60",
       )}
     >
       {/* Toggle button */}
       <div
         className={cn(
           "flex items-center border-b border-border h-14 shrink-0 px-2",
-          collapsed ? "justify-center" : "justify-end"
+          collapsed ? "justify-center" : "justify-end",
         )}
       >
         <Button
@@ -109,7 +109,7 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
         <NavItem
           icon={Star}
           label="Favorites"
-          href="/dashboard/favorites"
+          href="/favorites"
           pathname={pathname}
           collapsed={collapsed}
         />
@@ -214,10 +214,15 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
         <DropdownMenuTrigger
           className={cn(
             "border-t border-border flex items-center gap-3 p-3 shrink-0 w-full cursor-pointer hover:bg-sidebar-accent transition-colors outline-none",
-            collapsed ? "justify-center" : ""
+            collapsed ? "justify-center" : "",
           )}
         >
-          <UserAvatar name={user?.name ?? user?.email} image={user?.image} size={32} className="shrink-0" />
+          <UserAvatar
+            name={user?.name ?? user?.email}
+            image={user?.image}
+            size={32}
+            className="shrink-0"
+          />
           {!collapsed && (
             <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-medium text-foreground truncate">
@@ -229,7 +234,11 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
             </div>
           )}
         </DropdownMenuTrigger>
-        <DropdownMenuContent side="top" align={collapsed ? "center" : "start"} className="w-48">
+        <DropdownMenuContent
+          side="top"
+          align={collapsed ? "center" : "start"}
+          className="w-48"
+        >
           <DropdownMenuItem
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => router.push("/profile")}

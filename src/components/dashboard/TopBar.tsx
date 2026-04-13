@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Plus, FolderPlus, LayoutGrid, List } from "lucide-react";
+import { Search, Plus, FolderPlus, LayoutGrid, List, Star } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CreateItemDialog } from "@/components/dashboard/CreateItemDialog";
 import { CreateCollectionDialog } from "@/components/dashboard/CreateCollectionDialog";
@@ -41,7 +42,9 @@ export function TopBar({
   return (
     <>
       <header className="h-14 shrink-0 flex items-center gap-3 px-5 border-b border-border bg-background">
-        <span className="text-base font-semibold text-foreground mr-2">DevHub</span>
+        <span className="text-base font-semibold text-foreground mr-2">
+          DevHub
+        </span>
 
         <div className="flex-1 max-w-sm relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -58,6 +61,13 @@ export function TopBar({
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          <Link
+            href="/favorites"
+            aria-label="Favorites"
+            className="inline-flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            <Star className="h-4 w-4" />
+          </Link>
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <LayoutGrid className="h-4 w-4" />
           </Button>
@@ -84,8 +94,15 @@ export function TopBar({
         </div>
       </header>
 
-      <CreateItemDialog open={itemDialogOpen} onOpenChange={setItemDialogOpen} collections={collections} />
-      <CreateCollectionDialog open={collectionDialogOpen} onOpenChange={setCollectionDialogOpen} />
+      <CreateItemDialog
+        open={itemDialogOpen}
+        onOpenChange={setItemDialogOpen}
+        collections={collections}
+      />
+      <CreateCollectionDialog
+        open={collectionDialogOpen}
+        onOpenChange={setCollectionDialogOpen}
+      />
 
       <CommandPalette
         items={searchItems}

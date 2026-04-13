@@ -232,3 +232,20 @@ export const getCollectionsWithMeta = cache(async function getCollectionsWithMet
     }
   })
 })
+
+export interface FavoriteCollection {
+  id: string;
+  name: string;
+  description: string | null;
+  updatedAt: Date;
+}
+
+export async function getFavoriteCollections(
+  userId: string,
+): Promise<FavoriteCollection[]> {
+  return prisma.collection.findMany({
+    where: { userId, isFavorite: true },
+    orderBy: { updatedAt: "desc" },
+    select: { id: true, name: true, description: true, updatedAt: true },
+  });
+}

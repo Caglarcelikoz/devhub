@@ -105,6 +105,17 @@ export async function getPinnedItems(userId: string): Promise<ItemWithMeta[]> {
   return rows.map(mapItem)
 }
 
+export async function getFavoriteItems(
+  userId: string,
+): Promise<ItemWithMeta[]> {
+  const rows = await prisma.item.findMany({
+    where: { userId, isFavorite: true },
+    orderBy: { updatedAt: "desc" },
+    select: itemSelect,
+  });
+  return rows.map(mapItem);
+}
+
 export async function getRecentItems(userId: string, limit = 10): Promise<ItemWithMeta[]> {
   const rows = await prisma.item.findMany({
     where: { userId },

@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { createItem, getItemById, updateItem, deleteItem, getSearchItems, getItemsByType } from '@/lib/db/items'
+import {
+  createItem,
+  getItemById,
+  updateItem,
+  deleteItem,
+  getSearchItems,
+  getItemsByType,
+  getFavoriteItems,
+} from "@/lib/db/items";
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
@@ -578,3 +586,43 @@ describe('getItemsByType', () => {
     expect(result.totalCount).toBe(0)
   })
 })
+
+describe("getFavoriteItems", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("queries only isFavorite items sorted by updatedAt desc", async () => {
+    const row = makeRow({ isFavorite: true });
+    mockFindMany.mockResolvedValue([row] as never);
+
+    await getFavoriteItems("user-1");
+
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId: "user-1", isFavorite: true },
+        orderBy: { updatedAt: "desc" },
+      }),
+    );
+  });
+
+  it("maps raw rows to ItemWithMeta correctly", async () => {
+    const row = makeRow({ isFavorite: true, content: "const x = 1" });
+    mockFindMany.mockResolvedValue([row] as never);
+
+    const result = await getFavoriteItems("user-1");
+
+    expect(result).toHaveLength(1);
+    expect(result[0].isFavorite).toBe(true);
+    expect(result[0].tags).toEqual(["react", "hooks"]);
+    expect(result[0].itemType.name).toBe("snippet");
+  });
+
+  it("returns empty array when user has no favorites", async () => {
+    mockFindMany.mockResolvedValue([] as never);
+
+    const result = await getFavoriteItems("user-1");
+
+    expect(result).toEqual([]);
+  });
+});

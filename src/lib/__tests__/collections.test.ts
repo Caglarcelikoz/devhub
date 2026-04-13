@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getCollectionById, getSearchCollections, getCollectionsWithMetaPaginated } from '@/lib/db/collections'
+import {
+  getCollectionById,
+  getSearchCollections,
+  getCollectionsWithMetaPaginated,
+  getFavoriteCollections,
+} from "@/lib/db/collections";
 import { getItemsByCollection } from '@/lib/db/items'
 
 vi.mock('@/lib/prisma', () => ({
@@ -278,3 +283,44 @@ describe('getCollectionsWithMetaPaginated', () => {
     expect(result.totalCount).toBe(0)
   })
 })
+
+describe("getFavoriteCollections", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("queries only isFavorite collections sorted by updatedAt desc", async () => {
+    mockCollectionFindMany.mockResolvedValue([] as never);
+
+    await getFavoriteCollections("user-1");
+
+    expect(mockCollectionFindMany).toHaveBeenCalledWith({
+      where: { userId: "user-1", isFavorite: true },
+      orderBy: { updatedAt: "desc" },
+      select: { id: true, name: true, description: true, updatedAt: true },
+    });
+  });
+
+  it("returns mapped collection rows", async () => {
+    const row = {
+      id: "col-1",
+      name: "React Patterns",
+      description: "Useful patterns",
+      updatedAt: new Date("2024-03-01"),
+    };
+    mockCollectionFindMany.mockResolvedValue([row] as never);
+
+    const result = await getFavoriteCollections("user-1");
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(row);
+  });
+
+  it("returns empty array when user has no favorite collections", async () => {
+    mockCollectionFindMany.mockResolvedValue([] as never);
+
+    const result = await getFavoriteCollections("user-1");
+
+    expect(result).toEqual([]);
+  });
+});

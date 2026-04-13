@@ -25,11 +25,12 @@ const CHAOS_ICONS = [
 ];
 
 const ICON_SIZE    = 46;
-const DAMPING      = 0.97;
-const MAX_SPEED    = 2.8;
-const RANDOM_FORCE = 0.07;
-const REPEL_RADIUS = 110;
-const REPEL_FORCE  = 3.5;
+const DAMPING      = 0.985;
+const MAX_SPEED    = 2.2;
+const MIN_SPEED    = 0.55;
+const RANDOM_FORCE = 0.045;
+const REPEL_RADIUS = 120;
+const REPEL_FORCE  = 4.5;
 
 let chaosParticles = [];
 let mouseRelX = null;
@@ -71,20 +72,30 @@ function initChaos() {
 
     stage.appendChild(el);
 
+    // Distribute icons evenly across a 4×2 grid with jitter so they
+    // never all pile up in the same corner on load.
+    const idx = chaosParticles.length; // index before push
+    const cols = 4;
+    const rows = Math.ceil(CHAOS_ICONS.length / cols);
+    const cellW = (W - ICON_SIZE) / cols;
+    const cellH = (H - ICON_SIZE) / rows;
+    const col = idx % cols;
+    const row = Math.floor(idx / cols);
+    const jitter = 0.35; // fraction of cell to randomise within
+    const spawnX = cellW * col + cellW * (0.5 + (Math.random() - 0.5) * jitter);
+    const spawnY = cellH * row + cellH * (0.5 + (Math.random() - 0.5) * jitter);
+
+    // Give every icon a unique direction spread evenly around a circle
+    const angle = (idx / CHAOS_ICONS.length) * Math.PI * 2 + Math.random() * 0.8;
+    const speed = MIN_SPEED + Math.random() * (MAX_SPEED * 0.5 - MIN_SPEED);
+
     const particle = {
       el,
-      x: Math.random() * (W - ICON_SIZE),
-      y: Math.random() * (H - ICON_SIZE),
-      vx: (Math.random() - 0.5) * 1.8,
-      vy: (Math.random() - 0.5) * 1.8,
+      x: Math.min(Math.max(spawnX, 0), W - ICON_SIZE),
+      y: Math.min(Math.max(spawnY, 0), H - ICON_SIZE),
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
     };
-
-    // Ensure minimum initial speed
-    const speed = Math.hypot(particle.vx, particle.vy);
-    if (speed < 0.4) {
-      particle.vx = (particle.vx / speed) * 0.6;
-      particle.vy = (particle.vy / speed) * 0.6;
-    }
 
     setIconPos(particle);
     chaosParticles.push(particle);
@@ -144,11 +155,18 @@ function chaosTick() {
     p.vx *= DAMPING;
     p.vy *= DAMPING;
 
-    // Speed cap
+    // Speed clamp — enforce both min and max so icons never stall
     const speed = Math.hypot(p.vx, p.vy);
     if (speed > MAX_SPEED) {
       p.vx = (p.vx / speed) * MAX_SPEED;
       p.vy = (p.vy / speed) * MAX_SPEED;
+    } else if (speed < MIN_SPEED && speed > 0) {
+      p.vx = (p.vx / speed) * MIN_SPEED;
+      p.vy = (p.vy / speed) * MIN_SPEED;
+    } else if (speed === 0) {
+      const a = Math.random() * Math.PI * 2;
+      p.vx = Math.cos(a) * MIN_SPEED;
+      p.vy = Math.sin(a) * MIN_SPEED;
     }
 
     // Move

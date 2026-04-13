@@ -16,6 +16,7 @@ import {
   PanelLeftOpen,
   LogOut,
   User,
+  Settings,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -235,6 +236,13 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
           >
             <User className="h-4 w-4" />
             Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => router.push("/settings")}
+          >
+            <Settings className="h-4 w-4" />
+            Settings
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem

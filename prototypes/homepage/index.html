@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Devhub — Stop Losing Your Developer Knowledge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       NAVBAR
+  ============================================================ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <rect width="28" height="28" rx="8" fill="#3b82f6"/>
+          <path d="M7 7h5v14H7V7zm7 0h7v5h-7V7zm0 9h7v5h-7v-5z" fill="white"/>
+        </svg>
+        <span>devhub</span>
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="#" class="btn-ghost">Sign In</a>
+        <a href="#" class="btn-primary">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- ============================================================
+         HERO
+    ============================================================ -->
+    <section class="section-hero" id="hero">
+      <div class="container">
+
+        <div class="hero-headline reveal">
+          <div class="hero-eyebrow">For developers who ship a lot of code</div>
+          <h1>Stop Losing Your<br><span class="gradient-text">Developer Knowledge</span></h1>
+          <p class="hero-sub">Your best snippets, commands, and prompts are scattered across GitHub Gists, Notion, Slack, and sticky notes. Devhub is the single place you can search everything — instantly.</p>
+          <div class="hero-btns">
+            <a href="#" class="btn-primary btn-lg">Start for Free →</a>
+            <a href="#features" class="btn-ghost btn-lg">See how it works</a>
+          </div>
+        </div>
+
+        <div class="hero-visual reveal">
+          <!-- Chaos box -->
+          <div class="visual-chaos">
+            <div class="visual-label">Your knowledge today…</div>
+            <div class="chaos-stage" id="chaosStage"></div>
+          </div>
+
+          <!-- Arrow -->
+          <div class="visual-arrow" id="visualArrow" aria-hidden="true">
+            <svg class="arrow-svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <path d="M10 24H38M38 24L26 12M38 24L26 36"
+                stroke="url(#arrowGrad)" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round"/>
+              <defs>
+                <linearGradient id="arrowGrad" x1="10" y1="24" x2="38" y2="24" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#3b82f6"/>
+                  <stop offset="1" stop-color="#6366f1"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <span class="arrow-label">Transform</span>
+          </div>
+
+          <!-- Dashboard preview -->
+          <div class="visual-dashboard">
+            <div class="visual-label">…with Devhub</div>
+            <div class="dashboard-mockup">
+              <aside class="mock-sidebar">
+                <div class="mock-logomark">dh</div>
+                <nav class="mock-nav">
+                  <span class="mock-link active">All Items</span>
+                  <span class="mock-link" style="color:#3b82f6">Snippets</span>
+                  <span class="mock-link" style="color:#f59e0b">Prompts</span>
+                  <span class="mock-link" style="color:#06b6d4">Commands</span>
+                  <span class="mock-link" style="color:#22c55e">Notes</span>
+                  <span class="mock-link" style="color:#6366f1">Links</span>
+                </nav>
+              </aside>
+              <div class="mock-content">
+                <div class="mock-card" style="--c:#3b82f6"><span class="mock-type">snippet</span><span class="mock-title">useDebounce hook</span></div>
+                <div class="mock-card" style="--c:#f59e0b"><span class="mock-type">prompt</span><span class="mock-title">Code Review GPT</span></div>
+                <div class="mock-card" style="--c:#06b6d4"><span class="mock-type">command</span><span class="mock-title">Docker cleanup</span></div>
+                <div class="mock-card" style="--c:#22c55e"><span class="mock-type">note</span><span class="mock-title">Team onboarding</span></div>
+                <div class="mock-card" style="--c:#6366f1"><span class="mock-type">link</span><span class="mock-title">MDN Web Docs</span></div>
+                <div class="mock-card" style="--c:#ec4899"><span class="mock-type">image</span><span class="mock-title">System diagram</span></div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /hero-visual -->
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FEATURES
+    ============================================================ -->
+    <section class="section-features" id="features">
+      <div class="container">
+
+        <div class="section-head reveal">
+          <h2>A home for everything you build</h2>
+          <p>Seven knowledge types — one place to search them all.</p>
+        </div>
+
+        <div class="features-grid">
+
+          <div class="feature-card reveal" style="--accent:#3b82f6">
+            <div class="feature-icon" style="background:rgba(59,130,246,.1);color:#3b82f6">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <h3>Code Snippets</h3>
+            <p>Syntax-highlighted storage for every language. Monaco editor built in — feels exactly like VS Code.</p>
+          </div>
+
+          <div class="feature-card reveal" style="--accent:#f59e0b">
+            <div class="feature-icon" style="background:rgba(245,158,11,.1);color:#f59e0b">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h3>AI Prompts</h3>
+            <p>Build a personal library of prompts that actually work. Full Markdown editor with live preview.</p>
+          </div>
+
+          <div class="feature-card reveal" style="--accent:#06b6d4">
+            <div class="feature-icon" style="background:rgba(6,182,212,.1);color:#06b6d4">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            </div>
+            <h3>Commands</h3>
+            <p>Shell commands, npm scripts, kubectl incantations — all findable in under a second.</p>
+          </div>
+
+          <div class="feature-card reveal" style="--accent:#22c55e">
+            <div class="feature-icon" style="background:rgba(34,197,94,.1);color:#22c55e">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <h3>Notes</h3>
+            <p>Meeting notes, architecture decisions, README drafts. Full Markdown with GFM tables and code blocks.</p>
+          </div>
+
+          <div class="feature-card reveal" style="--accent:#6366f1">
+            <div class="feature-icon" style="background:rgba(99,102,241,.1);color:#6366f1">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <h3>Instant Search</h3>
+            <p>Full-text search across everything you've ever saved. Filter by type, tag, or collection.</p>
+          </div>
+
+          <div class="feature-card reveal" style="--accent:#64748b">
+            <div class="feature-icon" style="background:rgba(100,116,139,.1);color:#64748b">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h3>Files &amp; Docs</h3>
+            <p>Upload any file up to 50&nbsp;MB. Reference architecture diagrams, PDFs, and design assets alongside your code.</p>
+          </div>
+
+        </div><!-- /features-grid -->
+      </div>
+    </section>
+
+    <!-- ============================================================
+         AI SECTION
+    ============================================================ -->
+    <section class="section-ai" id="ai">
+      <div class="container">
+        <div class="ai-wrapper">
+
+          <div class="ai-left reveal">
+            <div class="pro-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Pro Feature
+            </div>
+            <h2>AI that understands<br>what you saved</h2>
+            <p class="ai-desc">Stop tagging everything manually. Devhub Pro uses AI to understand your code and docs — so you can find anything with a natural language query.</p>
+            <ul class="ai-list">
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Auto-tag items on save
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Semantic search across your library
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Generate code explanations
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Suggest related snippets
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Natural language queries: <em>"that React hook I wrote for forms"</em>
+              </li>
+            </ul>
+          </div>
+
+          <div class="ai-right reveal">
+            <div class="code-editor" role="img" aria-label="Code editor showing useDebounce hook with AI-generated tags">
+              <div class="editor-titlebar">
+                <span class="wdot wdot-red"></span>
+                <span class="wdot wdot-yellow"></span>
+                <span class="wdot wdot-green"></span>
+                <span class="editor-filename">useDebounce.ts</span>
+              </div>
+              <div class="editor-body">
+                <div class="line-nums" aria-hidden="true">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13</div>
+                <pre class="code-pre"><code><span class="kw">import</span> { useState, useEffect } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="kw">function</span> <span class="fn">useDebounce</span>&lt;<span class="ty">T</span>&gt;(
+  value: <span class="ty">T</span>,
+  delay: <span class="ty">number</span>
+): <span class="ty">T</span> {
+  <span class="kw">const</span> [debouncedValue, set] =
+    <span class="fn">useState</span>&lt;<span class="ty">T</span>&gt;(value)
+
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="kw">const</span> t = <span class="fn">setTimeout</span>(() =&gt; <span class="fn">set</span>(value), delay)
+    <span class="kw">return</span> () =&gt; <span class="fn">clearTimeout</span>(t)
+  }, [value, delay])</code></pre>
+              </div>
+              <div class="ai-tags-bar">
+                <span class="ai-bar-label">✦ AI Generated Tags</span>
+                <div class="ai-tag-list">
+                  <span class="ai-tag">typescript</span>
+                  <span class="ai-tag">react</span>
+                  <span class="ai-tag">hooks</span>
+                  <span class="ai-tag">debounce</span>
+                  <span class="ai-tag">performance</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /ai-wrapper -->
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PRICING
+    ============================================================ -->
+    <section class="section-pricing" id="pricing">
+      <div class="container">
+
+        <div class="section-head reveal">
+          <h2>Simple, honest pricing</h2>
+          <p>Start free. Upgrade when you outgrow it.</p>
+          <div class="billing-toggle">
+            <span class="billing-label" id="lblMonthly">Monthly</span>
+            <button class="toggle-btn" id="billingToggle" aria-label="Toggle billing period" aria-pressed="false">
+              <span class="toggle-thumb"></span>
+            </button>
+            <span class="billing-label" id="lblYearly">Yearly <em class="save-chip">Save 25%</em></span>
+          </div>
+        </div>
+
+        <div class="pricing-grid reveal">
+
+          <!-- Free -->
+          <div class="plan-card">
+            <div class="plan-header">
+              <h3>Free</h3>
+              <div class="plan-price">
+                <span class="price-amount">$0</span>
+                <span class="price-period">forever</span>
+              </div>
+            </div>
+            <ul class="plan-features">
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                50 items
+              </li>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                3 collections
+              </li>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                All 7 item types
+              </li>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Full-text search
+              </li>
+              <li class="dim">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3f3f46" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                AI features
+              </li>
+              <li class="dim">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3f3f46" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                File uploads
+              </li>
+            </ul>
+            <a href="#" class="plan-btn plan-btn-outline">Get Started Free</a>
+          </div>
+
+          <!-- Pro -->
+          <div class="plan-card plan-card-pro">
+            <div class="most-popular">Most Popular</div>
+            <div class="plan-header">
+              <h3>Pro</h3>
+              <div class="plan-price">
+                <span class="price-amount" id="proPrice">$8</span>
+                <span class="price-period" id="proPeriod">/month</span>
+              </div>
+              <p class="price-note" id="yearlyNote" style="display:none">Billed as $72/year</p>
+            </div>
+            <ul class="plan-features">
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Unlimited items
+              </li>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Unlimited collections
+              </li>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                All 7 item types
+              </li>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                AI auto-tagging
+              </li>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Semantic search
+              </li>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                File uploads (50&nbsp;MB)
+              </li>
+            </ul>
+            <a href="#" class="plan-btn plan-btn-primary">Start Pro Trial</a>
+          </div>
+
+        </div><!-- /pricing-grid -->
+      </div>
+    </section>
+
+    <!-- ============================================================
+         CTA
+    ============================================================ -->
+    <section class="section-cta">
+      <div class="container">
+        <div class="cta-box reveal">
+          <h2>Ready to Organize Your Knowledge?</h2>
+          <p>Join developers who stopped losing their best work. Free to start, no credit card needed.</p>
+          <a href="#" class="btn-primary btn-lg">Get Started Free →</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+
+        <div class="footer-brand">
+          <a href="#" class="logo">
+            <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+              <rect width="28" height="28" rx="8" fill="#3b82f6"/>
+              <path d="M7 7h5v14H7V7zm7 0h7v5h-7V7zm0 9h7v5h-7v-5z" fill="white"/>
+            </svg>
+            <span>devhub</span>
+          </a>
+          <p>A knowledge hub for code snippets, AI prompts, commands, notes, files, images, and links.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#">Changelog</a></li>
+            <li><a href="#">Roadmap</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Account</h4>
+          <ul>
+            <li><a href="#">Sign In</a></li>
+            <li><a href="#">Register</a></li>
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Profile</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+          </ul>
+        </div>
+
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="footerYear"></span> Devhub. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

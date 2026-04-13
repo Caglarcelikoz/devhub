@@ -7,7 +7,8 @@ import {
   updateItem as dbUpdateItem,
   deleteItem as dbDeleteItem,
   toggleFavoriteItem as dbToggleFavoriteItem,
-} from '@/lib/db/items'
+  togglePinnedItem as dbTogglePinnedItem,
+} from "@/lib/db/items";
 import type { ItemDetail } from '@/lib/db/items'
 
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image'] as const
@@ -184,5 +185,22 @@ export async function toggleFavorite(
     return { success: true, data: null }
   } catch {
     return { success: false, error: 'Failed to toggle favorite' }
+  }
+}
+
+export async function togglePin(itemId: string): Promise<ActionResult<null>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  try {
+    const toggled = await dbTogglePinnedItem(itemId, session.user.id);
+    if (!toggled) {
+      return { success: false, error: "Item not found" };
+    }
+    return { success: true, data: null };
+  } catch {
+    return { success: false, error: "Failed to toggle pin" };
   }
 }

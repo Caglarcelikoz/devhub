@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Star, Pin, Copy, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ImageThumbnailCard } from "@/components/dashboard/ImageThumbnailCard";
-import { toggleFavorite } from "@/actions/items";
+import { toggleFavorite, togglePin } from "@/actions/items";
 import type { ItemWithMeta } from "@/lib/db/items";
 
 interface ItemsGridProps {
@@ -50,6 +50,8 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
   const [copied, setCopied] = useState(false);
   const [isFavorite, setIsFavorite] = useState(item.isFavorite);
   const [togglingFavorite, setTogglingFavorite] = useState(false);
+  const [isPinned, setIsPinned] = useState(item.isPinned);
+  const [togglingPin, setTogglingPin] = useState(false);
 
   async function handleToggleFavorite(e: React.MouseEvent) {
     e.stopPropagation();
@@ -64,6 +66,19 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
       return;
     }
     router.refresh();
+  }
+
+  async function handleTogglePin(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (togglingPin) return;
+    setTogglingPin(true);
+    setIsPinned((prev) => !prev);
+    const result = await togglePin(item.id);
+    setTogglingPin(false);
+    if (!result.success) {
+      setIsPinned((prev) => !prev); // revert
+      toast.error(result.error);
+    }
   }
 
   function handleCopy(e: React.MouseEvent) {
@@ -91,7 +106,10 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
       <div className="flex items-start justify-between gap-2 pt-1">
         <span
           className="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
-          style={{ backgroundColor: `${itemType.color}18`, color: itemType.color }}
+          style={{
+            backgroundColor: `${itemType.color}18`,
+            color: itemType.color,
+          }}
         >
           {itemType.name}
         </span>
@@ -101,14 +119,27 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
             disabled={togglingFavorite}
             title={isFavorite ? "Remove from favorites" : "Add to favorites"}
             className={`p-0.5 rounded transition-opacity cursor-pointer ${
-              isFavorite
-                ? "opacity-100"
+              isFavorite ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            }`}
+          >
+            <Star
+              className={`h-3.5 w-3.5 ${isFavorite ? "fill-amber-400 text-amber-400" : "hover:text-amber-400"}`}
+            />
+          </button>
+          <button
+            onClick={handleTogglePin}
+            disabled={togglingPin}
+            title={isPinned ? "Unpin" : "Pin"}
+            className={`p-0.5 rounded transition-opacity cursor-pointer ${
+              isPinned
+                ? "opacity-100 text-foreground"
                 : "opacity-0 group-hover:opacity-100"
             }`}
           >
-            <Star className={`h-3.5 w-3.5 ${isFavorite ? "fill-amber-400 text-amber-400" : "hover:text-amber-400"}`} />
+            <Pin
+              className={`h-3.5 w-3.5 ${isPinned ? "fill-foreground" : "hover:text-foreground"}`}
+            />
           </button>
-          {item.isPinned && <Pin className="h-3.5 w-3.5" />}
           {copyText && (
             <button
               onClick={handleCopy}

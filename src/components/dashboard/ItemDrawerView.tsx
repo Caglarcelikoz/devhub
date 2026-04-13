@@ -34,13 +34,14 @@ const MARKDOWN_TYPES = ['note', 'prompt']
 const FILE_TYPES = ['file', 'image']
 
 interface ItemDrawerViewProps {
-  item: ItemDetail
-  copied: boolean
-  deleting: boolean
-  onCopy: () => void
-  onEditStart: () => void
-  onDelete: () => void
-  onToggleFavorite: () => void
+  item: ItemDetail;
+  copied: boolean;
+  deleting: boolean;
+  onCopy: () => void;
+  onEditStart: () => void;
+  onDelete: () => void;
+  onToggleFavorite: () => void;
+  onTogglePin: () => void;
 }
 
 export function ItemDrawerView({
@@ -51,32 +52,42 @@ export function ItemDrawerView({
   onEditStart,
   onDelete,
   onToggleFavorite,
+  onTogglePin,
 }: ItemDrawerViewProps) {
-  const { itemType } = item
-  const preview = item.contentType === 'URL' ? item.url : item.content
-  const showLanguage = LANGUAGE_TYPES.includes(itemType.name)
-  const showMarkdown = MARKDOWN_TYPES.includes(itemType.name)
-  const showFile = FILE_TYPES.includes(itemType.name)
-  const isImageType = itemType.name === 'image'
-  const createdDate = formatDate(new Date(item.createdAt))
-  const updatedDate = formatDate(new Date(item.updatedAt))
+  const { itemType } = item;
+  const preview = item.contentType === "URL" ? item.url : item.content;
+  const showLanguage = LANGUAGE_TYPES.includes(itemType.name);
+  const showMarkdown = MARKDOWN_TYPES.includes(itemType.name);
+  const showFile = FILE_TYPES.includes(itemType.name);
+  const isImageType = itemType.name === "image";
+  const createdDate = formatDate(new Date(item.createdAt));
+  const updatedDate = formatDate(new Date(item.updatedAt));
 
   return (
     <>
       {/* ── Action bar ── */}
       <div className="flex items-center gap-0.5 px-4 py-2 border-y border-border/60 shrink-0 overflow-x-auto scrollbar-none">
         <ActionButton
-          icon={<Star className={`h-4 w-4 ${item.isFavorite ? 'fill-amber-400 text-amber-400' : ''}`} />}
-          label={item.isFavorite ? 'Unfavorite' : 'Favorite'}
+          icon={
+            <Star
+              className={`h-4 w-4 ${item.isFavorite ? "fill-amber-400 text-amber-400" : ""}`}
+            />
+          }
+          label={item.isFavorite ? "Unfavorite" : "Favorite"}
           onClick={onToggleFavorite}
         />
         <ActionButton
-          icon={<Pin className={`h-4 w-4 ${item.isPinned ? 'text-foreground' : ''}`} />}
-          label={item.isPinned ? 'Unpin' : 'Pin'}
+          icon={
+            <Pin
+              className={`h-4 w-4 ${item.isPinned ? "text-foreground" : ""}`}
+            />
+          }
+          label={item.isPinned ? "Unpin" : "Pin"}
+          onClick={onTogglePin}
         />
         <ActionButton
           icon={<Copy className="h-4 w-4" />}
-          label={copied ? 'Copied!' : 'Copy'}
+          label={copied ? "Copied!" : "Copy"}
           onClick={onCopy}
         />
         <ActionButton
@@ -105,7 +116,8 @@ export function ItemDrawerView({
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete item?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  <strong>{item.title}</strong> will be permanently deleted. This cannot be undone.
+                  <strong>{item.title}</strong> will be permanently deleted.
+                  This cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -115,7 +127,7 @@ export function ItemDrawerView({
                   disabled={deleting}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
-                  {deleting ? 'Deleting…' : 'Delete'}
+                  {deleting ? "Deleting…" : "Delete"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -127,20 +139,29 @@ export function ItemDrawerView({
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
         {item.description && (
           <Section label="Description">
-            <p className="text-sm text-foreground/70 leading-relaxed">{item.description}</p>
+            <p className="text-sm text-foreground/70 leading-relaxed">
+              {item.description}
+            </p>
           </Section>
         )}
 
         {preview && (
           <Section label="Content">
             {showLanguage ? (
-              <CodeEditor value={item.content ?? ''} language={item.language ?? ''} readOnly />
+              <CodeEditor
+                value={item.content ?? ""}
+                language={item.language ?? ""}
+                readOnly
+              />
             ) : showMarkdown ? (
-              <MarkdownEditor value={item.content ?? ''} readOnly />
+              <MarkdownEditor value={item.content ?? ""} readOnly />
             ) : (
               <div
                 className="rounded-md border p-3"
-                style={{ borderColor: `${itemType.color}30`, backgroundColor: `${itemType.color}06` }}
+                style={{
+                  borderColor: `${itemType.color}30`,
+                  backgroundColor: `${itemType.color}06`,
+                }}
               >
                 <pre className="text-xs text-foreground/80 font-mono leading-relaxed whitespace-pre-wrap wrap-break-word">
                   {preview}
@@ -151,7 +172,7 @@ export function ItemDrawerView({
         )}
 
         {showFile && item.fileUrl && (
-          <Section label={isImageType ? 'Image' : 'File'}>
+          <Section label={isImageType ? "Image" : "File"}>
             {isImageType ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -162,13 +183,20 @@ export function ItemDrawerView({
             ) : (
               <div
                 className="flex items-center gap-3 rounded-md border p-3"
-                style={{ borderColor: `${itemType.color}30`, backgroundColor: `${itemType.color}06` }}
+                style={{
+                  borderColor: `${itemType.color}30`,
+                  backgroundColor: `${itemType.color}06`,
+                }}
               >
                 <File className="h-5 w-5 shrink-0 text-muted-foreground" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{item.fileName ?? 'File'}</p>
+                  <p className="text-sm font-medium truncate">
+                    {item.fileName ?? "File"}
+                  </p>
                   {item.fileSize && (
-                    <p className="text-xs text-muted-foreground">{formatBytes(item.fileSize)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatBytes(item.fileSize)}
+                    </p>
                   )}
                 </div>
               </div>
@@ -180,7 +208,11 @@ export function ItemDrawerView({
           <Section label="Tags" icon={<Tag className="h-3.5 w-3.5" />}>
             <div className="flex flex-wrap gap-1.5">
               {item.tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-xs px-2 py-0.5 h-auto font-normal rounded-md">
+                <Badge
+                  key={tag}
+                  variant="secondary"
+                  className="text-xs px-2 py-0.5 h-auto font-normal rounded-md"
+                >
                   {tag}
                 </Badge>
               ))}
@@ -189,10 +221,17 @@ export function ItemDrawerView({
         )}
 
         {item.collections.length > 0 && (
-          <Section label="Collections" icon={<FolderOpen className="h-3.5 w-3.5" />}>
+          <Section
+            label="Collections"
+            icon={<FolderOpen className="h-3.5 w-3.5" />}
+          >
             <div className="flex flex-wrap gap-1.5">
               {item.collections.map((col) => (
-                <Badge key={col.id} variant="outline" className="text-xs px-2 py-0.5 h-auto font-normal rounded-md">
+                <Badge
+                  key={col.id}
+                  variant="outline"
+                  className="text-xs px-2 py-0.5 h-auto font-normal rounded-md"
+                >
                   {col.name}
                 </Badge>
               ))}
@@ -204,17 +243,21 @@ export function ItemDrawerView({
           <div className="space-y-1.5 text-sm">
             <div className="flex justify-between">
               <span className="text-foreground/45">Created</span>
-              <span className="text-foreground/70 tabular-nums">{createdDate}</span>
+              <span className="text-foreground/70 tabular-nums">
+                {createdDate}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-foreground/45">Updated</span>
-              <span className="text-foreground/70 tabular-nums">{updatedDate}</span>
+              <span className="text-foreground/70 tabular-nums">
+                {updatedDate}
+              </span>
             </div>
           </div>
         </Section>
       </div>
     </>
-  )
+  );
 }
 
 function Section({

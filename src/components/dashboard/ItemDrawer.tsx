@@ -7,7 +7,12 @@ import { toast } from 'sonner'
 import { Sheet, SheetContent, SheetHeader } from '@/components/ui/sheet'
 import { ItemDrawerView } from './ItemDrawerView'
 import { ItemDrawerEdit } from './ItemDrawerEdit'
-import { updateItem, deleteItem, toggleFavorite } from '@/actions/items'
+import {
+  updateItem,
+  deleteItem,
+  toggleFavorite,
+  togglePin,
+} from "@/actions/items";
 import type { ItemDetail } from '@/lib/db/items'
 import type { CollectionOption } from '@/lib/db/collections'
 
@@ -31,6 +36,7 @@ export function ItemDrawer({ itemId, onClose, collections = [] }: ItemDrawerProp
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [togglingFavorite, setTogglingFavorite] = useState(false)
+  const [togglingPin, setTogglingPin] = useState(false);
 
   const { data: item, isLoading, isError } = useQuery({
     queryKey: ['item', itemId],
@@ -131,6 +137,27 @@ export function ItemDrawer({ itemId, onClose, collections = [] }: ItemDrawerProp
     router.refresh()
   }, [item, itemId, togglingFavorite, queryClient, router])
 
+  const handleTogglePin = useCallback(async () => {
+    if (!item || togglingPin) return;
+    setTogglingPin(true);
+    // Optimistic update — flip isPinned immediately in the cache
+    queryClient.setQueryData<ItemDetail>(["item", itemId], (old) =>
+      old ? { ...old, isPinned: !old.isPinned } : old,
+    );
+    const result = await togglePin(item.id);
+    setTogglingPin(false);
+    if (!result.success) {
+      // Revert on failure
+      queryClient.setQueryData<ItemDetail>(["item", itemId], (old) =>
+        old ? { ...old, isPinned: !old.isPinned } : old,
+      );
+      toast.error(result.error);
+      return;
+    }
+    toast.success(item.isPinned ? "Item unpinned" : "Item pinned");
+    router.refresh();
+  }, [item, itemId, togglingPin, queryClient, router]);
+
   const handleOpenChange = useCallback(
     (open: boolean) => { if (!open) { setIsEditing(false); onClose() } },
     [onClose],
@@ -138,7 +165,11 @@ export function ItemDrawer({ itemId, onClose, collections = [] }: ItemDrawerProp
 
   return (
     <Sheet open={itemId !== null} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" showCloseButton className="w-120! max-w-[90vw]! p-0 flex flex-col overflow-hidden gap-0">
+      <SheetContent
+        side="right"
+        showCloseButton
+        className="w-120! max-w-[90vw]! p-0 flex flex-col overflow-hidden gap-0"
+      >
         {isLoading && <DrawerSkeleton />}
         {isError && (
           <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
@@ -152,12 +183,18 @@ export function ItemDrawer({ itemId, onClose, collections = [] }: ItemDrawerProp
               <div className="flex items-center gap-2 pr-8">
                 <span
                   className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium shrink-0"
-                  style={{ backgroundColor: `${item.itemType.color}18`, color: item.itemType.color }}
+                  style={{
+                    backgroundColor: `${item.itemType.color}18`,
+                    color: item.itemType.color,
+                  }}
                 >
-                  {item.itemType.name.charAt(0).toUpperCase() + item.itemType.name.slice(1)}
+                  {item.itemType.name.charAt(0).toUpperCase() +
+                    item.itemType.name.slice(1)}
                 </span>
                 {!isEditing && item.language && (
-                  <span className="text-xs text-muted-foreground">{item.language}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {item.language}
+                  </span>
                 )}
               </div>
               {isEditing ? (
@@ -206,13 +243,14 @@ export function ItemDrawer({ itemId, onClose, collections = [] }: ItemDrawerProp
                 onEditStart={handleEditStart}
                 onDelete={handleDelete}
                 onToggleFavorite={handleToggleFavorite}
+                onTogglePin={handleTogglePin}
               />
             )}
           </div>
         )}
       </SheetContent>
     </Sheet>
-  )
+  );
 }
 
 function DrawerSkeleton() {

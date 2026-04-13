@@ -6,6 +6,7 @@ import {
   createCollection as dbCreateCollection,
   updateCollection as dbUpdateCollection,
   deleteCollection as dbDeleteCollection,
+  toggleFavoriteCollection as dbToggleFavoriteCollection,
 } from '@/lib/db/collections'
 import type { CreatedCollection, CollectionById } from '@/lib/db/collections'
 
@@ -103,5 +104,22 @@ export async function deleteCollection(
     return { success: true, data: null }
   } catch {
     return { success: false, error: 'Failed to delete collection' }
+  }
+}
+
+export async function toggleFavoriteCollection(
+  collectionId: string,
+): Promise<ActionResult<null>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const toggled = await dbToggleFavoriteCollection(session.user.id, collectionId)
+    if (!toggled) return { success: false, error: 'Collection not found' }
+    return { success: true, data: null }
+  } catch {
+    return { success: false, error: 'Failed to toggle favorite' }
   }
 }

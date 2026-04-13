@@ -95,6 +95,23 @@ export async function updateCollection(
   })
 }
 
+export async function toggleFavoriteCollection(
+  userId: string,
+  collectionId: string,
+): Promise<boolean> {
+  const existing = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    select: { id: true, isFavorite: true },
+  })
+  if (!existing) return false
+
+  await prisma.collection.update({
+    where: { id: collectionId },
+    data: { isFavorite: !existing.isFavorite },
+  })
+  return true
+}
+
 export async function deleteCollection(
   userId: string,
   collectionId: string,

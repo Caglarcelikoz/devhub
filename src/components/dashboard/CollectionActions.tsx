@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
-import { updateCollection, deleteCollection } from '@/actions/collections'
+import { updateCollection, deleteCollection, toggleFavoriteCollection } from '@/actions/collections'
 
 interface Collection {
   id: string
@@ -199,7 +199,21 @@ export function CollectionActionsDropdown({
   collection,
   afterDeleteRedirect = '',
 }: CollectionActionsDropdownProps) {
+  const router = useRouter()
   const actions = useCollectionActions(collection, afterDeleteRedirect)
+  const [togglingFavorite, setTogglingFavorite] = useState(false)
+
+  async function handleToggleFavorite() {
+    if (togglingFavorite) return
+    setTogglingFavorite(true)
+    const result = await toggleFavoriteCollection(collection.id)
+    setTogglingFavorite(false)
+    if (!result.success) {
+      toast.error(result.error)
+      return
+    }
+    router.refresh()
+  }
 
   return (
     <>
@@ -220,11 +234,12 @@ export function CollectionActionsDropdown({
             Edit
           </DropdownMenuItem>
           <DropdownMenuItem
-            className="flex items-center gap-2 cursor-pointer opacity-40"
-            disabled
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={handleToggleFavorite}
+            disabled={togglingFavorite}
           >
-            <Star className="h-3.5 w-3.5" />
-            Favorite
+            <Star className={`h-3.5 w-3.5 ${collection.isFavorite ? 'fill-amber-400 text-amber-400' : ''}`} />
+            {collection.isFavorite ? 'Unfavorite' : 'Favorite'}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -251,7 +266,21 @@ interface CollectionPageActionsProps {
 }
 
 export function CollectionPageActions({ collection }: CollectionPageActionsProps) {
+  const router = useRouter()
   const actions = useCollectionActions(collection, '/dashboard')
+  const [togglingFavorite, setTogglingFavorite] = useState(false)
+
+  async function handleToggleFavorite() {
+    if (togglingFavorite) return
+    setTogglingFavorite(true)
+    const result = await toggleFavoriteCollection(collection.id)
+    setTogglingFavorite(false)
+    if (!result.success) {
+      toast.error(result.error)
+      return
+    }
+    router.refresh()
+  }
 
   return (
     <>
@@ -259,12 +288,13 @@ export function CollectionPageActions({ collection }: CollectionPageActionsProps
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-foreground/40"
-          disabled
-          title="Favorite (coming soon)"
+          className={`h-8 w-8 ${collection.isFavorite ? 'text-amber-400' : 'text-foreground/40 hover:text-foreground'}`}
+          onClick={handleToggleFavorite}
+          disabled={togglingFavorite}
+          title={collection.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >
-          <Star className={`h-4 w-4 ${collection.isFavorite ? 'fill-amber-400 text-amber-400' : ''}`} />
-          <span className="sr-only">Favorite</span>
+          <Star className={`h-4 w-4 ${collection.isFavorite ? 'fill-amber-400' : ''}`} />
+          <span className="sr-only">{collection.isFavorite ? 'Unfavorite' : 'Favorite'}</span>
         </Button>
         <Button
           variant="ghost"

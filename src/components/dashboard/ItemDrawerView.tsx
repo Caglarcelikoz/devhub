@@ -40,6 +40,7 @@ interface ItemDrawerViewProps {
   onCopy: () => void
   onEditStart: () => void
   onDelete: () => void
+  onToggleFavorite: () => void
 }
 
 export function ItemDrawerView({
@@ -49,6 +50,7 @@ export function ItemDrawerView({
   onCopy,
   onEditStart,
   onDelete,
+  onToggleFavorite,
 }: ItemDrawerViewProps) {
   const { itemType } = item
   const preview = item.contentType === 'URL' ? item.url : item.content
@@ -66,6 +68,7 @@ export function ItemDrawerView({
         <ActionButton
           icon={<Star className={`h-4 w-4 ${item.isFavorite ? 'fill-amber-400 text-amber-400' : ''}`} />}
           label={item.isFavorite ? 'Unfavorite' : 'Favorite'}
+          onClick={onToggleFavorite}
         />
         <ActionButton
           icon={<Pin className={`h-4 w-4 ${item.isPinned ? 'text-foreground' : ''}`} />}

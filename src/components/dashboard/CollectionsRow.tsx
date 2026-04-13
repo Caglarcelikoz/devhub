@@ -1,10 +1,53 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { Star } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { CollectionWithMeta } from "@/lib/db/collections";
 import { CollectionActionsDropdown } from "./CollectionActions";
+import { toggleFavoriteCollection } from "@/actions/collections";
 
 interface CollectionsRowProps {
   collections: CollectionWithMeta[];
+}
+
+function FavoriteButton({ collection }: { collection: CollectionWithMeta }) {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+
+  async function handleClick(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (pending) return;
+    setPending(true);
+    const result = await toggleFavoriteCollection(collection.id);
+    setPending(false);
+    if (!result.success) {
+      toast.error(result.error);
+      return;
+    }
+    router.refresh();
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={pending}
+      title={collection.isFavorite ? "Remove from favorites" : "Add to favorites"}
+      className={`flex items-center justify-center h-6 w-6 rounded transition-colors ${
+        collection.isFavorite
+          ? "text-amber-400 hover:text-amber-500"
+          : "text-foreground/20 hover:text-amber-400"
+      }`}
+    >
+      <Star
+        className={`h-3.5 w-3.5 ${collection.isFavorite ? "fill-amber-400" : ""}`}
+      />
+    </button>
+  );
 }
 
 export function CollectionsRow({ collections }: CollectionsRowProps) {
@@ -30,12 +73,9 @@ export function CollectionsRow({ collections }: CollectionsRowProps) {
             className="block p-4 hover:opacity-90 transition-opacity"
           >
             <div className="flex items-start justify-between gap-2 mb-2">
-              <h3 className="text-[15px] font-medium text-foreground group-hover:text-primary transition-colors pr-6">
+              <h3 className="text-[15px] font-medium text-foreground group-hover:text-primary transition-colors pr-14">
                 {col.name}
               </h3>
-              {col.isFavorite && (
-                <Star className="h-4 w-4 text-amber-400 shrink-0 fill-amber-400" />
-              )}
             </div>
 
             <p className="text-sm text-foreground/55 line-clamp-1 mb-3">
@@ -61,8 +101,9 @@ export function CollectionsRow({ collections }: CollectionsRowProps) {
             </div>
           </Link>
 
-          {/* 3-dot menu — positioned top-right, outside the Link */}
-          <div className="absolute top-3 right-3">
+          {/* Actions: favorite + 3-dot menu — positioned top-right, outside the Link */}
+          <div className="absolute top-3 right-3 flex items-center gap-0.5">
+            <FavoriteButton collection={col} />
             <CollectionActionsDropdown collection={col} />
           </div>
         </div>

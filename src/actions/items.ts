@@ -6,6 +6,7 @@ import {
   createItem as dbCreateItem,
   updateItem as dbUpdateItem,
   deleteItem as dbDeleteItem,
+  toggleFavoriteItem as dbToggleFavoriteItem,
 } from '@/lib/db/items'
 import type { ItemDetail } from '@/lib/db/items'
 
@@ -164,5 +165,24 @@ export async function deleteItem(
     return { success: true, data: null }
   } catch {
     return { success: false, error: 'Failed to delete item' }
+  }
+}
+
+export async function toggleFavorite(
+  itemId: string,
+): Promise<ActionResult<null>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const toggled = await dbToggleFavoriteItem(itemId, session.user.id)
+    if (!toggled) {
+      return { success: false, error: 'Item not found' }
+    }
+    return { success: true, data: null }
+  } catch {
+    return { success: false, error: 'Failed to toggle favorite' }
   }
 }

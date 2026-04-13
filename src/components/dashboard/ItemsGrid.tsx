@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Star, Pin, Copy, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ImageThumbnailCard } from "@/components/dashboard/ImageThumbnailCard";
+import { toggleFavorite } from "@/actions/items";
 import type { ItemWithMeta } from "@/lib/db/items";
 
 interface ItemsGridProps {
@@ -39,11 +42,29 @@ export function ItemsGrid({ items, columns = "auto", onItemClick, thumbnailUrls 
 }
 
 function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id: string) => void }) {
+  const router = useRouter();
   const { itemType } = item;
   const timeAgo = formatTimeAgo(item.updatedAt);
   const preview = item.contentType === "URL" ? item.url : item.content;
   const copyText = item.contentType === "URL" ? item.url : item.content;
   const [copied, setCopied] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(item.isFavorite);
+  const [togglingFavorite, setTogglingFavorite] = useState(false);
+
+  async function handleToggleFavorite(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (togglingFavorite) return;
+    setTogglingFavorite(true);
+    setIsFavorite((prev) => !prev);
+    const result = await toggleFavorite(item.id);
+    setTogglingFavorite(false);
+    if (!result.success) {
+      setIsFavorite((prev) => !prev); // revert
+      toast.error(result.error);
+      return;
+    }
+    router.refresh();
+  }
 
   function handleCopy(e: React.MouseEvent) {
     e.stopPropagation();
@@ -75,7 +96,18 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
           {itemType.name}
         </span>
         <div className="flex items-center gap-1.5 text-muted-foreground/60 shrink-0">
-          {item.isFavorite && <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />}
+          <button
+            onClick={handleToggleFavorite}
+            disabled={togglingFavorite}
+            title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            className={`p-0.5 rounded transition-opacity cursor-pointer ${
+              isFavorite
+                ? "opacity-100"
+                : "opacity-0 group-hover:opacity-100"
+            }`}
+          >
+            <Star className={`h-3.5 w-3.5 ${isFavorite ? "fill-amber-400 text-amber-400" : "hover:text-amber-400"}`} />
+          </button>
           {item.isPinned && <Pin className="h-3.5 w-3.5" />}
           {copyText && (
             <button

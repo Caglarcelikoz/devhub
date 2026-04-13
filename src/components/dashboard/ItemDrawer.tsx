@@ -2,12 +2,12 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Sheet, SheetContent, SheetHeader } from '@/components/ui/sheet'
 import { ItemDrawerView } from './ItemDrawerView'
 import { ItemDrawerEdit } from './ItemDrawerEdit'
-import { updateItem, deleteItem } from '@/actions/items'
+import { updateItem, deleteItem, toggleFavorite } from '@/actions/items'
 import type { ItemDetail } from '@/lib/db/items'
 import type { CollectionOption } from '@/lib/db/collections'
 
@@ -25,10 +25,12 @@ async function fetchItem(id: string): Promise<ItemDetail> {
 
 export function ItemDrawer({ itemId, onClose, collections = [] }: ItemDrawerProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
   const [copied, setCopied] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [togglingFavorite, setTogglingFavorite] = useState(false)
 
   const { data: item, isLoading, isError } = useQuery({
     queryKey: ['item', itemId],
@@ -109,6 +111,26 @@ export function ItemDrawer({ itemId, onClose, collections = [] }: ItemDrawerProp
     router.refresh()
   }, [item, onClose, router])
 
+  const handleToggleFavorite = useCallback(async () => {
+    if (!item || togglingFavorite) return
+    setTogglingFavorite(true)
+    // Optimistic update — flip isFavorite immediately in the cache
+    queryClient.setQueryData<ItemDetail>(['item', itemId], (old) =>
+      old ? { ...old, isFavorite: !old.isFavorite } : old,
+    )
+    const result = await toggleFavorite(item.id)
+    setTogglingFavorite(false)
+    if (!result.success) {
+      // Revert on failure
+      queryClient.setQueryData<ItemDetail>(['item', itemId], (old) =>
+        old ? { ...old, isFavorite: !old.isFavorite } : old,
+      )
+      toast.error(result.error)
+      return
+    }
+    router.refresh()
+  }, [item, itemId, togglingFavorite, queryClient, router])
+
   const handleOpenChange = useCallback(
     (open: boolean) => { if (!open) { setIsEditing(false); onClose() } },
     [onClose],
@@ -183,6 +205,7 @@ export function ItemDrawer({ itemId, onClose, collections = [] }: ItemDrawerProp
                 onCopy={handleCopy}
                 onEditStart={handleEditStart}
                 onDelete={handleDelete}
+                onToggleFavorite={handleToggleFavorite}
               />
             )}
           </div>

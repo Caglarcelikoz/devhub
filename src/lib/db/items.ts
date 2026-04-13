@@ -319,6 +319,23 @@ export async function updateItem(
   }
 }
 
+export async function toggleFavoriteItem(
+  id: string,
+  userId: string,
+): Promise<boolean> {
+  const existing = await prisma.item.findFirst({
+    where: { id, userId },
+    select: { id: true, isFavorite: true },
+  });
+  if (!existing) return false;
+
+  await prisma.item.update({
+    where: { id },
+    data: { isFavorite: !existing.isFavorite },
+  });
+  return true;
+}
+
 export async function deleteItem(
   id: string,
   userId: string,

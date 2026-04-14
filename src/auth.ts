@@ -21,7 +21,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.name = user.name
         token.picture = user.image
       }
-      // Re-hydrate from DB only when the session is explicitly updated
+      // Re-hydrate name/image from DB when session is explicitly updated
       // (e.g. after a profile name/avatar change via useSession().update())
       if (trigger === 'update' && token.sub) {
         const dbUser = await prisma.user.findUnique({
@@ -34,6 +34,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       }
       void session // unused except on trigger==='update'
+      // Always sync isPro from DB so Stripe webhook-triggered changes
+      // are reflected on the next page load without a manual session update
+      if (token.sub) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { isPro: true },
+        })
+        token.isPro = dbUser?.isPro ?? false
+      }
       return token
     },
     session({ session, token }) {
@@ -46,6 +55,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.picture) {
         session.user.image = token.picture as string
       }
+      session.user.isPro = (token.isPro as boolean | undefined) ?? false
       return session
     },
   },

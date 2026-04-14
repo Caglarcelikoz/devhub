@@ -4,6 +4,12 @@ import { useState, useEffect } from "react";
 import { Search, Plus, FolderPlus, LayoutGrid, List, Star } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { CreateItemDialog } from "@/components/dashboard/CreateItemDialog";
 import { CreateCollectionDialog } from "@/components/dashboard/CreateCollectionDialog";
 import { CommandPalette } from "@/components/dashboard/CommandPalette";
@@ -46,7 +52,7 @@ export function TopBar({
           DevHub
         </span>
 
-        <div className="flex-1 max-w-sm relative">
+        <div className="flex-1 sm:max-w-sm relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <button
             type="button"
@@ -61,23 +67,28 @@ export function TopBar({
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          {/* Favorites — hidden on mobile (accessible via sidebar drawer) */}
           <Link
             href="/favorites"
             aria-label="Favorites"
-            className="inline-flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+            className="hidden sm:inline-flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             <Star className="h-4 w-4" />
           </Link>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
+
+          {/* View toggles — not meaningful on single-column mobile layout */}
+          <Button variant="ghost" size="icon" className="hidden sm:inline-flex h-8 w-8">
             <LayoutGrid className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Button variant="ghost" size="icon" className="hidden sm:inline-flex h-8 w-8">
             <List className="h-4 w-4" />
           </Button>
+
+          {/* Full CTA buttons on sm+ */}
           <Button
             size="sm"
             variant="outline"
-            className="h-9 px-4 gap-2 text-sm"
+            className="hidden sm:inline-flex h-9 px-4 gap-2 text-sm"
             onClick={() => setCollectionDialogOpen(true)}
           >
             <FolderPlus className="h-4 w-4" />
@@ -85,12 +96,29 @@ export function TopBar({
           </Button>
           <Button
             size="sm"
-            className="h-9 px-4 gap-2 text-sm bg-primary text-primary-foreground hover:bg-primary/90"
+            className="hidden sm:inline-flex h-9 px-4 gap-2 text-sm bg-primary text-primary-foreground hover:bg-primary/90"
             onClick={() => setItemDialogOpen(true)}
           >
             <Plus className="h-4 w-4" />
             New Item
           </Button>
+
+          {/* Collapsed + dropdown on mobile */}
+          <DropdownMenu>
+            <DropdownMenuTrigger className="sm:hidden inline-flex items-center justify-center h-9 w-9 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" aria-label="Create new">
+              <Plus className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setItemDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                New Item
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCollectionDialogOpen(true)}>
+                <FolderPlus className="h-4 w-4 mr-2" />
+                New Collection
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 

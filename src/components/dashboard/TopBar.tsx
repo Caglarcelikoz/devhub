@@ -48,9 +48,12 @@ export function TopBar({
   return (
     <>
       <header className="h-14 shrink-0 flex items-center gap-3 px-5 border-b border-border bg-background">
-        <span className="text-base font-semibold text-foreground mr-2">
+        <Link
+          href="/dashboard"
+          className="text-base font-semibold text-foreground mr-2 hover:text-primary transition-colors"
+        >
           DevHub
-        </span>
+        </Link>
 
         <div className="flex-1 sm:max-w-sm relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />

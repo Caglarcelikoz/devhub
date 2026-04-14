@@ -16,7 +16,7 @@ export function HeroSection() {
           <p className="text-sm font-medium text-blue-400 tracking-wide uppercase">
             For developers who ship a lot of code
           </p>
-          <h1 className="text-4xl sm:text-5xl font-bold leading-tight text-white">
+          <h1 className="text-4xl sm:text-[2.75rem] md:text-5xl font-bold leading-tight text-white">
             Stop Losing Your{' '}
             <span className="bg-linear-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
               Developer Knowledge

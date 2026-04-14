@@ -13,9 +13,12 @@ interface ItemsGridClientProps {
   layout?: 'grid' | 'list'
   thumbnailUrls?: Record<string, string>
   collections?: CollectionOption[]
+  emptyMessage?: string
+  emptyActionLabel?: string
+  onEmptyAction?: () => void
 }
 
-export function ItemsGridClient({ items, columns, layout = 'grid', thumbnailUrls, collections = [] }: ItemsGridClientProps) {
+export function ItemsGridClient({ items, columns, layout = 'grid', thumbnailUrls, collections = [], emptyMessage, emptyActionLabel, onEmptyAction }: ItemsGridClientProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   return (
@@ -28,6 +31,9 @@ export function ItemsGridClient({ items, columns, layout = 'grid', thumbnailUrls
           columns={columns}
           onItemClick={(id) => setSelectedId(id)}
           thumbnailUrls={thumbnailUrls}
+          emptyMessage={emptyMessage}
+          emptyActionLabel={emptyActionLabel}
+          onEmptyAction={onEmptyAction}
         />
       )}
       <ItemDrawer

@@ -34,11 +34,13 @@ export function PricingToggle() {
           onClick={() => setYearly(!yearly)}
           aria-label="Toggle billing period"
           aria-pressed={yearly}
-          className={`relative w-10 h-6 rounded-full transition-colors ${yearly ? 'bg-blue-600' : 'bg-zinc-700'}`}
+          className="relative flex items-center justify-center min-w-11 min-h-11 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         >
-          <span
-            className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${yearly ? 'translate-x-4' : 'translate-x-0'}`}
-          />
+          <span className={`relative w-10 h-6 rounded-full transition-colors block ${yearly ? 'bg-blue-600' : 'bg-zinc-700'}`}>
+            <span
+              className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${yearly ? 'translate-x-4' : 'translate-x-0'}`}
+            />
+          </span>
         </button>
         <span className={yearly ? 'text-white' : 'text-zinc-500'}>
           Yearly{' '}

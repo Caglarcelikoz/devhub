@@ -54,15 +54,17 @@ export function DashboardShell({ children, itemTypes, collections, user }: Dashb
       {/* Main content */}
       <main className="flex-1 overflow-y-auto flex flex-col">
         {/* Mobile menu trigger */}
-        <div className="md:hidden flex items-center gap-2 px-4 h-10 border-b border-border shrink-0">
+        <div className="md:hidden flex items-center gap-3 px-3 h-12 border-b border-border shrink-0">
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7"
+            className="h-10 w-10 shrink-0"
             onClick={() => setDrawerOpen(true)}
+            aria-label="Open navigation menu"
           >
-            <Menu className="h-4 w-4" />
+            <Menu className="h-5 w-5" />
           </Button>
+          <span className="text-sm font-semibold text-foreground">DevHub</span>
         </div>
         <div className="flex-1 overflow-y-auto p-6">{children}</div>
       </main>

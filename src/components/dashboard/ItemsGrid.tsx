@@ -14,11 +14,27 @@ interface ItemsGridProps {
   columns?: "auto" | "two" | "three";
   onItemClick?: (id: string) => void;
   thumbnailUrls?: Record<string, string>;
+  emptyMessage?: string;
+  onEmptyAction?: () => void;
+  emptyActionLabel?: string;
 }
 
-export function ItemsGrid({ items, columns = "auto", onItemClick, thumbnailUrls }: ItemsGridProps) {
+export function ItemsGrid({ items, columns = "auto", onItemClick, thumbnailUrls, emptyMessage = "No items yet.", onEmptyAction, emptyActionLabel }: ItemsGridProps) {
   if (items.length === 0) {
-    return <p className="text-sm text-foreground/40">No items yet.</p>;
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
+        <p className="text-sm text-foreground/40">{emptyMessage}</p>
+        {onEmptyAction && emptyActionLabel && (
+          <button
+            type="button"
+            onClick={onEmptyAction}
+            className="text-sm px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            {emptyActionLabel}
+          </button>
+        )}
+      </div>
+    );
   }
 
   const gridClass =

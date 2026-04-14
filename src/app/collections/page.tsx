@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { FolderOpen } from "lucide-react";
+import Link from "next/link";
 import { getCollectionsWithMetaPaginated } from "@/lib/db/collections";
 import { CollectionsRow } from "@/components/dashboard/CollectionsRow";
 import { Pagination } from "@/components/ui/Pagination";
@@ -46,11 +47,20 @@ export default async function CollectionsPage({ searchParams }: CollectionsPageP
 
       {/* Collections grid */}
       {totalCount === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
+        <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-foreground/8">
             <FolderOpen className="w-5 h-5 text-foreground/40" />
           </div>
-          <p className="text-sm text-foreground/40">No collections yet.</p>
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-medium text-foreground/60">No collections yet</p>
+            <p className="text-xs text-foreground/40">Group your items into collections to stay organised.</p>
+          </div>
+          <Link
+            href="/dashboard"
+            className="text-sm px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            Go to Dashboard
+          </Link>
         </div>
       ) : (
         <>

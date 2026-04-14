@@ -126,6 +126,11 @@
   html {
     @apply font-sans;
     }
+
+  /* Global focus-visible ring — applies to all interactive elements */
+  :focus-visible {
+    @apply outline-none ring-2 ring-offset-2 ring-offset-background ring-ring;
+  }
 }
 
 /* ── Markdown preview ─────────────────────────────────────────────────────── */

@@ -1,11 +1,13 @@
 import { Check, Sparkles } from 'lucide-react';
 
-const bullets = [
+type BulletNode = string | React.ReactNode;
+
+const bullets: BulletNode[] = [
   'Auto-tag items on save',
   'Semantic search across your library',
   'Generate code explanations',
   'Suggest related snippets',
-  'Natural language queries: "that React hook I wrote for forms"',
+  <>Natural language queries: <em className="not-italic text-zinc-400">&ldquo;that React hook I wrote for forms&rdquo;</em></>,
 ];
 
 const tags = ['typescript', 'react', 'hooks', 'debounce', 'performance'];
@@ -30,10 +32,10 @@ export function AiSection() {
               so you can find anything with a natural language query.
             </p>
             <ul className="flex flex-col gap-3">
-              {bullets.map((bullet) => (
-                <li key={bullet} className="flex items-start gap-3 text-sm text-zinc-300">
+              {bullets.map((bullet, i) => (
+                <li key={i} className="flex items-start gap-3 text-sm text-zinc-300">
                   <Check size={16} className="text-blue-400 mt-0.5 flex-shrink-0" strokeWidth={2.5} />
-                  <span dangerouslySetInnerHTML={{ __html: bullet.replace(/"([^"]+)"/, '<em class="text-zinc-400">"$1"</em>') }} />
+                  <span>{bullet}</span>
                 </li>
               ))}
             </ul>

@@ -2,6 +2,7 @@
 
 import { z } from 'zod'
 import { auth } from '@/auth'
+import { canCreateCollection } from "@/lib/usage";
 import {
   createCollection as dbCreateCollection,
   updateCollection as dbUpdateCollection,
@@ -32,6 +33,18 @@ export async function createCollection(
   const session = await auth()
   if (!session?.user?.id) {
     return { success: false, error: 'Unauthorized' }
+  }
+
+  const allowed = await canCreateCollection(
+    session.user.id,
+    session.user.isPro ?? false,
+  );
+  if (!allowed) {
+    return {
+      success: false,
+      error:
+        "You have reached the free tier limit of 3 collections. Upgrade to Pro for unlimited collections.",
+    };
   }
 
   const parsed = createCollectionSchema.safeParse(input)

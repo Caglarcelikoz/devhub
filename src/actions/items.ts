@@ -2,6 +2,7 @@
 
 import { z } from 'zod'
 import { auth } from '@/auth'
+import { canCreateItem } from "@/lib/usage";
 import {
   createItem as dbCreateItem,
   updateItem as dbUpdateItem,
@@ -40,25 +41,48 @@ type CreateItemInput = z.input<typeof createItemSchema>
 export async function createItem(
   input: CreateItemInput,
 ): Promise<ActionResult<ItemDetail>> {
-  const session = await auth()
+  const session = await auth();
   if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
+    return { success: false, error: "Unauthorized" };
   }
 
-  const parsed = createItemSchema.safeParse(input)
+  // Feature gating for free users
+  if (["file", "image"].includes(input.itemTypeName) && !session.user.isPro) {
+    return {
+      success: false,
+      error: "File and image uploads require a Pro subscription.",
+    };
+  }
+
+  const allowed = await canCreateItem(
+    session.user.id,
+    session.user.isPro ?? false,
+  );
+  if (!allowed) {
+    return {
+      success: false,
+      error:
+        "You have reached the free tier limit of 50 items. Upgrade to Pro for unlimited items.",
+    };
+  }
+
+  const parsed = createItemSchema.safeParse(input);
   if (!parsed.success) {
-    const message = parsed.error.issues.map((e) => e.message).join(', ')
-    return { success: false, error: message }
+    const message = parsed.error.issues.map((e) => e.message).join(", ");
+    return { success: false, error: message };
   }
 
-  const data = parsed.data
+  const data = parsed.data;
 
-  if (data.itemTypeName === 'link' && !data.url) {
-    return { success: false, error: 'URL is required for link items' }
+  if (data.itemTypeName === "link" && !data.url) {
+    return { success: false, error: "URL is required for link items" };
   }
 
-  if ((data.itemTypeName === 'file' || data.itemTypeName === 'image') && !data.fileUrl) {
-    return { success: false, error: 'A file must be uploaded first' }
+  if (
+    (data.itemTypeName === "file" || data.itemTypeName === "image") &&
+    !data.fileUrl
+  ) {
+    return { success: false, error: "A file must be uploaded first" };
   }
 
   try {
@@ -74,15 +98,15 @@ export async function createItem(
       tags: data.tags,
       itemTypeName: data.itemTypeName,
       collectionIds: data.collectionIds,
-    })
+    });
 
     if (!created) {
-      return { success: false, error: 'Item type not found' }
+      return { success: false, error: "Item type not found" };
     }
 
-    return { success: true, data: created }
+    return { success: true, data: created };
   } catch {
-    return { success: false, error: 'Failed to create item' }
+    return { success: false, error: "Failed to create item" };
   }
 }
 

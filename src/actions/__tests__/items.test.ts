@@ -9,8 +9,13 @@ vi.mock('@/lib/db/items', () => ({
   deleteItem: vi.fn(),
 }))
 
+vi.mock("@/lib/usage", () => ({
+  canCreateItem: vi.fn().mockResolvedValue(true),
+}));
+
 import { auth } from '@/auth'
 import { createItem as dbCreateItem, updateItem as dbUpdateItem, deleteItem as dbDeleteItem } from '@/lib/db/items'
+import { canCreateItem } from "@/lib/usage";
 import { createItem, updateItem, deleteItem } from '@/actions/items'
 import type { ItemDetail } from '@/lib/db/items'
 
@@ -18,9 +23,10 @@ const mockAuth = auth as unknown as { mockResolvedValue: (v: unknown) => void }
 const mockDbCreateItem = vi.mocked(dbCreateItem)
 const mockDbUpdateItem = vi.mocked(dbUpdateItem)
 const mockDbDeleteItem = vi.mocked(dbDeleteItem)
+const mockCanCreateItem = vi.mocked(canCreateItem);
 
-function makeSession(userId = 'user-1') {
-  return { user: { id: userId, email: 'test@example.com' } }
+function makeSession(userId = "user-1", isPro = false) {
+  return { user: { id: userId, email: "test@example.com", isPro } };
 }
 
 function makeItemDetail(overrides: Partial<ItemDetail> = {}): ItemDetail {
@@ -62,6 +68,7 @@ const validCreateInput = {
 describe('createItem action', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockCanCreateItem.mockResolvedValue(true);
   })
 
   it('returns error when not authenticated', async () => {
@@ -92,36 +99,100 @@ describe('createItem action', () => {
     expect(result.success).toBe(false)
   })
 
-  it('returns error when file type is missing a fileUrl', async () => {
-    mockAuth.mockResolvedValue(makeSession())
-    const result = await createItem({ ...validCreateInput, itemTypeName: 'file', fileUrl: null })
-    expect(result.success).toBe(false)
-    if (!result.success) expect(result.error).toContain('file must be uploaded')
-  })
+  it("returns error for free user creating a file item", async () => {
+    mockAuth.mockResolvedValue(makeSession("user-1", false));
+    const result = await createItem({
+      ...validCreateInput,
+      itemTypeName: "file",
+      fileUrl: "user-1/files/uuid.pdf",
+      fileName: "doc.pdf",
+      fileSize: 1024,
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("Pro subscription");
+    expect(mockDbCreateItem).not.toHaveBeenCalled();
+  });
 
-  it('returns error when image type is missing a fileUrl', async () => {
-    mockAuth.mockResolvedValue(makeSession())
-    const result = await createItem({ ...validCreateInput, itemTypeName: 'image', fileUrl: null })
-    expect(result.success).toBe(false)
-    if (!result.success) expect(result.error).toContain('file must be uploaded')
-  })
+  it("returns error for free user creating an image item", async () => {
+    mockAuth.mockResolvedValue(makeSession("user-1", false));
+    const result = await createItem({
+      ...validCreateInput,
+      itemTypeName: "image",
+      fileUrl: "user-1/images/uuid.png",
+      fileName: "pic.png",
+      fileSize: 512,
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("Pro subscription");
+    expect(mockDbCreateItem).not.toHaveBeenCalled();
+  });
 
-  it('creates a file item successfully when fileUrl is provided', async () => {
-    const created = makeItemDetail({ contentType: 'FILE', itemType: { id: 'type-file', name: 'file', color: '#6b7280', icon: 'File' } })
-    mockAuth.mockResolvedValue(makeSession())
-    mockDbCreateItem.mockResolvedValue(created)
+  it("returns error when Pro user uploads file without fileUrl", async () => {
+    mockAuth.mockResolvedValue(makeSession("user-1", true));
+    const result = await createItem({
+      ...validCreateInput,
+      itemTypeName: "file",
+      fileUrl: null,
+    });
+    expect(result.success).toBe(false);
+    if (!result.success)
+      expect(result.error).toContain("file must be uploaded");
+  });
+
+  it("returns error when Pro user uploads image without fileUrl", async () => {
+    mockAuth.mockResolvedValue(makeSession("user-1", true));
+    const result = await createItem({
+      ...validCreateInput,
+      itemTypeName: "image",
+      fileUrl: null,
+    });
+    expect(result.success).toBe(false);
+    if (!result.success)
+      expect(result.error).toContain("file must be uploaded");
+  });
+
+  it("returns error when free user has reached 50-item limit", async () => {
+    mockAuth.mockResolvedValue(makeSession("user-1", false));
+    mockCanCreateItem.mockResolvedValue(false);
+    const result = await createItem(validCreateInput);
+    expect(result.success).toBe(false);
+    if (!result.success)
+      expect(result.error).toContain("free tier limit of 50");
+    expect(mockDbCreateItem).not.toHaveBeenCalled();
+  });
+
+  it("Pro user is not blocked by item count limit", async () => {
+    mockAuth.mockResolvedValue(makeSession("user-1", true));
+    mockCanCreateItem.mockResolvedValue(true);
+    mockDbCreateItem.mockResolvedValue(makeItemDetail());
+    const result = await createItem(validCreateInput);
+    expect(result.success).toBe(true);
+  });
+
+  it("creates a file item successfully when Pro user provides fileUrl", async () => {
+    const created = makeItemDetail({
+      contentType: "FILE",
+      itemType: {
+        id: "type-file",
+        name: "file",
+        color: "#6b7280",
+        icon: "File",
+      },
+    });
+    mockAuth.mockResolvedValue(makeSession("user-1", true));
+    mockDbCreateItem.mockResolvedValue(created);
 
     const result = await createItem({
       ...validCreateInput,
-      itemTypeName: 'file',
+      itemTypeName: "file",
       content: null,
-      fileUrl: 'user-1/files/uuid-report.pdf',
-      fileName: 'report.pdf',
+      fileUrl: "user-1/files/uuid-report.pdf",
+      fileName: "report.pdf",
       fileSize: 204800,
-    })
-    expect(result.success).toBe(true)
-    if (result.success) expect(result.data.contentType).toBe('FILE')
-  })
+    });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.contentType).toBe("FILE");
+  });
 
   it('returns error when link is missing a URL', async () => {
     mockAuth.mockResolvedValue(makeSession())

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Search, Plus, FolderPlus, LayoutGrid, List, Star } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,6 +15,7 @@ import { CreateItemDialog } from "@/components/dashboard/CreateItemDialog";
 import { CreateCollectionDialog } from "@/components/dashboard/CreateCollectionDialog";
 import { CommandPalette } from "@/components/dashboard/CommandPalette";
 import { ItemDrawer } from "@/components/dashboard/ItemDrawer";
+import { useUsageLimits } from "@/context/UsageLimitsContext";
 import type { CollectionOption } from "@/lib/db/collections";
 import type { SearchItem } from "@/lib/db/items";
 import type { SearchCollection } from "@/lib/db/collections";
@@ -29,10 +31,47 @@ export function TopBar({
   searchItems = [],
   searchCollections = [],
 }: TopBarProps) {
+  const { canCreateItem, canCreateCollection } = useUsageLimits();
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
   const [collectionDialogOpen, setCollectionDialogOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [drawerItemId, setDrawerItemId] = useState<string | null>(null);
+
+  function handleNewItem() {
+    if (!canCreateItem) {
+      toast.error(
+        "You've reached the 50-item limit. Upgrade to Pro for unlimited items.",
+        {
+          action: {
+            label: "Upgrade",
+            onClick: () => {
+              window.location.href = "/settings#billing";
+            },
+          },
+        },
+      );
+      return;
+    }
+    setItemDialogOpen(true);
+  }
+
+  function handleNewCollection() {
+    if (!canCreateCollection) {
+      toast.error(
+        "You've reached the 3-collection limit. Upgrade to Pro for unlimited collections.",
+        {
+          action: {
+            label: "Upgrade",
+            onClick: () => {
+              window.location.href = "/settings#billing";
+            },
+          },
+        },
+      );
+      return;
+    }
+    setCollectionDialogOpen(true);
+  }
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -80,10 +119,18 @@ export function TopBar({
           </Link>
 
           {/* View toggles — not meaningful on single-column mobile layout */}
-          <Button variant="ghost" size="icon" className="hidden sm:inline-flex h-8 w-8">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden sm:inline-flex h-8 w-8"
+          >
             <LayoutGrid className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="hidden sm:inline-flex h-8 w-8">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden sm:inline-flex h-8 w-8"
+          >
             <List className="h-4 w-4" />
           </Button>
 
@@ -92,7 +139,7 @@ export function TopBar({
             size="sm"
             variant="outline"
             className="hidden sm:inline-flex h-9 px-4 gap-2 text-sm"
-            onClick={() => setCollectionDialogOpen(true)}
+            onClick={handleNewCollection}
           >
             <FolderPlus className="h-4 w-4" />
             New Collection
@@ -100,7 +147,7 @@ export function TopBar({
           <Button
             size="sm"
             className="hidden sm:inline-flex h-9 px-4 gap-2 text-sm bg-primary text-primary-foreground hover:bg-primary/90"
-            onClick={() => setItemDialogOpen(true)}
+            onClick={handleNewItem}
           >
             <Plus className="h-4 w-4" />
             New Item
@@ -108,15 +155,18 @@ export function TopBar({
 
           {/* Collapsed + dropdown on mobile */}
           <DropdownMenu>
-            <DropdownMenuTrigger className="sm:hidden inline-flex items-center justify-center h-9 w-9 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" aria-label="Create new">
+            <DropdownMenuTrigger
+              className="sm:hidden inline-flex items-center justify-center h-9 w-9 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              aria-label="Create new"
+            >
               <Plus className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setItemDialogOpen(true)}>
+              <DropdownMenuItem onClick={handleNewItem}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Item
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setCollectionDialogOpen(true)}>
+              <DropdownMenuItem onClick={handleNewCollection}>
                 <FolderPlus className="h-4 w-4 mr-2" />
                 New Collection
               </DropdownMenuItem>

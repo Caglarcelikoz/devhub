@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { ItemsGridClient } from "@/components/dashboard/ItemsGridClient";
 import { NewItemButton } from "@/components/dashboard/NewItemButton";
+import { UpgradeGate } from "@/components/dashboard/UpgradeGate";
 import { Pagination } from "@/components/ui/Pagination";
 import type { CreatableType } from "@/components/dashboard/CreateItemDialog";
 
@@ -72,7 +73,10 @@ interface ItemsPageProps {
   searchParams: Promise<{ page?: string }>;
 }
 
-export default async function ItemsPage({ params, searchParams }: ItemsPageProps) {
+export default async function ItemsPage({
+  params,
+  searchParams,
+}: ItemsPageProps) {
   const { type: slug } = await params;
   const typeName = typeSlugToName(slug);
 
@@ -83,6 +87,16 @@ export default async function ItemsPage({ params, searchParams }: ItemsPageProps
   const session = await auth();
   if (!session?.user?.id) {
     redirect("/sign-in");
+  }
+
+  // Gate file/image pages for free users
+  if ((typeName === "file" || typeName === "image") && !session.user.isPro) {
+    return (
+      <UpgradeGate
+        title={`${typeName === "file" ? "File" : "Image"} storage is a Pro feature`}
+        description={`Upgrade to DevHub Pro to upload and manage ${typeName}s, along with unlimited items and collections.`}
+      />
+    );
   }
 
   const { page: pageParam } = await searchParams;
@@ -103,8 +117,11 @@ export default async function ItemsPage({ params, searchParams }: ItemsPageProps
       items
         .filter((item) => item.fileUrl)
         .map(async (item) => {
-          thumbnailUrls[item.id] = await getSignedDownloadUrl(item.fileUrl!, 300);
-        })
+          thumbnailUrls[item.id] = await getSignedDownloadUrl(
+            item.fileUrl!,
+            300,
+          );
+        }),
     );
   }
 

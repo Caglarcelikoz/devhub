@@ -13,8 +13,10 @@ import {
   DEFAULT_EDITOR_PREFERENCES,
   type EditorPreferences,
 } from "@/context/EditorPreferencesContext";
+import { UsageLimitsProvider } from "@/context/UsageLimitsContext";
 import { editorPreferencesSchema } from "@/lib/editor-preferences";
 import { prisma } from "@/lib/prisma";
+import { canCreateItem, canCreateCollection } from "@/lib/usage";
 
 export default async function FavoritesLayout({
   children,
@@ -29,6 +31,8 @@ export default async function FavoritesLayout({
 
   const userId = session.user.id;
 
+  const isPro = session.user.isPro ?? false;
+
   const [
     itemTypes,
     collections,
@@ -36,6 +40,8 @@ export default async function FavoritesLayout({
     searchItems,
     searchCollections,
     user,
+    itemAllowed,
+    collectionAllowed,
   ] = await Promise.all([
     getItemTypesWithCount(userId),
     getCollectionsWithMeta(userId),
@@ -46,6 +52,8 @@ export default async function FavoritesLayout({
       where: { id: userId },
       select: { editorPreferences: true },
     }),
+    canCreateItem(userId, isPro),
+    canCreateCollection(userId, isPro),
   ]);
 
   const parsedPrefs = editorPreferencesSchema.safeParse(
@@ -56,21 +64,27 @@ export default async function FavoritesLayout({
     : DEFAULT_EDITOR_PREFERENCES;
 
   return (
-    <EditorPreferencesProvider initialPreferences={initialPreferences}>
-      <div className="flex flex-col h-screen bg-background">
-        <TopBar
-          collections={collectionOptions}
-          searchItems={searchItems}
-          searchCollections={searchCollections}
-        />
-        <DashboardShell
-          itemTypes={itemTypes}
-          collections={collections}
-          user={session.user}
-        >
-          {children}
-        </DashboardShell>
-      </div>
-    </EditorPreferencesProvider>
+    <UsageLimitsProvider
+      canCreateItem={itemAllowed}
+      canCreateCollection={collectionAllowed}
+      isPro={isPro}
+    >
+      <EditorPreferencesProvider initialPreferences={initialPreferences}>
+        <div className="flex flex-col h-screen bg-background">
+          <TopBar
+            collections={collectionOptions}
+            searchItems={searchItems}
+            searchCollections={searchCollections}
+          />
+          <DashboardShell
+            itemTypes={itemTypes}
+            collections={collections}
+            user={session.user}
+          >
+            {children}
+          </DashboardShell>
+        </div>
+      </EditorPreferencesProvider>
+    </UsageLimitsProvider>
   );
 }

@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { ItemsGridClient } from "@/components/dashboard/ItemsGridClient";
 import { NewItemButton } from "@/components/dashboard/NewItemButton";
-import { UpgradeGate } from "@/components/dashboard/UpgradeGate";
 import { Pagination } from "@/components/ui/Pagination";
 import type { CreatableType } from "@/components/dashboard/CreateItemDialog";
 
@@ -91,12 +90,7 @@ export default async function ItemsPage({
 
   // Gate file/image pages for free users
   if ((typeName === "file" || typeName === "image") && !session.user.isPro) {
-    return (
-      <UpgradeGate
-        title={`${typeName === "file" ? "File" : "Image"} storage is a Pro feature`}
-        description={`Upgrade to DevHub Pro to upload and manage ${typeName}s, along with unlimited items and collections.`}
-      />
-    );
+    redirect("/upgrade");
   }
 
   const { page: pageParam } = await searchParams;

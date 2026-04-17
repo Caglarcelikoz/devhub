@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Plus, FolderPlus, LayoutGrid, List, Star } from "lucide-react";
+import { Search, Plus, FolderPlus, LayoutGrid, List, Star, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ export function TopBar({
   searchItems = [],
   searchCollections = [],
 }: TopBarProps) {
-  const { canCreateItem, canCreateCollection } = useUsageLimits();
+  const { canCreateItem, canCreateCollection, isPro } = useUsageLimits();
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
   const [collectionDialogOpen, setCollectionDialogOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -109,6 +109,19 @@ export function TopBar({
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          {/* Upgrade button — shown only for free users */}
+          {!isPro && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hidden sm:inline-flex h-8 px-3 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+              render={<Link href="/upgrade" />}
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              Upgrade
+            </Button>
+          )}
+
           {/* Favorites — hidden on mobile (accessible via sidebar drawer) */}
           <Link
             href="/favorites"

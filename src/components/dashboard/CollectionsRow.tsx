@@ -58,7 +58,7 @@ export function CollectionsRow({ collections }: CollectionsRowProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {collections.map((col) => (
         <div
           key={col.id}
@@ -70,15 +70,15 @@ export function CollectionsRow({ collections }: CollectionsRowProps) {
           {/* Clickable card body → navigates to collection */}
           <Link
             href={`/collections/${col.id}`}
-            className="block p-4 hover:opacity-90 transition-opacity"
+            className="block p-5 hover:opacity-90 transition-opacity"
           >
             <div className="flex items-start justify-between gap-2 mb-2">
-              <h3 className="text-[15px] font-medium text-foreground group-hover:text-primary transition-colors pr-14">
+              <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors pr-14">
                 {col.name}
               </h3>
             </div>
 
-            <p className="text-[13px] text-foreground/55 line-clamp-1 mb-3">
+            <p className="text-sm text-foreground/55 line-clamp-1 mb-3">
               {col.description ?? "No description"}
             </p>
 
@@ -95,7 +95,7 @@ export function CollectionsRow({ collections }: CollectionsRowProps) {
                 ))}
               </div>
 
-              <span className="text-[13px] text-foreground/50 tabular-nums">
+              <span className="text-sm text-foreground/50 tabular-nums">
                 {col.itemCount} {col.itemCount === 1 ? "item" : "items"}
               </span>
             </div>

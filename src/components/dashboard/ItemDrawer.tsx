@@ -191,7 +191,7 @@ export function ItemDrawer({ itemId, onClose, collections = [], isPro = false }:
       <SheetContent
         side="right"
         showCloseButton
-        className="w-120! max-w-[90vw]! p-0 flex flex-col overflow-hidden gap-0"
+        className="w-[95vw] sm:w-[70vw] lg:w-[45vw] xl:w-[38vw] 2xl:w-[35vw] max-w-[95vw]! p-0 flex flex-col overflow-hidden gap-0"
       >
         {isLoading && <DrawerSkeleton />}
         {isError && (

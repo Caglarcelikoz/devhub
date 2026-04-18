@@ -24,6 +24,7 @@ export function Pagination({ currentPage, totalPages, buildHref }: PaginationPro
       {hasPrev ? (
         <Link
           href={buildHref(currentPage - 1)}
+          scroll={false}
           className="flex items-center justify-center w-8 h-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-foreground/8 transition-colors"
           aria-label="Previous page"
         >
@@ -48,6 +49,7 @@ export function Pagination({ currentPage, totalPages, buildHref }: PaginationPro
           <Link
             key={item}
             href={buildHref(item)}
+            scroll={false}
             className={cn(
               "flex items-center justify-center w-8 h-8 rounded-md text-sm transition-colors",
               item === currentPage
@@ -65,6 +67,7 @@ export function Pagination({ currentPage, totalPages, buildHref }: PaginationPro
       {hasNext ? (
         <Link
           href={buildHref(currentPage + 1)}
+          scroll={false}
           className="flex items-center justify-center w-8 h-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-foreground/8 transition-colors"
           aria-label="Next page"
         >

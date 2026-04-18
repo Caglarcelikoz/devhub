@@ -73,7 +73,7 @@ export default async function CollectionPage({ params, searchParams }: Collectio
         </div>
       ) : (
         <>
-          <ItemsGridClient items={items} columns="two" collections={collectionOptions} />
+          <ItemsGridClient items={items} columns="two" collections={collectionOptions} isPro={session.user.isPro} />
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

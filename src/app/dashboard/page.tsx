@@ -93,6 +93,7 @@ export default async function DashboardPage({
           <ItemsGridClient
             items={pinnedItems}
             collections={collectionOptions}
+            isPro={session.user.isPro}
           />
         </section>
       )}
@@ -103,7 +104,7 @@ export default async function DashboardPage({
           label="All Items"
           icon={<Clock className="h-4 w-4" />}
         />
-        <ItemsGridClient items={allItems} collections={collectionOptions} />
+        <ItemsGridClient items={allItems} collections={collectionOptions} isPro={session.user.isPro} />
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

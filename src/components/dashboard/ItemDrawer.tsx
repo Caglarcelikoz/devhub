@@ -20,6 +20,7 @@ interface ItemDrawerProps {
   itemId: string | null
   onClose: () => void
   collections?: CollectionOption[]
+  isPro?: boolean
 }
 
 async function fetchItem(id: string): Promise<ItemDetail> {
@@ -28,7 +29,7 @@ async function fetchItem(id: string): Promise<ItemDetail> {
   return res.json()
 }
 
-export function ItemDrawer({ itemId, onClose, collections = [] }: ItemDrawerProps) {
+export function ItemDrawer({ itemId, onClose, collections = [], isPro = false }: ItemDrawerProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
@@ -241,6 +242,7 @@ export function ItemDrawer({ itemId, onClose, collections = [] }: ItemDrawerProp
                 item={item}
                 copied={copied}
                 deleting={deleting}
+                isPro={isPro}
                 onCopy={handleCopy}
                 onEditStart={handleEditStart}
                 onDelete={handleDelete}

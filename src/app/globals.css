@@ -136,8 +136,8 @@
 /* ── Markdown preview ─────────────────────────────────────────────────────── */
 .markdown-preview {
   color: #cccccc;
-  font-size: 0.8125rem;
-  line-height: 1.7;
+  font-size: 1rem;
+  line-height: 1.75;
   word-break: break-word;
 }
 

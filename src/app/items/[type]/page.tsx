@@ -176,6 +176,7 @@ export default async function ItemsPage({
             layout={typeName === "file" ? "list" : "grid"}
             thumbnailUrls={thumbnailUrls}
             collections={collectionOptions}
+            isPro={session.user.isPro}
           />
           <Pagination
             currentPage={currentPage}

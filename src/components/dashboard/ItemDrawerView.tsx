@@ -37,6 +37,7 @@ interface ItemDrawerViewProps {
   item: ItemDetail;
   copied: boolean;
   deleting: boolean;
+  isPro?: boolean;
   onCopy: () => void;
   onEditStart: () => void;
   onDelete: () => void;
@@ -48,6 +49,7 @@ export function ItemDrawerView({
   item,
   copied,
   deleting,
+  isPro = false,
   onCopy,
   onEditStart,
   onDelete,
@@ -153,6 +155,11 @@ export function ItemDrawerView({
                 language={item.language ?? ""}
                 readOnly
                 minHeight={300}
+                showExplain
+                isPro={isPro}
+                itemId={item.id}
+                itemTitle={item.title}
+                itemType={itemType.name as 'snippet' | 'command'}
               />
             ) : showMarkdown ? (
               <MarkdownEditor value={item.content ?? ""} readOnly />

@@ -27,7 +27,7 @@ export function RevealWrapper({ children, className }: { children: React.ReactNo
   return (
     <div
       ref={ref}
-      className={`opacity-0 translate-y-6 transition-all duration-700 ease-out ${className ?? ''}`}
+      className={`opacity-10 translate-y-3 transition-all duration-700 ease-out ${className ?? ''}`}
     >
       {children}
     </div>

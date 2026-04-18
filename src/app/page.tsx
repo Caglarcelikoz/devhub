@@ -1,6 +1,7 @@
 import { Navbar } from './(home)/_components/Navbar';
 import { HeroSection } from './(home)/_components/HeroSection';
 import { FeaturesSection } from './(home)/_components/FeaturesSection';
+import { HowItWorksSection } from './(home)/_components/HowItWorksSection';
 import { AiSection } from './(home)/_components/AiSection';
 import { PricingSection } from './(home)/_components/PricingSection';
 import { CtaSection } from './(home)/_components/CtaSection';
@@ -15,6 +16,9 @@ export default function HomePage() {
         <HeroSection />
         <RevealWrapper>
           <FeaturesSection />
+        </RevealWrapper>
+        <RevealWrapper>
+          <HowItWorksSection />
         </RevealWrapper>
         <RevealWrapper>
           <AiSection />

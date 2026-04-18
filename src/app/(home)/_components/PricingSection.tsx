@@ -2,7 +2,7 @@ import { PricingToggle } from './PricingToggle';
 
 export function PricingSection() {
   return (
-    <section id="pricing" className="py-20 px-4 sm:px-6">
+    <section id="pricing" className="py-24 px-4 sm:px-6 border-t border-white/6">
       <div className="max-w-6xl mx-auto">
 
         <div className="text-center mb-12">

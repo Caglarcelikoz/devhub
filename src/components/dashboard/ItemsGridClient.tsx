@@ -17,9 +17,10 @@ interface ItemsGridClientProps {
   emptyMessage?: string
   emptyActionLabel?: string
   onEmptyAction?: () => void
+  hideTypeBadge?: boolean
 }
 
-export function ItemsGridClient({ items, columns, layout = 'grid', thumbnailUrls, collections = [], isPro = false, emptyMessage, emptyActionLabel, onEmptyAction }: ItemsGridClientProps) {
+export function ItemsGridClient({ items, columns, layout = 'grid', thumbnailUrls, collections = [], isPro = false, emptyMessage, emptyActionLabel, onEmptyAction, hideTypeBadge = false }: ItemsGridClientProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   return (
@@ -35,6 +36,7 @@ export function ItemsGridClient({ items, columns, layout = 'grid', thumbnailUrls
           emptyMessage={emptyMessage}
           emptyActionLabel={emptyActionLabel}
           onEmptyAction={onEmptyAction}
+          hideTypeBadge={hideTypeBadge}
         />
       )}
       <ItemDrawer

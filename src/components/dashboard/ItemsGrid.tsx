@@ -17,9 +17,10 @@ interface ItemsGridProps {
   emptyMessage?: string;
   onEmptyAction?: () => void;
   emptyActionLabel?: string;
+  hideTypeBadge?: boolean;
 }
 
-export function ItemsGrid({ items, columns = "auto", onItemClick, thumbnailUrls, emptyMessage = "No items yet.", onEmptyAction, emptyActionLabel }: ItemsGridProps) {
+export function ItemsGrid({ items, columns = "auto", onItemClick, thumbnailUrls, emptyMessage = "No items yet.", onEmptyAction, emptyActionLabel, hideTypeBadge = false }: ItemsGridProps) {
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
@@ -50,14 +51,14 @@ export function ItemsGrid({ items, columns = "auto", onItemClick, thumbnailUrls,
         item.itemType.name === "image" ? (
           <ImageThumbnailCard key={item.id} item={item} onItemClick={onItemClick} thumbnailUrl={thumbnailUrls?.[item.id]} />
         ) : (
-          <ItemCard key={item.id} item={item} onItemClick={onItemClick} />
+          <ItemCard key={item.id} item={item} onItemClick={onItemClick} hideTypeBadge={hideTypeBadge} />
         )
       )}
     </div>
   );
 }
 
-function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id: string) => void }) {
+function ItemCard({ item, onItemClick, hideTypeBadge }: { item: ItemWithMeta; onItemClick?: (id: string) => void; hideTypeBadge?: boolean }) {
   const router = useRouter();
   const { itemType } = item;
   const timeAgo = formatTimeAgo(item.updatedAt);
@@ -120,15 +121,17 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
 
       {/* Header row */}
       <div className="flex items-start justify-between gap-2 pt-1">
-        <span
-          className="inline-flex items-center px-2.5 py-1 rounded text-sm font-medium"
-          style={{
-            backgroundColor: `${itemType.color}18`,
-            color: itemType.color,
-          }}
-        >
-          {itemType.name}
-        </span>
+        {!hideTypeBadge && (
+          <span
+            className="inline-flex items-center px-2.5 py-1 rounded text-sm font-medium"
+            style={{
+              backgroundColor: `${itemType.color}18`,
+              color: itemType.color,
+            }}
+          >
+            {itemType.name}
+          </span>
+        )}
         <div className="flex items-center gap-1.5 text-muted-foreground/60 shrink-0">
           <button
             onClick={handleToggleFavorite}

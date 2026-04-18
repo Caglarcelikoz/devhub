@@ -126,6 +126,7 @@ export function TopBar({
           <Link
             href="/favorites"
             aria-label="Favorites"
+            title="Favorites"
             className="hidden sm:inline-flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             <Star className="h-4 w-4" />
@@ -135,6 +136,8 @@ export function TopBar({
           <Button
             variant="ghost"
             size="icon"
+            title="Grid view"
+            aria-label="Grid view"
             className="hidden sm:inline-flex h-8 w-8"
           >
             <LayoutGrid className="h-4 w-4" />
@@ -142,6 +145,8 @@ export function TopBar({
           <Button
             variant="ghost"
             size="icon"
+            title="List view"
+            aria-label="List view"
             className="hidden sm:inline-flex h-8 w-8"
           >
             <List className="h-4 w-4" />

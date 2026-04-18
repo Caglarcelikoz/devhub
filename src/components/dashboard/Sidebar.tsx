@@ -11,7 +11,6 @@ import {
   Image,
   Link as LinkIcon,
   Star,
-  Clock,
   PanelLeftClose,
   PanelLeftOpen,
   LogOut,
@@ -113,17 +112,10 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
           pathname={pathname}
           collapsed={collapsed}
         />
-        <NavItem
-          icon={Clock}
-          label="Recent"
-          href="/dashboard/recent"
-          pathname={pathname}
-          collapsed={collapsed}
-        />
 
         {/* Types */}
         {!collapsed && (
-          <p className="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-foreground/50">
+          <p className="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-foreground/70">
             Types
           </p>
         )}
@@ -150,7 +142,7 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
 
         {/* Collections */}
         {!collapsed && (
-          <p className="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-foreground/50">
+          <p className="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-foreground/70">
             Collections
           </p>
         )}
@@ -281,17 +273,24 @@ interface NavItemProps {
 
 function NavItem({ icon: Icon, iconColor, label, href, pathname, collapsed, count, dotColor, isPro }: NavItemProps) {
   const isActive = pathname === href;
+  const activeColor = iconColor ?? "hsl(var(--primary))";
 
   return (
     <Link
       href={href}
       title={collapsed ? label : undefined}
       className={cn(
-        "flex items-center gap-3 px-3 py-2 mx-1 rounded-md transition-colors",
+        "flex items-center gap-3 py-2 mx-1 rounded-md transition-colors",
         "text-foreground/60 hover:text-foreground hover:bg-sidebar-accent",
-        isActive && "bg-sidebar-accent text-foreground",
-        collapsed && "justify-center"
+        isActive
+          ? "text-foreground font-medium border-l-2 pl-2.5 pr-3"
+          : "px-3",
+        collapsed && "justify-center px-0 border-l-0"
       )}
+      style={isActive && !collapsed ? {
+        borderLeftColor: activeColor,
+        backgroundColor: `${activeColor}15`,
+      } : undefined}
     >
       {dotColor ? (
         <span

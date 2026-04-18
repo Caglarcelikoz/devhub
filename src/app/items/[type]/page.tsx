@@ -177,6 +177,7 @@ export default async function ItemsPage({
             thumbnailUrls={thumbnailUrls}
             collections={collectionOptions}
             isPro={session.user.isPro}
+            hideTypeBadge
           />
           <Pagination
             currentPage={currentPage}

@@ -105,7 +105,7 @@ export function BillingSettings({
           {loadingPlan === "monthly" && (
             <Loader2 className="mr-2 h-3 w-3 animate-spin" />
           )}
-          Upgrade $8/mo
+          Upgrade €8/mo
         </Button>
         <Button
           variant="outline"
@@ -117,7 +117,7 @@ export function BillingSettings({
           {loadingPlan === "yearly" && (
             <Loader2 className="mr-2 h-3 w-3 animate-spin" />
           )}
-          Upgrade $72/yr{" "}
+          Upgrade €72/yr{" "}
           <span className="ml-1 text-xs text-muted-foreground">(save 25%)</span>
         </Button>
       </div>

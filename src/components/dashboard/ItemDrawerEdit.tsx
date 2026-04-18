@@ -4,6 +4,8 @@ import { Check, X, Calendar } from 'lucide-react'
 import { CodeEditor } from '@/components/ui/code-editor'
 import { MarkdownEditor } from '@/components/ui/markdown-editor'
 import { CollectionSelector } from '@/components/ui/collection-selector'
+import { TagsField } from '@/components/ui/tags-field'
+import { useUsageLimits } from '@/context/UsageLimitsContext'
 import type { ItemDetail } from '@/lib/db/items'
 import type { CollectionOption } from '@/lib/db/collections'
 
@@ -54,6 +56,7 @@ export function ItemDrawerEdit({
   onSave,
   onCancel,
 }: ItemDrawerEditProps) {
+  const { isPro } = useUsageLimits()
   const { itemType } = item
   const showContent = TEXT_TYPES.includes(itemType.name)
   const showLanguage = LANGUAGE_TYPES.includes(itemType.name)
@@ -126,15 +129,14 @@ export function ItemDrawerEdit({
           </EditSection>
         )}
 
-        <EditSection label="Tags">
-          <input
-            type="text"
-            value={tagsInput}
-            onChange={(e) => onTagsInputChange(e.target.value)}
-            placeholder="react, hooks, auth (comma-separated)"
-            className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-ring"
-          />
-        </EditSection>
+        <TagsField
+          value={tagsInput}
+          onChange={onTagsInputChange}
+          isPro={isPro}
+          title={title}
+          content={content || undefined}
+          itemType={item.itemType.name}
+        />
 
         <EditSection label="Collections">
           <CollectionSelector

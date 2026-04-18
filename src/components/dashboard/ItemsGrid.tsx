@@ -199,7 +199,7 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
       {/* Tags + timestamp */}
       <div className="flex items-center justify-between gap-2 mt-auto">
         <div className="flex flex-wrap gap-1.5 min-w-0">
-          {item.tags.slice(0, 3).map((tag) => (
+          {item.tags.map((tag) => (
             <Badge
               key={tag}
               variant="secondary"

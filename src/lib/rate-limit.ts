@@ -25,6 +25,7 @@ let registerLimiter: Ratelimit | null | undefined = undefined
 let forgotPasswordLimiter: Ratelimit | null | undefined = undefined
 let resetPasswordLimiter: Ratelimit | null | undefined = undefined
 let resendVerificationLimiter: Ratelimit | null | undefined = undefined
+let aiLimiter: Ratelimit | null | undefined = undefined
 
 function getLoginLimiter() {
   if (loginLimiter === undefined) loginLimiter = makeRatelimit(5, '15 m')
@@ -45,6 +46,10 @@ function getResetPasswordLimiter() {
 function getResendVerificationLimiter() {
   if (resendVerificationLimiter === undefined) resendVerificationLimiter = makeRatelimit(3, '15 m')
   return resendVerificationLimiter
+}
+function getAiLimiter() {
+  if (aiLimiter === undefined) aiLimiter = makeRatelimit(20, '1 h')
+  return aiLimiter
 }
 
 export function getIP(request: NextRequest | Request): string {
@@ -121,4 +126,25 @@ export async function checkResendVerificationRateLimit(
 ): Promise<RateLimitResult> {
   const ip = getIP(request)
   return checkLimit(getResendVerificationLimiter(), `resend-verification:${ip}:${email}`)
+}
+
+export async function checkAiRateLimit(userId: string): Promise<{ limited: boolean; error?: string }> {
+  const limiter = getAiLimiter()
+  if (!limiter) return { limited: false }
+
+  try {
+    const { success, reset } = await limiter.limit(`ai:${userId}`)
+    if (success) return { limited: false }
+
+    const retryAfterSeconds = Math.ceil((reset - Date.now()) / 1000)
+    const minutes = Math.ceil(retryAfterSeconds / 60)
+    const message =
+      retryAfterSeconds <= 60
+        ? `AI rate limit reached. Try again in ${retryAfterSeconds} seconds.`
+        : `AI rate limit reached. Try again in ${minutes} minute${minutes === 1 ? '' : 's'}.`
+
+    return { limited: true, error: message }
+  } catch {
+    return { limited: false }
+  }
 }

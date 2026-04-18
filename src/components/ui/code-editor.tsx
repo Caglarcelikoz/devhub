@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
-import Editor, { useMonaco } from '@monaco-editor/react'
+import { useState, useCallback } from 'react'
+import Editor from '@monaco-editor/react'
 import { Copy, Check } from 'lucide-react'
 import { useEditorPreferences } from '@/context/EditorPreferencesContext'
 
@@ -94,19 +94,18 @@ interface CodeEditorProps {
   minHeight?: number
 }
 
+import type { Monaco } from '@monaco-editor/react'
+
+function registerThemes(monaco: Monaco) {
+  monaco.editor.defineTheme('monokai', MONOKAI_THEME)
+  monaco.editor.defineTheme('github-dark', GITHUB_DARK_THEME)
+}
+
 export function CodeEditor({ value, onChange, language = '', onLanguageChange, readOnly = false, minHeight = MIN_HEIGHT }: CodeEditorProps) {
   const [copied, setCopied] = useState(false)
-  const monaco = useMonaco()
   const { preferences } = useEditorPreferences()
 
   const normalizedLanguage = normalizeLanguage(language)
-
-  // Register custom themes once Monaco is loaded
-  useEffect(() => {
-    if (!monaco) return
-    monaco.editor.defineTheme('monokai', MONOKAI_THEME)
-    monaco.editor.defineTheme('github-dark', GITHUB_DARK_THEME)
-  }, [monaco])
 
   // Fluid height: grow with content, cap at MAX_HEIGHT
   const lineCount = value ? value.split('\n').length : 1
@@ -202,6 +201,7 @@ export function CodeEditor({ value, onChange, language = '', onLanguageChange, r
         value={value}
         language={normalizedLanguage}
         theme={preferences.theme}
+        beforeMount={registerThemes}
         onChange={readOnly ? undefined : handleChange}
         loading={<EditorLoader bg={bg} />}
         height={editorHeight}

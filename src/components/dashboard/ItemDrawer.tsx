@@ -98,6 +98,8 @@ export function ItemDrawer({ itemId, onClose, collections = [] }: ItemDrawerProp
       return
     }
 
+    // Update cache immediately so the view reflects the new data without waiting for router.refresh()
+    queryClient.setQueryData<ItemDetail>(['item', itemId], result.data)
     setIsEditing(false)
     toast.success('Item updated')
     router.refresh()

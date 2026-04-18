@@ -26,6 +26,8 @@ import type { UploadedFile } from '@/components/ui/file-upload'
 import { createItem } from '@/actions/items'
 import { CollectionSelector } from '@/components/ui/collection-selector'
 import type { CollectionOption } from '@/lib/db/collections'
+import { TagsField } from '@/components/ui/tags-field'
+import { useUsageLimits } from '@/context/UsageLimitsContext'
 
 export type CreatableType = 'snippet' | 'prompt' | 'command' | 'note' | 'link' | 'file' | 'image'
 
@@ -53,6 +55,7 @@ interface CreateItemDialogProps {
 
 export function CreateItemDialog({ open, onOpenChange, defaultType, collections = [] }: CreateItemDialogProps) {
   const router = useRouter()
+  const { isPro } = useUsageLimits()
 
   const [itemTypeName, setItemTypeName] = useState<CreatableType>(defaultType ?? 'snippet')
   const [title, setTitle] = useState('')
@@ -236,16 +239,14 @@ export function CreateItemDialog({ open, onOpenChange, defaultType, collections 
           )}
 
           {/* Tags */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-foreground/40">
-              Tags
-            </label>
-            <Input
-              value={tagsInput}
-              onChange={(e) => setTagsInput(e.target.value)}
-              placeholder="react, hooks, auth (comma-separated)"
-            />
-          </div>
+          <TagsField
+            value={tagsInput}
+            onChange={setTagsInput}
+            isPro={isPro}
+            title={title}
+            content={content || undefined}
+            itemType={itemTypeName}
+          />
 
           {/* Collections */}
           <div className="space-y-1.5">

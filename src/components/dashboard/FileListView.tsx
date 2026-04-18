@@ -55,12 +55,12 @@ function FileListRow({
 
       {/* Main info */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-foreground leading-snug truncate">
+        <p className="text-[15px] font-medium text-foreground leading-snug truncate">
           {item.title}
         </p>
         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
           {item.fileName && (
-            <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+            <span className="text-sm text-muted-foreground truncate max-w-[200px]">
               {item.fileName}
             </span>
           )}
@@ -68,7 +68,7 @@ function FileListRow({
             <span className="text-xs text-muted-foreground/50">·</span>
           )}
           {item.fileSize != null && (
-            <span className="text-xs text-muted-foreground shrink-0">
+            <span className="text-sm text-muted-foreground shrink-0">
               {formatFileSize(item.fileSize)}
             </span>
           )}
@@ -76,7 +76,7 @@ function FileListRow({
       </div>
 
       {/* Date — hidden on mobile, shown on sm+ */}
-      <span className="hidden sm:block text-xs text-foreground/35 tabular-nums shrink-0">
+      <span className="hidden sm:block text-[13px] text-foreground/35 tabular-nums shrink-0">
         {formatDate(item.updatedAt)}
       </span>
 

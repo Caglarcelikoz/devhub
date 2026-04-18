@@ -48,7 +48,7 @@ export default async function SettingsPage() {
           {/* Billing */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm font-semibold uppercase tracking-wider text-foreground/50">
+              <CardTitle className="text-[11px] font-semibold uppercase tracking-wider text-foreground/50">
                 Billing
               </CardTitle>
             </CardHeader>
@@ -64,7 +64,7 @@ export default async function SettingsPage() {
           {/* Editor Preferences */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm font-semibold uppercase tracking-wider text-foreground/50">
+              <CardTitle className="text-[11px] font-semibold uppercase tracking-wider text-foreground/50">
                 Editor preferences
               </CardTitle>
             </CardHeader>
@@ -80,7 +80,7 @@ export default async function SettingsPage() {
           {hasPassword && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-semibold uppercase tracking-wider text-foreground/50">
+                <CardTitle className="text-[11px] font-semibold uppercase tracking-wider text-foreground/50">
                   Change password
                 </CardTitle>
               </CardHeader>
@@ -93,12 +93,12 @@ export default async function SettingsPage() {
           {/* Danger Zone */}
           <Card className="border-destructive/30">
             <CardHeader>
-              <CardTitle className="text-sm font-semibold uppercase tracking-wider text-destructive/70">
+              <CardTitle className="text-[11px] font-semibold uppercase tracking-wider text-destructive/70">
                 Danger zone
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-[15px] text-muted-foreground">
                 Permanently delete your account and all associated data. This
                 cannot be undone.
               </p>

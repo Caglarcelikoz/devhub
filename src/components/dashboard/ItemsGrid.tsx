@@ -23,7 +23,7 @@ export function ItemsGrid({ items, columns = "auto", onItemClick, thumbnailUrls,
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
-        <p className="text-sm text-foreground/40">{emptyMessage}</p>
+        <p className="text-base text-foreground/40">{emptyMessage}</p>
         {onEmptyAction && emptyActionLabel && (
           <button
             type="button"
@@ -121,7 +121,7 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
       {/* Header row */}
       <div className="flex items-start justify-between gap-2 pt-1">
         <span
-          className="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
+          className="inline-flex items-center px-2 py-1 rounded text-[11px] font-medium"
           style={{
             backgroundColor: `${itemType.color}18`,
             color: itemType.color,
@@ -190,7 +190,7 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
           className="flex min-w-0"
           style={{ borderLeft: `2px solid ${itemType.color}50` }}
         >
-          <pre className="text-xs text-foreground/50 overflow-hidden line-clamp-3 font-mono leading-relaxed whitespace-pre-wrap pl-2.5">
+          <pre className="text-[13px] text-foreground/50 overflow-hidden line-clamp-3 font-mono leading-relaxed whitespace-pre-wrap pl-2.5">
             {preview}
           </pre>
         </div>
@@ -209,7 +209,7 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
             </Badge>
           ))}
         </div>
-        <span className="text-xs text-foreground/35 shrink-0 tabular-nums">
+        <span className="text-[11px] text-foreground/35 shrink-0 tabular-nums">
           {timeAgo}
         </span>
       </div>

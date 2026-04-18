@@ -103,7 +103,7 @@ export function ItemDrawerView({
           <a
             href={`/api/items/${item.id}/download`}
             download={item.fileName ?? undefined}
-            className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-accent"
+            className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-accent"
             title="Download"
           >
             <Download className="h-4 w-4" />
@@ -112,7 +112,7 @@ export function ItemDrawerView({
         )}
         <div className="ml-auto shrink-0">
           <AlertDialog>
-            <AlertDialogTrigger className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+            <AlertDialogTrigger className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors text-muted-foreground hover:text-destructive hover:bg-destructive/10">
               <Trash2 className="h-4 w-4" />
               <span className="hidden sm:inline">Delete</span>
             </AlertDialogTrigger>
@@ -143,7 +143,7 @@ export function ItemDrawerView({
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
         {item.description && (
           <Section label="Description">
-            <p className="text-sm text-foreground/70 leading-relaxed">
+            <p className="text-[15px] text-foreground/70 leading-relaxed">
               {item.description}
             </p>
           </Section>
@@ -182,7 +182,7 @@ export function ItemDrawerView({
                   backgroundColor: `${itemType.color}06`,
                 }}
               >
-                <pre className="text-xs text-foreground/80 font-mono leading-relaxed whitespace-pre-wrap wrap-break-word">
+                <pre className="text-sm text-foreground/80 font-mono leading-relaxed whitespace-pre-wrap wrap-break-word">
                   {preview}
                 </pre>
               </div>
@@ -209,11 +209,11 @@ export function ItemDrawerView({
               >
                 <File className="h-5 w-5 shrink-0 text-muted-foreground" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
+                  <p className="text-[15px] font-medium truncate">
                     {item.fileName ?? "File"}
                   </p>
                   {item.fileSize && (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       {formatBytes(item.fileSize)}
                     </p>
                   )}
@@ -230,7 +230,7 @@ export function ItemDrawerView({
                 <Badge
                   key={tag}
                   variant="secondary"
-                  className="text-xs px-2 py-0.5 h-auto font-normal rounded-md"
+                  className="text-sm px-2 py-0.5 h-auto font-normal rounded-md"
                 >
                   {tag}
                 </Badge>
@@ -249,7 +249,7 @@ export function ItemDrawerView({
                 <Badge
                   key={col.id}
                   variant="outline"
-                  className="text-xs px-2 py-0.5 h-auto font-normal rounded-md"
+                  className="text-sm px-2 py-0.5 h-auto font-normal rounded-md"
                 >
                   {col.name}
                 </Badge>
@@ -259,7 +259,7 @@ export function ItemDrawerView({
         )}
 
         <Section label="Details" icon={<Calendar className="h-3.5 w-3.5" />}>
-          <div className="space-y-1.5 text-sm">
+          <div className="space-y-1.5 text-[15px]">
             <div className="flex justify-between">
               <span className="text-foreground/45">Created</span>
               <span className="text-foreground/70 tabular-nums">
@@ -292,7 +292,7 @@ function Section({
     <div className="space-y-2">
       <div className="flex items-center gap-1.5 text-foreground/40">
         {icon}
-        <span className="text-xs font-semibold uppercase tracking-wider">{label}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-wider">{label}</span>
       </div>
       {children}
     </div>
@@ -312,7 +312,7 @@ function ActionButton({
     <button
       onClick={onClick}
       title={label}
-      className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-accent"
+      className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-accent"
     >
       {icon}
       <span className="hidden sm:inline">{label}</span>

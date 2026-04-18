@@ -71,7 +71,7 @@ export function BillingSettings({
           <Badge className="bg-amber-500/15 text-amber-500 border-amber-500/20 hover:bg-amber-500/15">
             Pro
           </Badge>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-[15px] text-muted-foreground">
             Your plan is active
           </span>
         </div>
@@ -92,7 +92,7 @@ export function BillingSettings({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-[15px] text-muted-foreground">
         {itemCount}/50 items · {collectionCount}/3 collections
       </p>
       <div className="flex flex-col sm:flex-row gap-2">

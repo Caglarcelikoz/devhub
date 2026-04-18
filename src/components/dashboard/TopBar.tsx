@@ -99,7 +99,7 @@ export function TopBar({
           <button
             type="button"
             onClick={() => setPaletteOpen(true)}
-            className="w-full h-9 pl-9 pr-3 text-sm text-left text-muted-foreground bg-muted rounded-md border border-transparent hover:border-border transition-colors flex items-center justify-between"
+            className="w-full h-9 pl-9 pr-3 text-[15px] text-left text-muted-foreground bg-muted rounded-md border border-transparent hover:border-border transition-colors flex items-center justify-between"
           >
             <span>Search items...</span>
             <kbd className="hidden sm:inline-flex items-center gap-0.5 text-xs text-muted-foreground/60 font-mono">
@@ -114,7 +114,7 @@ export function TopBar({
             <Button
               variant="ghost"
               size="sm"
-              className="hidden sm:inline-flex h-8 px-3 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+              className="hidden sm:inline-flex h-8 px-3 gap-1.5 text-sm text-muted-foreground hover:text-foreground"
               render={<Link href="/upgrade" />}
             >
               <Sparkles className="h-3.5 w-3.5" />

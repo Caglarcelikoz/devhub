@@ -78,7 +78,7 @@ export function CollectionsRow({ collections }: CollectionsRowProps) {
               </h3>
             </div>
 
-            <p className="text-sm text-foreground/55 line-clamp-1 mb-3">
+            <p className="text-[13px] text-foreground/55 line-clamp-1 mb-3">
               {col.description ?? "No description"}
             </p>
 
@@ -95,7 +95,7 @@ export function CollectionsRow({ collections }: CollectionsRowProps) {
                 ))}
               </div>
 
-              <span className="text-sm text-foreground/50 tabular-nums">
+              <span className="text-[13px] text-foreground/50 tabular-nums">
                 {col.itemCount} {col.itemCount === 1 ? "item" : "items"}
               </span>
             </div>

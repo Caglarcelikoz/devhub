@@ -70,13 +70,13 @@ export default async function DashboardPage({
       {/* Collections */}
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-foreground/50">
+          <h2 className="text-[11px] font-semibold uppercase tracking-wider text-foreground/50">
             Collections
           </h2>
           {hasMoreCollections && (
             <Link
               href="/collections"
-              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-border text-foreground/70 hover:text-foreground hover:bg-foreground/5 transition-colors"
+              className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-md border border-border text-foreground/70 hover:text-foreground hover:bg-foreground/5 transition-colors"
             >
               Show all {allCollections.length}
               <ChevronRight className="h-3.5 w-3.5" />
@@ -125,7 +125,7 @@ function SectionHeading({
   return (
     <div className="flex items-center gap-2 mb-4">
       {icon && <span className="text-foreground/40">{icon}</span>}
-      <h2 className="text-xs font-semibold uppercase tracking-wider text-foreground/50">
+      <h2 className="text-[11px] font-semibold uppercase tracking-wider text-foreground/50">
         {label}
       </h2>
     </div>

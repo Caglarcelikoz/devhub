@@ -27,7 +27,7 @@ export function StatsCards({ stats }: { stats: Stats }) {
           </div>
           <div>
             <p className="text-2xl font-semibold text-foreground leading-none">{value}</p>
-            <p className="text-sm text-muted-foreground mt-1">{label}</p>
+            <p className="text-[13px] text-muted-foreground mt-1">{label}</p>
           </div>
         </div>
       ))}

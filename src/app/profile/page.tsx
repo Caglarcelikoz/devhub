@@ -56,7 +56,7 @@ export default async function ProfilePage() {
       {/* Account */}
       <Card className="flex flex-col">
         <CardHeader>
-          <CardTitle className="text-sm font-semibold uppercase tracking-wider text-foreground/50">
+          <CardTitle className="text-[11px] font-semibold uppercase tracking-wider text-foreground/50">
             Account
           </CardTitle>
         </CardHeader>
@@ -65,15 +65,15 @@ export default async function ProfilePage() {
             <UserAvatar name={user.name} image={user.image} size={56} />
             <div>
               <p className="font-semibold text-foreground">{user.name ?? "No name"}</p>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
+              <p className="text-[15px] text-muted-foreground">{user.email}</p>
             </div>
           </div>
           <Separator />
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-[15px]">
             <span className="text-muted-foreground">Member since</span>
             <span className="text-foreground">{joinedDate}</span>
           </div>
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-[15px]">
             <span className="text-muted-foreground">Sign-in method</span>
             <span className="text-foreground">{hasPassword ? "Email / Password" : "GitHub OAuth"}</span>
           </div>
@@ -83,7 +83,7 @@ export default async function ProfilePage() {
       {/* Usage Stats */}
       <Card className="flex flex-col">
         <CardHeader>
-          <CardTitle className="text-sm font-semibold uppercase tracking-wider text-foreground/50">
+          <CardTitle className="text-[11px] font-semibold uppercase tracking-wider text-foreground/50">
             Usage
           </CardTitle>
         </CardHeader>
@@ -91,21 +91,21 @@ export default async function ProfilePage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="rounded-lg border border-border bg-muted/30 p-4 text-center">
               <p className="text-2xl font-bold text-foreground">{totalItems}</p>
-              <p className="text-xs text-muted-foreground mt-1">Total items</p>
+              <p className="text-sm text-muted-foreground mt-1">Total items</p>
             </div>
             <div className="rounded-lg border border-border bg-muted/30 p-4 text-center">
               <p className="text-2xl font-bold text-foreground">{totalCollections}</p>
-              <p className="text-xs text-muted-foreground mt-1">Collections</p>
+              <p className="text-sm text-muted-foreground mt-1">Collections</p>
             </div>
           </div>
           <Separator />
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-foreground/50">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-foreground/50">
               By type
             </p>
             <div className="space-y-2">
               {itemTypeCounts.map((type) => (
-                <div key={type.id} className="flex items-center justify-between text-sm">
+                <div key={type.id} className="flex items-center justify-between text-[15px]">
                   <div className="flex items-center gap-2">
                     <span
                       className="h-2 w-2 rounded-full shrink-0"

@@ -123,7 +123,7 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
 
         {/* Types */}
         {!collapsed && (
-          <p className="px-3 pt-5 pb-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/50">
+          <p className="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-foreground/50">
             Types
           </p>
         )}
@@ -150,7 +150,7 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
 
         {/* Collections */}
         {!collapsed && (
-          <p className="px-3 pt-5 pb-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/50">
+          <p className="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-foreground/50">
             Collections
           </p>
         )}
@@ -160,7 +160,7 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
         {favoriteCollections.length > 0 && (
           <>
             {!collapsed && (
-              <p className="px-3 pb-1 text-xs text-foreground/40">Favorites</p>
+              <p className="px-3 pb-1 text-[11px] text-foreground/40">Favorites</p>
             )}
             {favoriteCollections.map((col) => (
               <NavItem
@@ -179,7 +179,7 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
 
         {/* Recent collections */}
         {!collapsed && recentCollections.length > 0 && (
-          <p className="px-3 pt-3 pb-1 text-xs text-foreground/40">Recent</p>
+          <p className="px-3 pt-3 pb-1 text-[11px] text-foreground/40">Recent</p>
         )}
         {recentCollections.map((col) => {
           const dominantColor = col.dominantColor;
@@ -202,7 +202,7 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
         {!collapsed && (
           <Link
             href="/collections"
-            className="flex items-center px-3 py-1.5 mx-1 mt-1 text-xs text-foreground/40 hover:text-foreground/70 transition-colors"
+            className="flex items-center px-3 py-1.5 mx-1 mt-1 text-sm text-foreground/40 hover:text-foreground/70 transition-colors"
           >
             View all collections
           </Link>
@@ -228,7 +228,7 @@ export function Sidebar({ collapsed, onToggle, itemTypes, collections, user }: S
               <p className="text-sm font-medium text-foreground truncate">
                 {user?.name ?? "User"}
               </p>
-              <p className="text-xs text-foreground/50 truncate">
+              <p className="text-[11px] text-foreground/50 truncate">
                 {user?.email ?? ""}
               </p>
             </div>
@@ -306,14 +306,14 @@ function NavItem({ icon: Icon, iconColor, label, href, pathname, collapsed, coun
       )}
       {!collapsed && (
         <>
-          <span className="flex-1 truncate text-sm">{label}</span>
+          <span className="flex-1 truncate text-[15px]">{label}</span>
           {isPro && (
             <Badge variant="secondary" className="h-4 px-1 text-[10px] font-semibold tracking-wide text-foreground/50">
               PRO
             </Badge>
           )}
           {count !== undefined && count > 0 && (
-            <span className="text-xs text-foreground/40 tabular-nums">{count}</span>
+            <span className="text-[11px] text-foreground/40 tabular-nums">{count}</span>
           )}
         </>
       )}

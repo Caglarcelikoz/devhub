@@ -99,10 +99,10 @@ export function FavoritesListClient({
         <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-foreground/8">
           <Star className="w-5 h-5 text-foreground/40" />
         </div>
-        <p className="text-sm text-foreground/40 font-mono">
+        <p className="text-base text-foreground/40 font-mono">
           No favorites yet.
         </p>
-        <p className="text-xs text-foreground/30 font-mono">
+        <p className="text-sm text-foreground/30 font-mono">
           Star items or collections to find them here quickly.
         </p>
       </div>
@@ -114,11 +114,11 @@ export function FavoritesListClient({
       <div className="space-y-8">
         {/* Sort control */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-foreground/40">sort</span>
+          <span className="text-sm font-mono text-foreground/40">sort</span>
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="text-xs font-mono bg-transparent border border-border/50 rounded px-2 py-1 text-foreground/70 hover:border-border transition-colors outline-none cursor-pointer"
+            className="text-sm font-mono bg-transparent border border-border/50 rounded px-2 py-1 text-foreground/70 hover:border-border transition-colors outline-none cursor-pointer"
           >
             {SORT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -132,10 +132,10 @@ export function FavoritesListClient({
         {hasItems && (
           <section>
             <div className="flex items-center gap-2 mb-2 pb-1 border-b border-border/50">
-              <span className="text-xs font-mono text-foreground/50 uppercase tracking-widest">
+              <span className="text-[11px] font-mono text-foreground/50 uppercase tracking-widest">
                 Items
               </span>
-              <span className="text-xs font-mono text-foreground/30">
+              <span className="text-[11px] font-mono text-foreground/30">
                 ({items.length})
               </span>
             </div>
@@ -153,12 +153,12 @@ export function FavoritesListClient({
                       style={{ backgroundColor: item.itemType.color }}
                     />
                     {/* Title */}
-                    <span className="flex-1 text-sm font-mono text-foreground truncate">
+                    <span className="flex-1 text-[15px] font-mono text-foreground truncate">
                       {item.title}
                     </span>
                     {/* Type badge */}
                     <span
-                      className="shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded"
+                      className="shrink-0 text-[11px] font-mono px-1.5 py-0.5 rounded"
                       style={{
                         backgroundColor: `${item.itemType.color}22`,
                         color: item.itemType.color,
@@ -167,7 +167,7 @@ export function FavoritesListClient({
                       {item.itemType.name}
                     </span>
                     {/* Date */}
-                    <span className="shrink-0 text-xs font-mono text-foreground/35 w-16 text-right">
+                    <span className="shrink-0 text-[11px] font-mono text-foreground/35 w-16 text-right">
                       {formatTimeAgo(item.updatedAt)}
                     </span>
                   </button>
@@ -181,10 +181,10 @@ export function FavoritesListClient({
         {hasCollections && (
           <section>
             <div className="flex items-center gap-2 mb-2 pb-1 border-b border-border/50">
-              <span className="text-xs font-mono text-foreground/50 uppercase tracking-widest">
+              <span className="text-[11px] font-mono text-foreground/50 uppercase tracking-widest">
                 Collections
               </span>
-              <span className="text-xs font-mono text-foreground/30">
+              <span className="text-[11px] font-mono text-foreground/30">
                 ({collections.length})
               </span>
             </div>
@@ -199,15 +199,15 @@ export function FavoritesListClient({
                     {/* Folder icon */}
                     <FolderOpen className="shrink-0 w-3 h-3 text-foreground/40" />
                     {/* Name */}
-                    <span className="flex-1 text-sm font-mono text-foreground truncate">
+                    <span className="flex-1 text-[15px] font-mono text-foreground truncate">
                       {col.name}
                     </span>
                     {/* Type badge */}
-                    <span className="shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded bg-foreground/8 text-foreground/50">
+                    <span className="shrink-0 text-[11px] font-mono px-1.5 py-0.5 rounded bg-foreground/8 text-foreground/50">
                       collection
                     </span>
                     {/* Date */}
-                    <span className="shrink-0 text-xs font-mono text-foreground/35 w-16 text-right">
+                    <span className="shrink-0 text-[11px] font-mono text-foreground/35 w-16 text-right">
                       {formatTimeAgo(col.updatedAt)}
                     </span>
                   </button>

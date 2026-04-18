@@ -137,7 +137,7 @@ export default async function ItemsPage({
           <h1 className="text-xl font-semibold text-foreground leading-none">
             {label}
           </h1>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {totalCount} {totalCount === 1 ? "item" : "items"}
           </p>
         </div>
@@ -159,7 +159,7 @@ export default async function ItemsPage({
           >
             <Icon className="w-5 h-5" style={{ color: typeColor }} />
           </div>
-          <p className="text-sm text-foreground/40">No {typeName}s yet.</p>
+          <p className="text-base text-foreground/40">No {typeName}s yet.</p>
           {CREATABLE_TYPES.includes(typeName) && (
             <NewItemButton
               defaultType={typeName as CreatableType}

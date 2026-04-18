@@ -50,8 +50,8 @@ export function EditorPreferencesForm() {
       {/* Font Size */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-foreground">Font size</p>
-          <p className="text-xs text-muted-foreground">Editor font size in pixels</p>
+          <p className="text-[15px] font-medium text-foreground">Font size</p>
+          <p className="text-sm text-muted-foreground">Editor font size in pixels</p>
         </div>
         <Select
           value={String(preferences.fontSize)}
@@ -73,8 +73,8 @@ export function EditorPreferencesForm() {
       {/* Tab Size */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-foreground">Tab size</p>
-          <p className="text-xs text-muted-foreground">Number of spaces per tab</p>
+          <p className="text-[15px] font-medium text-foreground">Tab size</p>
+          <p className="text-sm text-muted-foreground">Number of spaces per tab</p>
         </div>
         <Select
           value={String(preferences.tabSize)}
@@ -96,8 +96,8 @@ export function EditorPreferencesForm() {
       {/* Theme */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-foreground">Theme</p>
-          <p className="text-xs text-muted-foreground">Color theme for the code editor</p>
+          <p className="text-[15px] font-medium text-foreground">Theme</p>
+          <p className="text-sm text-muted-foreground">Color theme for the code editor</p>
         </div>
         <Select
           value={preferences.theme}
@@ -119,8 +119,8 @@ export function EditorPreferencesForm() {
       {/* Word Wrap */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-foreground">Word wrap</p>
-          <p className="text-xs text-muted-foreground">Wrap long lines in the editor</p>
+          <p className="text-[15px] font-medium text-foreground">Word wrap</p>
+          <p className="text-sm text-muted-foreground">Wrap long lines in the editor</p>
         </div>
         <Switch
           checked={preferences.wordWrap}
@@ -131,8 +131,8 @@ export function EditorPreferencesForm() {
       {/* Minimap */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-foreground">Minimap</p>
-          <p className="text-xs text-muted-foreground">Show code overview on the right side</p>
+          <p className="text-[15px] font-medium text-foreground">Minimap</p>
+          <p className="text-sm text-muted-foreground">Show code overview on the right side</p>
         </div>
         <Switch
           checked={preferences.minimap}

@@ -198,20 +198,6 @@ export function CreateItemDialog({ open, onOpenChange, defaultType, collections 
             </div>
           )}
 
-          {/* Language — snippet/command, before content */}
-          {showLanguage && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-foreground/40">
-                Language
-              </label>
-              <Input
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                placeholder="e.g. typescript, bash…"
-              />
-            </div>
-          )}
-
           {/* Content — text types */}
           {showContent && (
             <div className="space-y-1.5">
@@ -219,7 +205,7 @@ export function CreateItemDialog({ open, onOpenChange, defaultType, collections 
                 Content
               </label>
               {showLanguage ? (
-                <CodeEditor value={content} onChange={setContent} language={language} />
+                <CodeEditor value={content} onChange={setContent} language={language} onLanguageChange={setLanguage} />
               ) : showMarkdown ? (
                 <MarkdownEditor value={content} onChange={setContent} />
               ) : (

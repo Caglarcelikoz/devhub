@@ -152,6 +152,7 @@ export function ItemDrawerView({
                 value={item.content ?? ""}
                 language={item.language ?? ""}
                 readOnly
+                minHeight={300}
               />
             ) : showMarkdown ? (
               <MarkdownEditor value={item.content ?? ""} readOnly />

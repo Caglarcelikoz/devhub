@@ -108,22 +108,10 @@ export function ItemDrawerEdit({
           </EditSection>
         )}
 
-        {showLanguage && (
-          <EditSection label="Language">
-            <input
-              type="text"
-              value={language}
-              onChange={(e) => onLanguageChange(e.target.value)}
-              placeholder="e.g. typescript, bash…"
-              className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-ring"
-            />
-          </EditSection>
-        )}
-
         {showContent && (
           <EditSection label="Content">
             {showLanguage ? (
-              <CodeEditor value={content} onChange={onContentChange} language={language} />
+              <CodeEditor value={content} onChange={onContentChange} language={language} onLanguageChange={onLanguageChange} minHeight={300} />
             ) : showMarkdown ? (
               <MarkdownEditor value={content} onChange={onContentChange} />
             ) : (

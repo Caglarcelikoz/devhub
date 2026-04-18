@@ -5,10 +5,38 @@ import Editor, { useMonaco } from '@monaco-editor/react'
 import { Copy, Check } from 'lucide-react'
 import { useEditorPreferences } from '@/context/EditorPreferencesContext'
 
+export const SUPPORTED_LANGUAGES = [
+  { value: '', label: 'Plain Text' },
+  { value: 'typescript', label: 'TypeScript' },
+  { value: 'javascript', label: 'JavaScript' },
+  { value: 'tsx', label: 'TSX' },
+  { value: 'jsx', label: 'JSX' },
+  { value: 'python', label: 'Python' },
+  { value: 'rust', label: 'Rust' },
+  { value: 'go', label: 'Go' },
+  { value: 'java', label: 'Java' },
+  { value: 'kotlin', label: 'Kotlin' },
+  { value: 'csharp', label: 'C#' },
+  { value: 'cpp', label: 'C++' },
+  { value: 'php', label: 'PHP' },
+  { value: 'ruby', label: 'Ruby' },
+  { value: 'swift', label: 'Swift' },
+  { value: 'bash', label: 'Bash / Shell' },
+  { value: 'sql', label: 'SQL' },
+  { value: 'html', label: 'HTML' },
+  { value: 'css', label: 'CSS' },
+  { value: 'scss', label: 'SCSS' },
+  { value: 'json', label: 'JSON' },
+  { value: 'yaml', label: 'YAML' },
+  { value: 'xml', label: 'XML' },
+  { value: 'markdown', label: 'Markdown' },
+  { value: 'dockerfile', label: 'Dockerfile' },
+]
+
 const LINE_HEIGHT = 20 // px per line (matches fontSize 13 + line spacing)
 const EDITOR_PADDING = 24 // top + bottom padding
 const MIN_HEIGHT = 80
-const MAX_HEIGHT = 400
+const MAX_HEIGHT = 600
 
 // Custom theme definitions
 const MONOKAI_THEME = {
@@ -61,10 +89,12 @@ interface CodeEditorProps {
   value: string
   onChange?: (value: string) => void
   language?: string
+  onLanguageChange?: (language: string) => void
   readOnly?: boolean
+  minHeight?: number
 }
 
-export function CodeEditor({ value, onChange, language = '', readOnly = false }: CodeEditorProps) {
+export function CodeEditor({ value, onChange, language = '', onLanguageChange, readOnly = false, minHeight = MIN_HEIGHT }: CodeEditorProps) {
   const [copied, setCopied] = useState(false)
   const monaco = useMonaco()
   const { preferences } = useEditorPreferences()
@@ -80,7 +110,7 @@ export function CodeEditor({ value, onChange, language = '', readOnly = false }:
 
   // Fluid height: grow with content, cap at MAX_HEIGHT
   const lineCount = value ? value.split('\n').length : 1
-  const editorHeight = Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, lineCount * LINE_HEIGHT + EDITOR_PADDING))
+  const editorHeight = Math.min(MAX_HEIGHT, Math.max(minHeight, lineCount * LINE_HEIGHT + EDITOR_PADDING))
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(value).then(() => {
@@ -129,13 +159,26 @@ export function CodeEditor({ value, onChange, language = '', readOnly = false }:
           <div className="h-3 w-3 rounded-full" style={{ background: '#28c840' }} />
         </div>
 
-        {/* Language + Copy */}
+        {/* Language selector + Copy */}
         <div className="flex items-center gap-3">
-          {language && (
+          {onLanguageChange ? (
+            <select
+              value={language}
+              onChange={(e) => onLanguageChange(e.target.value)}
+              className="text-xs font-mono rounded px-1.5 py-0.5 outline-none cursor-pointer border-0"
+              style={{ background: headerBg, color: '#858585' }}
+            >
+              {SUPPORTED_LANGUAGES.map((l) => (
+                <option key={l.value} value={l.value} style={{ background: '#1e1e1e' }}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+          ) : language ? (
             <span className="text-xs font-mono select-none" style={{ color: '#858585' }}>
               {language}
             </span>
-          )}
+          ) : null}
           <button
             onClick={handleCopy}
             title="Copy code"

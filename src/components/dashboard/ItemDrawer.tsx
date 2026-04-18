@@ -67,6 +67,26 @@ export function ItemDrawer({ itemId, onClose, collections = [], isPro = false }:
     setIsEditing(true)
   }, [item])
 
+  const handleAcceptOptimized = useCallback(async (optimized: string) => {
+    if (!item) return
+    const result = await updateItem(item.id, {
+      title: item.title,
+      description: item.description ?? null,
+      content: optimized,
+      url: item.url ?? null,
+      language: item.language ?? null,
+      tags: item.tags,
+      collectionIds: item.collections.map((c) => c.id),
+    })
+    if (!result.success) {
+      toast.error(result.error)
+      return
+    }
+    queryClient.setQueryData<ItemDetail>(['item', itemId], result.data)
+    toast.success('Prompt updated')
+    router.refresh()
+  }, [item, itemId, queryClient, router])
+
   const handleCancel = useCallback(() => setIsEditing(false), [])
 
   const handleCopy = useCallback(() => {
@@ -248,6 +268,7 @@ export function ItemDrawer({ itemId, onClose, collections = [], isPro = false }:
                 onDelete={handleDelete}
                 onToggleFavorite={handleToggleFavorite}
                 onTogglePin={handleTogglePin}
+                onAcceptOptimized={handleAcceptOptimized}
               />
             )}
           </div>

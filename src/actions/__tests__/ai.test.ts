@@ -16,7 +16,7 @@ vi.mock('@/lib/rate-limit', () => ({
 import { auth } from '@/auth'
 import { getOpenAIClient } from '@/lib/openai'
 import { checkAiRateLimit } from '@/lib/rate-limit'
-import { generateAutoTags, generateDescription, explainCode } from '@/actions/ai'
+import { generateAutoTags, generateDescription, explainCode, optimizePrompt } from '@/actions/ai'
 
 function makeSession(isPro = true) {
   return { user: { id: 'user-1', email: 'test@example.com', isPro } }
@@ -354,5 +354,122 @@ describe('explainCode', () => {
     const callArgs = client.responses.create.mock.calls[0][0]
     expect(callArgs.input).toContain('x'.repeat(3000))
     expect(callArgs.input).not.toContain('x'.repeat(3001))
+  })
+})
+
+describe('optimizePrompt', () => {
+  const validOutput = JSON.stringify({
+    optimized: 'You are an expert assistant. Do X clearly and concisely.',
+    note: 'Added explicit role and clarified the instruction.',
+  })
+
+  it('returns error when unauthenticated', async () => {
+    mockAuth.mockResolvedValue(null as never)
+    const result = await optimizePrompt({ title: 'My prompt', content: 'Do X.' })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toBe('Unauthorized')
+  })
+
+  it('returns error for free users', async () => {
+    mockAuth.mockResolvedValue(makeSession(false) as never)
+    const result = await optimizePrompt({ title: 'My prompt', content: 'Do X.' })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toContain('Pro subscription')
+  })
+
+  it('returns error when rate limited', async () => {
+    mockCheckAiRateLimit.mockResolvedValue({ limited: true, error: 'AI rate limit reached.' })
+    const result = await optimizePrompt({ title: 'My prompt', content: 'Do X.' })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toContain('rate limit')
+  })
+
+  it('returns validation error for empty title', async () => {
+    const result = await optimizePrompt({ title: '', content: 'Do X.' })
+    expect(result.success).toBe(false)
+  })
+
+  it('returns validation error for empty content', async () => {
+    const result = await optimizePrompt({ title: 'My prompt', content: '' })
+    expect(result.success).toBe(false)
+  })
+
+  it('returns optimized prompt and note on success', async () => {
+    mockGetOpenAIClient.mockReturnValue(makeOpenAIClient(validOutput) as never)
+    const result = await optimizePrompt({ title: 'My prompt', content: 'Do X.' })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.optimized).toBe('You are an expert assistant. Do X clearly and concisely.')
+      expect(result.data.note).toBe('Added explicit role and clarified the instruction.')
+    }
+  })
+
+  it('trims whitespace from optimized and note fields', async () => {
+    const output = JSON.stringify({ optimized: '  Refined prompt.  ', note: '  Some note.  ' })
+    mockGetOpenAIClient.mockReturnValue(makeOpenAIClient(output) as never)
+    const result = await optimizePrompt({ title: 'test', content: 'Do X.' })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.optimized).toBe('Refined prompt.')
+      expect(result.data.note).toBe('Some note.')
+    }
+  })
+
+  it('returns error when AI returns invalid JSON', async () => {
+    mockGetOpenAIClient.mockReturnValue(makeOpenAIClient('not json') as never)
+    const result = await optimizePrompt({ title: 'test', content: 'Do X.' })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toContain('parse')
+  })
+
+  it('returns error when optimized field is missing', async () => {
+    mockGetOpenAIClient.mockReturnValue(makeOpenAIClient(JSON.stringify({ note: 'A note.' })) as never)
+    const result = await optimizePrompt({ title: 'test', content: 'Do X.' })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toContain('invalid')
+  })
+
+  it('returns empty string for note when note field is missing', async () => {
+    const output = JSON.stringify({ optimized: 'Better prompt.' })
+    mockGetOpenAIClient.mockReturnValue(makeOpenAIClient(output) as never)
+    const result = await optimizePrompt({ title: 'test', content: 'Do X.' })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.note).toBe('')
+    }
+  })
+
+  it('returns error on AI service failure', async () => {
+    mockGetOpenAIClient.mockReturnValue({
+      responses: {
+        create: vi.fn().mockRejectedValue(new Error('Service unavailable')),
+      },
+    } as never)
+    const result = await optimizePrompt({ title: 'test', content: 'Do X.' })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toContain('AI service error')
+  })
+
+  it('truncates content to 3000 chars before calling AI', async () => {
+    const client = makeOpenAIClient(validOutput)
+    mockGetOpenAIClient.mockReturnValue(client as never)
+
+    const longContent = 'p'.repeat(4000)
+    await optimizePrompt({ title: 'test', content: longContent })
+
+    const callArgs = client.responses.create.mock.calls[0][0]
+    expect(callArgs.input).toContain('p'.repeat(3000))
+    expect(callArgs.input).not.toContain('p'.repeat(3001))
+  })
+
+  it('includes title and json keyword in the AI prompt input', async () => {
+    const client = makeOpenAIClient(validOutput)
+    mockGetOpenAIClient.mockReturnValue(client as never)
+
+    await optimizePrompt({ title: 'My special prompt', content: 'Do X.' })
+
+    const callArgs = client.responses.create.mock.calls[0][0]
+    expect(callArgs.input).toContain('My special prompt')
+    expect(callArgs.input.toLowerCase()).toContain('json')
   })
 })

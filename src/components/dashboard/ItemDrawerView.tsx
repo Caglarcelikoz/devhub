@@ -43,6 +43,7 @@ interface ItemDrawerViewProps {
   onDelete: () => void;
   onToggleFavorite: () => void;
   onTogglePin: () => void;
+  onAcceptOptimized?: (optimized: string) => void;
 }
 
 export function ItemDrawerView({
@@ -55,6 +56,7 @@ export function ItemDrawerView({
   onDelete,
   onToggleFavorite,
   onTogglePin,
+  onAcceptOptimized,
 }: ItemDrawerViewProps) {
   const { itemType } = item;
   const preview = item.contentType === "URL" ? item.url : item.content;
@@ -162,7 +164,16 @@ export function ItemDrawerView({
                 itemType={itemType.name as 'snippet' | 'command'}
               />
             ) : showMarkdown ? (
-              <MarkdownEditor value={item.content ?? ""} readOnly />
+              <MarkdownEditor
+                value={item.content ?? ""}
+                readOnly
+                maxHeight={600}
+                showOptimize={itemType.name === 'prompt'}
+                isPro={isPro}
+                itemId={item.id}
+                itemTitle={item.title}
+                onAcceptOptimized={onAcceptOptimized}
+              />
             ) : (
               <div
                 className="rounded-md border p-3"

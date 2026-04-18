@@ -249,3 +249,16 @@
   max-width: 100%;
   border-radius: 4px;
 }
+.editor-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.editor-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.editor-scrollbar::-webkit-scrollbar-thumb {
+  background: #4a4a4a;
+  border-radius: 3px;
+}
+.editor-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #606060;
+}

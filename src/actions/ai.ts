@@ -133,6 +133,72 @@ export async function explainCode(
   }
 }
 
+const optimizePromptSchema = z.object({
+  title: z.string().trim().min(1),
+  content: z.string().trim().min(1),
+})
+
+export async function optimizePrompt(
+  input: z.input<typeof optimizePromptSchema>,
+): Promise<ActionResult<{ optimized: string; note: string }>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  if (!session.user.isPro) {
+    return { success: false, error: 'AI features require a Pro subscription.' }
+  }
+
+  const parsed = optimizePromptSchema.safeParse(input)
+  if (!parsed.success) {
+    const message = parsed.error.issues.map((e) => e.message).join(', ')
+    return { success: false, error: message }
+  }
+
+  const rateCheck = await checkAiRateLimit(session.user.id)
+  if (rateCheck.limited) {
+    return { success: false, error: rateCheck.error ?? 'Rate limit exceeded.' }
+  }
+
+  const { title, content } = parsed.data
+
+  try {
+    const client = getOpenAIClient()
+    const response = await client.responses.create({
+      model: AI_MODEL,
+      instructions:
+        'You are an expert prompt engineer. Analyze the given AI prompt and return an improved version. Return ONLY a JSON object with two keys: "optimized" (the full improved prompt text) and "note" (a 1-2 sentence explanation of the key improvements made). Do not add any other text.',
+      input: `Return JSON. Title: ${title}\n\nPrompt:\n${content.slice(0, 3000)}`,
+      text: {
+        format: { type: 'json_object' },
+      },
+    })
+
+    let result: { optimized: string; note: string }
+    try {
+      result = JSON.parse(response.output_text)
+    } catch {
+      return { success: false, error: 'Failed to parse AI response.' }
+    }
+
+    if (!result?.optimized || typeof result.optimized !== 'string') {
+      return { success: false, error: 'AI returned an invalid response.' }
+    }
+
+    return {
+      success: true,
+      data: {
+        optimized: result.optimized.trim(),
+        note: typeof result.note === 'string' ? result.note.trim() : '',
+      },
+    }
+  } catch (err) {
+    console.error('AI prompt optimization error:', err)
+    return { success: false, error: 'AI service error. Please try again.' }
+  }
+}
+
 const generateAutoTagsSchema = z.object({
   title: z.string().trim().min(1),
   content: z.string().nullable().optional(),

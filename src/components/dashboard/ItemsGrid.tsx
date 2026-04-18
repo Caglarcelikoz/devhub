@@ -39,10 +39,10 @@ export function ItemsGrid({ items, columns = "auto", onItemClick, thumbnailUrls,
 
   const gridClass =
     columns === "two"
-      ? "grid grid-cols-1 md:grid-cols-2 gap-3"
+      ? "grid grid-cols-1 md:grid-cols-2 gap-4"
       : columns === "three"
-      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
-      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3";
+      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4";
 
   return (
     <div className={gridClass}>
@@ -109,19 +109,19 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
   return (
     <div
       onClick={() => onItemClick?.(item.id)}
-      className="group relative rounded-lg border bg-card p-4 flex flex-col gap-3 cursor-pointer transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md"
+      className="group relative rounded-lg border bg-card p-5 flex flex-col gap-3 cursor-pointer transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md"
       style={{ borderColor: `${itemType.color}40` }}
     >
       {/* Top accent bar */}
       <div
-        className="absolute top-0 left-4 right-4 h-0.5 rounded-b-full opacity-60"
+        className="absolute top-0 left-5 right-5 h-0.5 rounded-b-full opacity-60"
         style={{ backgroundColor: itemType.color }}
       />
 
       {/* Header row */}
       <div className="flex items-start justify-between gap-2 pt-1">
         <span
-          className="inline-flex items-center px-2 py-1 rounded text-[11px] font-medium"
+          className="inline-flex items-center px-2.5 py-1 rounded text-sm font-medium"
           style={{
             backgroundColor: `${itemType.color}18`,
             color: itemType.color,
@@ -174,11 +174,11 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
 
       {/* Title + description */}
       <div>
-        <h3 className="text-[15px] font-semibold text-foreground leading-snug line-clamp-1">
+        <h3 className="text-base font-semibold text-foreground leading-snug line-clamp-1">
           {item.title}
         </h3>
         {item.description && (
-          <p className="text-sm text-foreground/55 mt-1 line-clamp-2 leading-snug">
+          <p className="text-[15px] text-foreground/55 mt-1 line-clamp-2 leading-snug">
             {item.description}
           </p>
         )}
@@ -190,7 +190,7 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
           className="flex min-w-0"
           style={{ borderLeft: `2px solid ${itemType.color}50` }}
         >
-          <pre className="text-[13px] text-foreground/50 overflow-hidden line-clamp-3 font-mono leading-relaxed whitespace-pre-wrap pl-2.5">
+          <pre className="text-sm text-foreground/50 overflow-hidden line-clamp-3 font-mono leading-relaxed whitespace-pre-wrap pl-2.5">
             {preview}
           </pre>
         </div>
@@ -203,13 +203,13 @@ function ItemCard({ item, onItemClick }: { item: ItemWithMeta; onItemClick?: (id
             <Badge
               key={tag}
               variant="secondary"
-              className="text-xs px-2 py-0.5 h-auto font-normal rounded-md"
+              className="text-sm px-2 py-0.5 h-auto font-normal rounded-md"
             >
               {tag}
             </Badge>
           ))}
         </div>
-        <span className="text-[11px] text-foreground/35 shrink-0 tabular-nums">
+        <span className="text-sm text-foreground/35 shrink-0 tabular-nums">
           {timeAgo}
         </span>
       </div>

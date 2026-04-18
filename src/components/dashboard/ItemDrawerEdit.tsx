@@ -5,6 +5,7 @@ import { CodeEditor } from '@/components/ui/code-editor'
 import { MarkdownEditor } from '@/components/ui/markdown-editor'
 import { CollectionSelector } from '@/components/ui/collection-selector'
 import { TagsField } from '@/components/ui/tags-field'
+import { DescriptionField } from '@/components/ui/description-field'
 import { useUsageLimits } from '@/context/UsageLimitsContext'
 import type { ItemDetail } from '@/lib/db/items'
 import type { CollectionOption } from '@/lib/db/collections'
@@ -89,15 +90,19 @@ export function ItemDrawerEdit({
 
       {/* ── Scrollable body ── */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-        <EditSection label="Description">
-          <textarea
-            value={description}
-            onChange={(e) => onDescriptionChange(e.target.value)}
-            placeholder="Optional description…"
-            rows={3}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-1 focus:ring-ring resize-none"
-          />
-        </EditSection>
+        <DescriptionField
+          value={description}
+          onChange={onDescriptionChange}
+          isPro={isPro}
+          title={title}
+          itemType={item.itemType.name}
+          content={content || undefined}
+          url={url || undefined}
+          fileName={item.fileName ?? undefined}
+          language={language || undefined}
+          rows={4}
+          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-1 focus:ring-ring resize-none"
+        />
 
         {showUrl && (
           <EditSection label="URL">

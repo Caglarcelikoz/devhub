@@ -9,6 +9,70 @@ type ActionResult<T> =
   | { success: true; data: T }
   | { success: false; error: string }
 
+const generateDescriptionSchema = z.object({
+  title: z.string().trim().min(1),
+  itemType: z.string().trim().min(1),
+  content: z.string().nullable().optional(),
+  url: z.string().nullable().optional(),
+  fileName: z.string().nullable().optional(),
+  language: z.string().nullable().optional(),
+})
+
+export async function generateDescription(
+  input: z.input<typeof generateDescriptionSchema>,
+): Promise<ActionResult<string>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  if (!session.user.isPro) {
+    return { success: false, error: 'AI features require a Pro subscription.' }
+  }
+
+  const parsed = generateDescriptionSchema.safeParse(input)
+  if (!parsed.success) {
+    const message = parsed.error.issues.map((e) => e.message).join(', ')
+    return { success: false, error: message }
+  }
+
+  const rateCheck = await checkAiRateLimit(session.user.id)
+  if (rateCheck.limited) {
+    return { success: false, error: rateCheck.error ?? 'Rate limit exceeded.' }
+  }
+
+  const { title, itemType, content, url, fileName, language } = parsed.data
+
+  const parts = [
+    `Type: ${itemType}`,
+    `Title: ${title}`,
+    language ? `Language: ${language}` : '',
+    url ? `URL: ${url}` : '',
+    fileName ? `File: ${fileName}` : '',
+    content ? `Content (excerpt): ${content.slice(0, 1500)}` : '',
+  ].filter(Boolean)
+
+  try {
+    const client = getOpenAIClient()
+    const response = await client.responses.create({
+      model: AI_MODEL,
+      instructions:
+        'You are a developer tool assistant. Write a concise 1-2 sentence description for the given developer resource. The description should explain what it is and why it is useful. Return ONLY the description text, no quotes, no extra formatting.',
+      input: parts.join('\n'),
+    })
+
+    const description = response.output_text.trim()
+    if (!description) {
+      return { success: false, error: 'AI returned an empty response.' }
+    }
+
+    return { success: true, data: description }
+  } catch (err) {
+    console.error('AI description generation error:', err)
+    return { success: false, error: 'AI service error. Please try again.' }
+  }
+}
+
 const generateAutoTagsSchema = z.object({
   title: z.string().trim().min(1),
   content: z.string().nullable().optional(),

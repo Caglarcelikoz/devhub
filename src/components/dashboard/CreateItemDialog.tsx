@@ -27,6 +27,7 @@ import { createItem } from '@/actions/items'
 import { CollectionSelector } from '@/components/ui/collection-selector'
 import type { CollectionOption } from '@/lib/db/collections'
 import { TagsField } from '@/components/ui/tags-field'
+import { DescriptionField } from '@/components/ui/description-field'
 import { useUsageLimits } from '@/context/UsageLimitsContext'
 
 export type CreatableType = 'snippet' | 'prompt' | 'command' | 'note' | 'link' | 'file' | 'image'
@@ -173,18 +174,17 @@ export function CreateItemDialog({ open, onOpenChange, defaultType, collections 
           </div>
 
           {/* Description */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-foreground/40">
-              Description
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Optional description…"
-              rows={2}
-              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none placeholder:text-muted-foreground"
-            />
-          </div>
+          <DescriptionField
+            value={description}
+            onChange={setDescription}
+            isPro={isPro}
+            title={title}
+            itemType={itemTypeName}
+            content={content || undefined}
+            url={url || undefined}
+            fileName={uploadedFile?.fileName ?? undefined}
+            language={language || undefined}
+          />
 
           {/* URL — link only */}
           {showUrl && (

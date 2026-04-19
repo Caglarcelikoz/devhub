@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/auth";
-import { getItemsByType } from "@/lib/db/items";
+import { getItemsByType, getTagsByType } from "@/lib/db/items";
 import { getCollections } from "@/lib/db/collections";
 import { getSignedDownloadUrl } from "@/lib/s3";
 import { ITEMS_PER_PAGE } from "@/lib/constants";
@@ -17,6 +17,7 @@ import {
 import { ItemsGridClient } from "@/components/dashboard/ItemsGridClient";
 import { NewItemButton } from "@/components/dashboard/NewItemButton";
 import { SortControls } from "@/components/dashboard/SortControls";
+import { TagFilter } from "@/components/dashboard/TagFilter";
 import { Pagination } from "@/components/ui/Pagination";
 import type { CreatableType } from "@/components/dashboard/CreateItemDialog";
 import type { ItemSortOption } from "@/lib/db/items";
@@ -80,7 +81,7 @@ const VALID_SORTS: ItemSortOption[] = [
 
 interface ItemsPageProps {
   params: Promise<{ type: string }>;
-  searchParams: Promise<{ page?: string; sort?: string }>;
+  searchParams: Promise<{ page?: string; sort?: string; tag?: string }>;
 }
 
 export default async function ItemsPage({
@@ -104,16 +105,18 @@ export default async function ItemsPage({
     redirect("/upgrade");
   }
 
-  const { page: pageParam, sort: sortParam } = await searchParams;
+  const { page: pageParam, sort: sortParam, tag: tagParam } = await searchParams;
   const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
   const currentSort: ItemSortOption =
     VALID_SORTS.includes(sortParam as ItemSortOption)
       ? (sortParam as ItemSortOption)
       : "pinned";
+  const activeTag = tagParam ?? null;
 
-  const [{ items, totalCount }, collectionOptions] = await Promise.all([
-    getItemsByType(session.user.id, typeName, currentPage, ITEMS_PER_PAGE, currentSort),
+  const [{ items, totalCount }, collectionOptions, allTags] = await Promise.all([
+    getItemsByType(session.user.id, typeName, currentPage, ITEMS_PER_PAGE, currentSort, activeTag ?? undefined),
     getCollections(session.user.id),
+    getTagsByType(session.user.id, typeName),
   ]);
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
@@ -166,6 +169,9 @@ export default async function ItemsPage({
         )}
       </div>
 
+      {/* Tag filter */}
+      <TagFilter tags={allTags} activeTag={activeTag} />
+
       {/* Grid */}
       {totalCount === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
@@ -198,9 +204,13 @@ export default async function ItemsPage({
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            buildHref={(page) =>
-              `/items/${slug}?page=${page}${currentSort !== "pinned" ? `&sort=${currentSort}` : ""}`
-            }
+            buildHref={(page) => {
+              const params = new URLSearchParams();
+              params.set("page", String(page));
+              if (currentSort !== "pinned") params.set("sort", currentSort);
+              if (activeTag) params.set("tag", activeTag);
+              return `/items/${slug}?${params.toString()}`;
+            }}
           />
         </>
       )}

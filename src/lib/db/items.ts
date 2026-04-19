@@ -181,8 +181,13 @@ export async function getItemsByType(
   page = 1,
   pageSize = 21,
   sort: ItemSortOption = 'pinned',
+  tag?: string,
 ): Promise<PaginatedItems> {
-  const where = { userId, itemType: { name: typeName } };
+  const where = {
+    userId,
+    itemType: { name: typeName },
+    ...(tag ? { tags: { some: { name: tag } } } : {}),
+  };
   const [rows, totalCount] = await Promise.all([
     prisma.item.findMany({
       where,
@@ -194,6 +199,18 @@ export async function getItemsByType(
     prisma.item.count({ where }),
   ]);
   return { items: rows.map(mapItem), totalCount };
+}
+
+export async function getTagsByType(
+  userId: string,
+  typeName: string,
+): Promise<string[]> {
+  const tags = await prisma.tag.findMany({
+    where: { items: { some: { userId, itemType: { name: typeName } } } },
+    select: { name: true },
+    orderBy: { name: 'asc' },
+  });
+  return tags.map((t) => t.name);
 }
 
 export async function getItemsByCollection(

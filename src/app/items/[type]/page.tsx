@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { ItemsGridClient } from "@/components/dashboard/ItemsGridClient";
+import { ImageGallery } from "@/components/dashboard/ImageGallery";
 import { NewItemButton } from "@/components/dashboard/NewItemButton";
 import { SortControls } from "@/components/dashboard/SortControls";
 import { TagFilter } from "@/components/dashboard/TagFilter";
@@ -192,15 +193,24 @@ export default async function ItemsPage({
         </div>
       ) : (
         <>
-          <ItemsGridClient
-            items={items}
-            columns={typeName === "file" ? "two" : "three"}
-            layout={typeName === "file" ? "list" : "grid"}
-            thumbnailUrls={thumbnailUrls}
-            collections={collectionOptions}
-            isPro={session.user.isPro}
-            hideTypeBadge
-          />
+          {typeName === "image" ? (
+            <ImageGallery
+              items={items}
+              thumbnailUrls={thumbnailUrls}
+              collections={collectionOptions}
+              isPro={session.user.isPro}
+            />
+          ) : (
+            <ItemsGridClient
+              items={items}
+              columns={typeName === "file" ? "two" : "three"}
+              layout={typeName === "file" ? "list" : "grid"}
+              thumbnailUrls={thumbnailUrls}
+              collections={collectionOptions}
+              isPro={session.user.isPro}
+              hideTypeBadge
+            />
+          )}
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

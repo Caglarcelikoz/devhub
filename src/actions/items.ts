@@ -10,8 +10,9 @@ import {
   deleteItem as dbDeleteItem,
   toggleFavoriteItem as dbToggleFavoriteItem,
   togglePinnedItem as dbTogglePinnedItem,
+  getItemsByIds as dbGetItemsByIds,
 } from "@/lib/db/items";
-import type { ItemDetail } from '@/lib/db/items'
+import type { ItemDetail, ItemWithMeta } from '@/lib/db/items'
 import type { ActionResult } from '@/types/actions'
 
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image'] as const
@@ -194,5 +195,19 @@ export async function togglePin(itemId: string): Promise<ActionResult<null>> {
     return { success: true, data: null };
   } catch {
     return { success: false, error: "Failed to toggle pin" };
+  }
+}
+
+export async function fetchRecentlyViewedItems(
+  ids: string[],
+): Promise<ActionResult<ItemWithMeta[]>> {
+  const session = await requireAuth()
+  if (!session) return { success: false, error: 'Unauthorized' }
+
+  try {
+    const items = await dbGetItemsByIds(session.user.id, ids.slice(0, 3))
+    return { success: true, data: items }
+  } catch {
+    return { success: false, error: 'Failed to load items' }
   }
 }

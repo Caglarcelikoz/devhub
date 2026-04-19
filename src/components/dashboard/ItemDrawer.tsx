@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -16,6 +16,7 @@ import {
 } from "@/actions/items";
 import type { ItemDetail } from '@/lib/db/items'
 import type { CollectionOption } from '@/lib/db/collections'
+import { trackRecentlyViewed } from '@/lib/utils/recently-viewed'
 
 interface ItemDrawerProps {
   itemId: string | null
@@ -46,6 +47,10 @@ export function ItemDrawer({ itemId, onClose, collections = [], isPro = false }:
     enabled: itemId !== null,
     staleTime: 0,
   })
+
+  useEffect(() => {
+    if (itemId) trackRecentlyViewed(itemId)
+  }, [itemId])
 
   // Edit form state — initialised from item when entering edit mode
   const [title, setTitle] = useState('')

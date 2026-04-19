@@ -3,16 +3,22 @@ import { auth } from "@/auth";
 import { getCollectionsWithMeta, getCollections } from "@/lib/db/collections";
 import {
   getPinnedItems,
+  getRecentItems,
   getAllItemsPaginated,
+  getFilesAndImages,
   getItemStats,
 } from "@/lib/db/items";
+import { getSignedDownloadUrl } from "@/lib/s3";
 import { DASHBOARD_COLLECTIONS_LIMIT } from "@/lib/constants";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { CollectionsRow } from "@/components/dashboard/CollectionsRow";
 import { ItemsGridClient } from "@/components/dashboard/ItemsGridClient";
+import { RecentlyViewedSection } from "@/components/dashboard/RecentlyViewedSection";
+import { FilesAndImagesSection } from "@/components/dashboard/FilesAndImagesSection";
 import { Pagination } from "@/components/ui/Pagination";
 import { Pin, Clock, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
 const DASHBOARD_ITEMS_PAGE_SIZE = 12;
 
@@ -37,23 +43,37 @@ export default async function DashboardPage({
     allCollections,
     collectionOptions,
     pinnedItems,
+    recentlyCreated,
     { items: allItems, totalCount },
     itemStats,
+    filesAndImages,
+    totalFiles,
+    totalImages,
   ] = await Promise.all([
     getCollectionsWithMeta(userId),
     getCollections(userId),
     getPinnedItems(userId),
+    getRecentItems(userId, 3),
     getAllItemsPaginated(userId, currentPage, DASHBOARD_ITEMS_PAGE_SIZE),
     getItemStats(userId),
+    getFilesAndImages(userId, 4),
+    prisma.item.count({ where: { userId, itemType: { name: 'file' } } }),
+    prisma.item.count({ where: { userId, itemType: { name: 'image' } } }),
   ]);
 
-  const totalPages = Math.ceil(totalCount / DASHBOARD_ITEMS_PAGE_SIZE);
-  const visibleCollections = allCollections.slice(
-    0,
-    DASHBOARD_COLLECTIONS_LIMIT,
+  // Pre-sign thumbnail URLs for dashboard image strip
+  const thumbnailUrls: Record<string, string> = {};
+  await Promise.all(
+    filesAndImages.images
+      .filter((img) => img.fileUrl)
+      .map(async (img) => {
+        thumbnailUrls[img.id] = await getSignedDownloadUrl(img.fileUrl!, 300);
+      }),
   );
-  const hasMoreCollections =
-    allCollections.length > DASHBOARD_COLLECTIONS_LIMIT;
+
+  const totalPages = Math.ceil(totalCount / DASHBOARD_ITEMS_PAGE_SIZE);
+  const visibleCollections = allCollections.slice(0, DASHBOARD_COLLECTIONS_LIMIT);
+  const hasMoreCollections = allCollections.length > DASHBOARD_COLLECTIONS_LIMIT;
 
   const stats = {
     totalItems: itemStats.totalItems,
@@ -85,6 +105,35 @@ export default async function DashboardPage({
         </div>
         <CollectionsRow collections={visibleCollections} />
       </section>
+
+      {/* Files & Images */}
+      {session.user.isPro && (
+        <FilesAndImagesSection
+          files={filesAndImages.files}
+          images={filesAndImages.images}
+          thumbnailUrls={thumbnailUrls}
+          collections={collectionOptions}
+          isPro={session.user.isPro}
+          totalFiles={totalFiles}
+          totalImages={totalImages}
+        />
+      )}
+
+      {/* Recently Created */}
+      {recentlyCreated.length > 0 && (
+        <section>
+          <SectionHeading label="Recently Created" icon={<Clock className="h-4 w-4" />} />
+          <ItemsGridClient
+            items={recentlyCreated}
+            columns="three"
+            collections={collectionOptions}
+            isPro={session.user.isPro}
+          />
+        </section>
+      )}
+
+      {/* Recently Viewed */}
+      <RecentlyViewedSection collections={collectionOptions} isPro={session.user.isPro} />
 
       {/* Pinned Items */}
       {pinnedItems.length > 0 && (

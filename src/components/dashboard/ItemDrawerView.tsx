@@ -88,11 +88,13 @@ export function ItemDrawerView({
           label={item.isPinned ? "Unpin" : "Pin"}
           onClick={onTogglePin}
         />
-        <ActionButton
-          icon={<Copy className="h-4 w-4" />}
-          label={copied ? "Copied!" : "Copy"}
-          onClick={onCopy}
-        />
+        {item.contentType !== "FILE" && (
+          <ActionButton
+            icon={<Copy className="h-4 w-4" />}
+            label={copied ? "Copied!" : "Copy"}
+            onClick={onCopy}
+          />
+        )}
         <ActionButton
           icon={<Pencil className="h-4 w-4" />}
           label="Edit"

@@ -96,9 +96,11 @@ const itemDetailSelect = {
   },
 } as const
 
+const FILE_TYPE_NAMES = ['file', 'image']
+
 export async function getPinnedItems(userId: string): Promise<ItemWithMeta[]> {
   const rows = await prisma.item.findMany({
-    where: { userId, isPinned: true },
+    where: { userId, isPinned: true, itemType: { name: { notIn: FILE_TYPE_NAMES } } },
     orderBy: { updatedAt: 'desc' },
     select: itemSelect,
   })
@@ -118,7 +120,7 @@ export async function getFavoriteItems(
 
 export async function getRecentItems(userId: string, limit = 10): Promise<ItemWithMeta[]> {
   const rows = await prisma.item.findMany({
-    where: { userId },
+    where: { userId, itemType: { name: { notIn: FILE_TYPE_NAMES } } },
     orderBy: { updatedAt: 'desc' },
     take: limit,
     select: itemSelect,
@@ -131,7 +133,7 @@ export async function getAllItemsPaginated(
   page = 1,
   pageSize = 12,
 ): Promise<PaginatedItems> {
-  const where = { userId };
+  const where = { userId, itemType: { name: { notIn: FILE_TYPE_NAMES } } };
   const [rows, totalCount] = await Promise.all([
     prisma.item.findMany({
       where,
@@ -143,6 +145,27 @@ export async function getAllItemsPaginated(
     prisma.item.count({ where }),
   ]);
   return { items: rows.map(mapItem), totalCount };
+}
+
+export async function getFilesAndImages(
+  userId: string,
+  limit = 6,
+): Promise<{ files: ItemWithMeta[]; images: ItemWithMeta[] }> {
+  const [files, images] = await Promise.all([
+    prisma.item.findMany({
+      where: { userId, itemType: { name: 'file' } },
+      orderBy: { updatedAt: 'desc' },
+      take: limit,
+      select: itemSelect,
+    }),
+    prisma.item.findMany({
+      where: { userId, itemType: { name: 'image' } },
+      orderBy: { updatedAt: 'desc' },
+      take: limit,
+      select: itemSelect,
+    }),
+  ]);
+  return { files: files.map(mapItem), images: images.map(mapItem) };
 }
 
 export interface PaginatedItems {
@@ -199,6 +222,23 @@ export async function getItemsByType(
     prisma.item.count({ where }),
   ]);
   return { items: rows.map(mapItem), totalCount };
+}
+
+export async function getItemsByIds(
+  userId: string,
+  ids: string[],
+): Promise<ItemWithMeta[]> {
+  if (ids.length === 0) return [];
+  const rows = await prisma.item.findMany({
+    where: { id: { in: ids }, userId },
+    select: itemSelect,
+  });
+  // preserve caller's order
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  return ids.flatMap((id) => {
+    const row = byId.get(id);
+    return row ? [mapItem(row)] : [];
+  });
 }
 
 export async function getTagsByType(

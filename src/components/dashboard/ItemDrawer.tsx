@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Sheet, SheetContent, SheetHeader } from '@/components/ui/sheet'
+import { colorBg } from '@/lib/utils/color'
 import { ItemDrawerView } from './ItemDrawerView'
 import { ItemDrawerEdit } from './ItemDrawerEdit'
 import {
@@ -207,7 +208,7 @@ export function ItemDrawer({ itemId, onClose, collections = [], isPro = false }:
                 <span
                   className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium shrink-0"
                   style={{
-                    backgroundColor: `${item.itemType.color}18`,
+                    backgroundColor: colorBg(item.itemType.color),
                     color: item.itemType.color,
                   }}
                 >

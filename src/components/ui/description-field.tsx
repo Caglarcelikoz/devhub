@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { generateDescription } from '@/actions/ai'
+import { AiFieldLabel } from '@/components/ui/ai-field-label'
 
 interface DescriptionFieldProps {
   value: string
@@ -53,26 +53,14 @@ export function DescriptionField({
 
   return (
     <div className="space-y-1.5">
-      <div className="flex items-center justify-between min-h-5">
-        <span className="text-xs font-semibold uppercase tracking-wider text-foreground/40">
-          Description
-        </span>
-        {isPro && (
-          <button
-            type="button"
-            onClick={handleGenerate}
-            disabled={loading}
-            className="inline-flex items-center gap-1 text-xs text-muted-foreground/60 hover:text-primary disabled:opacity-50 transition-colors"
-          >
-            {loading ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              <Sparkles className="h-3 w-3" />
-            )}
-            {loading ? 'Generating…' : 'Generate'}
-          </button>
-        )}
-      </div>
+      <AiFieldLabel
+        label="Description"
+        isPro={isPro}
+        loading={loading}
+        onAction={handleGenerate}
+        actionLabel="Generate"
+        loadingLabel="Generating…"
+      />
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}

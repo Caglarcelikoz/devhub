@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
-import { toast } from "sonner";
 import { Button } from '@/components/ui/button'
 import { CreateItemDialog } from '@/components/dashboard/CreateItemDialog'
 import { useUsageLimits } from "@/context/UsageLimitsContext";
+import { showItemLimitToast } from '@/lib/limits'
 import type { CreatableType } from '@/components/dashboard/CreateItemDialog'
 import type { CollectionOption } from '@/lib/db/collections'
 
@@ -20,21 +20,8 @@ export function NewItemButton({ defaultType, label = 'New Item', collections = [
   const [open, setOpen] = useState(false)
 
   function handleClick() {
-    if (!canCreateItem) {
-      toast.error(
-        "You've reached the 50-item limit. Upgrade to Pro for unlimited items.",
-        {
-          action: {
-            label: "Upgrade",
-            onClick: () => {
-              window.location.href = "/settings#billing";
-            },
-          },
-        },
-      );
-      return;
-    }
-    setOpen(true);
+    if (!canCreateItem) { showItemLimitToast(); return }
+    setOpen(true)
   }
 
   return (

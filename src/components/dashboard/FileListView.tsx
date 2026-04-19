@@ -2,6 +2,8 @@
 
 import { Download, FileText, FileImage, FileCode, FileArchive, FileAudio, FileVideo, File } from 'lucide-react'
 import type { ItemWithMeta } from '@/lib/db/items'
+import { formatBytes, formatDate } from '@/lib/utils/format'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface FileListViewProps {
   items: ItemWithMeta[]
@@ -10,7 +12,7 @@ interface FileListViewProps {
 
 export function FileListView({ items, onItemClick }: FileListViewProps) {
   if (items.length === 0) {
-    return <p className="text-sm text-foreground/40">No items yet.</p>
+    return <EmptyState title="No items yet." />
   }
 
   return (
@@ -69,7 +71,7 @@ function FileListRow({
           )}
           {item.fileSize != null && (
             <span className="text-sm text-muted-foreground shrink-0">
-              {formatFileSize(item.fileSize)}
+              {formatBytes(item.fileSize)}
             </span>
           )}
         </div>
@@ -109,16 +111,3 @@ function getFileIcon(ext: string, color: string) {
   return <File {...props} />
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(date)
-}

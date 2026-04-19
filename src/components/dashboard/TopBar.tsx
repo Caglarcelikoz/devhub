@@ -16,6 +16,7 @@ import { CreateCollectionDialog } from "@/components/dashboard/CreateCollectionD
 import { CommandPalette } from "@/components/dashboard/CommandPalette";
 import { ItemDrawer } from "@/components/dashboard/ItemDrawer";
 import { useUsageLimits } from "@/context/UsageLimitsContext";
+import { showItemLimitToast } from "@/lib/limits";
 import type { CollectionOption } from "@/lib/db/collections";
 import type { SearchItem } from "@/lib/db/items";
 import type { SearchCollection } from "@/lib/db/collections";
@@ -38,21 +39,8 @@ export function TopBar({
   const [drawerItemId, setDrawerItemId] = useState<string | null>(null);
 
   function handleNewItem() {
-    if (!canCreateItem) {
-      toast.error(
-        "You've reached the 50-item limit. Upgrade to Pro for unlimited items.",
-        {
-          action: {
-            label: "Upgrade",
-            onClick: () => {
-              window.location.href = "/settings#billing";
-            },
-          },
-        },
-      );
-      return;
-    }
-    setItemDialogOpen(true);
+    if (!canCreateItem) { showItemLimitToast(); return }
+    setItemDialogOpen(true)
   }
 
   function handleNewCollection() {

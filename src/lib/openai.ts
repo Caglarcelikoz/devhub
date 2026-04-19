@@ -13,3 +13,20 @@ export function getOpenAIClient(): OpenAI {
   }
   return _client
 }
+
+interface CallAIOptions {
+  instructions: string
+  input: string
+  jsonMode?: boolean
+}
+
+export async function callAI({ instructions, input, jsonMode = false }: CallAIOptions): Promise<string> {
+  const client = getOpenAIClient()
+  const response = await client.responses.create({
+    model: AI_MODEL,
+    instructions,
+    input,
+    ...(jsonMode ? { text: { format: { type: 'json_object' } } } : {}),
+  })
+  return response.output_text
+}

@@ -29,6 +29,7 @@ import type { CollectionOption } from '@/lib/db/collections'
 import { TagsField } from '@/components/ui/tags-field'
 import { DescriptionField } from '@/components/ui/description-field'
 import { useUsageLimits } from '@/context/UsageLimitsContext'
+import { isTextType, isLanguageType, isMarkdownType, isFileType } from '@/lib/constants/item-types'
 
 export type CreatableType = 'snippet' | 'prompt' | 'command' | 'note' | 'link' | 'file' | 'image'
 
@@ -41,11 +42,6 @@ const TYPES: { value: CreatableType; label: string }[] = [
   { value: 'file', label: 'File' },
   { value: 'image', label: 'Image' },
 ]
-
-const TEXT_TYPES: CreatableType[] = ['snippet', 'prompt', 'command', 'note']
-const LANGUAGE_TYPES: CreatableType[] = ['snippet', 'command']
-const MARKDOWN_TYPES: CreatableType[] = ['note', 'prompt']
-const FILE_TYPES: CreatableType[] = ['file', 'image']
 
 interface CreateItemDialogProps {
   open: boolean
@@ -69,11 +65,11 @@ export function CreateItemDialog({ open, onOpenChange, defaultType, collections 
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null)
   const [saving, setSaving] = useState(false)
 
-  const showContent = TEXT_TYPES.includes(itemTypeName)
-  const showLanguage = LANGUAGE_TYPES.includes(itemTypeName)
-  const showMarkdown = MARKDOWN_TYPES.includes(itemTypeName)
+  const showContent = isTextType(itemTypeName)
+  const showLanguage = isLanguageType(itemTypeName)
+  const showMarkdown = isMarkdownType(itemTypeName)
   const showUrl = itemTypeName === 'link'
-  const showFileUpload = FILE_TYPES.includes(itemTypeName)
+  const showFileUpload = isFileType(itemTypeName)
 
   const resetForm = () => {
     setItemTypeName(defaultType ?? 'snippet')

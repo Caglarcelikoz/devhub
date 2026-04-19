@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AuthFormHeader } from "@/components/auth/AuthFormHeader";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -35,14 +36,7 @@ export function ForgotPasswordForm() {
 
   return (
     <div className="w-full max-w-sm space-y-6">
-      <div className="space-y-1 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Forgot your password?
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Enter your email and we&apos;ll send you a reset link.
-        </p>
-      </div>
+      <AuthFormHeader title="Forgot your password?" subtitle="Enter your email and we'll send you a reset link." />
 
       {submitted ? (
         <div className="space-y-4">

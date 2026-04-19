@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Star } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { CollectionWithMeta } from "@/lib/db/collections";
@@ -52,9 +53,7 @@ function FavoriteButton({ collection }: { collection: CollectionWithMeta }) {
 
 export function CollectionsRow({ collections }: CollectionsRowProps) {
   if (collections.length === 0) {
-    return (
-      <p className="text-sm text-foreground/40">No collections yet.</p>
-    );
+    return <EmptyState title="No collections yet." />
   }
 
   return (

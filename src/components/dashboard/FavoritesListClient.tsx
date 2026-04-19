@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Star, FolderOpen } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useRouter } from "next/navigation";
 import { ItemDrawer } from "@/components/dashboard/ItemDrawer";
 import type { ItemWithMeta } from "@/lib/db/items";
@@ -9,6 +10,7 @@ import type {
   FavoriteCollection,
   CollectionOption,
 } from "@/lib/db/collections";
+import { formatTimeAgo } from "@/lib/utils/time";
 
 type SortKey = "date-desc" | "date-asc" | "name-asc" | "name-desc" | "type-asc";
 
@@ -19,17 +21,6 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "name-desc", label: "Name Z→A" },
   { value: "type-asc", label: "Type A→Z" },
 ];
-
-function formatTimeAgo(date: Date): string {
-  const diff = Date.now() - new Date(date).getTime();
-  const mins = Math.floor(diff / 60_000);
-  if (mins < 60) return `${Math.max(1, mins)}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(date).toLocaleDateString();
-}
 
 interface FavoritesListClientProps {
   items: ItemWithMeta[];
@@ -95,18 +86,12 @@ export function FavoritesListClient({
 
   if (!hasItems && !hasCollections) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 gap-3 text-center">
-        <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-foreground/8">
-          <Star className="w-5 h-5 text-foreground/40" />
-        </div>
-        <p className="text-base text-foreground/40 font-mono">
-          No favorites yet.
-        </p>
-        <p className="text-sm text-foreground/30 font-mono">
-          Star items or collections to find them here quickly.
-        </p>
-      </div>
-    );
+      <EmptyState
+        icon={<Star className="w-5 h-5 text-foreground/40" />}
+        title="No favorites yet."
+        description="Star items or collections to find them here quickly."
+      />
+    )
   }
 
   return (

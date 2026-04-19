@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AuthFormHeader } from "@/components/auth/AuthFormHeader";
 
 export function ResetPasswordForm() {
   const router = useRouter();
@@ -54,14 +55,7 @@ export function ResetPasswordForm() {
 
   return (
     <div className="w-full max-w-sm space-y-6">
-      <div className="space-y-1 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Reset your password
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Enter a new password for your account.
-        </p>
-      </div>
+      <AuthFormHeader title="Reset your password" subtitle="Enter a new password for your account." />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (

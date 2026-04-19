@@ -1,15 +1,13 @@
-import { NextResponse } from 'next/server'
-import { auth } from '@/auth'
+import { requireSession } from '@/lib/api/require-session'
 import { prisma } from '@/lib/prisma'
 import { deleteFromS3 } from '@/lib/s3'
+import { apiError, apiSuccess } from '@/lib/api/responses'
 
 export async function DELETE() {
-  try {
-    const session = await auth()
+  const { session, error } = await requireSession()
+  if (error) return error
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+  try {
 
     const fileItems = await prisma.item.findMany({
       where: { userId: session.user.id, fileUrl: { not: null } },
@@ -20,8 +18,8 @@ export async function DELETE() {
 
     await prisma.user.delete({ where: { id: session.user.id } })
 
-    return NextResponse.json({ success: true })
+    return apiSuccess({ success: true })
   } catch {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return apiError('Internal server error')
   }
 }

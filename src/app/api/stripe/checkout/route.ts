@@ -1,15 +1,13 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { requireSession } from '@/lib/api/require-session';
 import { stripe } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
-  try {
-    const session = await auth();
+  const { session, error: authError } = await requireSession()
+  if (authError) return authError
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  try {
 
     const { plan } = await request.json() as { plan: string };
 

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, Check, X, Loader2 } from 'lucide-react'
+import { Check, X } from 'lucide-react'
+import { AiFieldLabel } from '@/components/ui/ai-field-label'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { generateAutoTags } from '@/actions/ai'
@@ -79,26 +80,14 @@ export function TagsField({
   return (
     <div className="space-y-1.5">
       {label && (
-        <div className="flex items-center justify-between min-h-[1.25rem]">
-          <span className="text-xs font-semibold uppercase tracking-wider text-foreground/40">
-            Tags
-          </span>
-          {isPro && (
-            <button
-              type="button"
-              onClick={handleSuggest}
-              disabled={loading}
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground/60 hover:text-primary disabled:opacity-50 transition-colors"
-            >
-              {loading ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <Sparkles className="h-3 w-3" />
-              )}
-              {loading ? 'Suggesting…' : 'Suggest'}
-            </button>
-          )}
-        </div>
+        <AiFieldLabel
+          label="Tags"
+          isPro={isPro}
+          loading={loading}
+          onAction={handleSuggest}
+          actionLabel="Suggest"
+          loadingLabel="Suggesting…"
+        />
       )}
 
       {/* Suggestion pills */}

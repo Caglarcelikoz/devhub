@@ -2,7 +2,8 @@
 
 import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Folder, Code, Sparkles, Terminal, StickyNote, File, Image, Link } from 'lucide-react'
+import { Folder, File } from 'lucide-react'
+import { ITEM_TYPE_ICONS } from '@/lib/constants/item-types'
 import {
   Command,
   CommandDialog,
@@ -16,15 +17,6 @@ import {
 import type { SearchItem } from '@/lib/db/items'
 import type { SearchCollection } from '@/lib/db/collections'
 
-const ITEM_TYPE_ICONS: Record<string, React.ElementType> = {
-  snippet: Code,
-  prompt: Sparkles,
-  command: Terminal,
-  note: StickyNote,
-  file: File,
-  image: Image,
-  link: Link,
-}
 
 interface CommandPaletteProps {
   items: SearchItem[]
@@ -69,7 +61,7 @@ export function CommandPalette({
         {items.length > 0 && (
           <CommandGroup heading="Items">
             {items.map((item) => {
-              const Icon = ITEM_TYPE_ICONS[item.itemType.name] ?? File
+              const Icon = ITEM_TYPE_ICONS[item.itemType.name as keyof typeof ITEM_TYPE_ICONS] ?? File
               return (
                 <CommandItem
                   key={item.id}

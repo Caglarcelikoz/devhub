@@ -1,15 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/auth'
+import { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
+import { requireSession } from '@/lib/api/require-session'
 import { getItemById } from '@/lib/db/items'
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const { session, error } = await requireSession()
+  if (error) return error
 
   const { id } = await params
   const item = await getItemById(id, session.user.id)

@@ -27,11 +27,10 @@ import { Badge } from '@/components/ui/badge'
 import { CodeEditor } from '@/components/ui/code-editor'
 import { MarkdownEditor } from '@/components/ui/markdown-editor'
 import type { ItemDetail } from '@/lib/db/items'
-
-const TEXT_TYPES = ['snippet', 'prompt', 'command', 'note']
-const LANGUAGE_TYPES = ['snippet', 'command']
-const MARKDOWN_TYPES = ['note', 'prompt']
-const FILE_TYPES = ['file', 'image']
+import { isLanguageType, isMarkdownType, isFileType } from '@/lib/constants/item-types'
+import { formatDate, formatBytes } from '@/lib/utils/format'
+import { colorBorderSubtle, colorBgSubtle } from '@/lib/utils/color'
+import { SectionLabel } from '@/components/ui/section-label'
 
 interface ItemDrawerViewProps {
   item: ItemDetail;
@@ -60,9 +59,9 @@ export function ItemDrawerView({
 }: ItemDrawerViewProps) {
   const { itemType } = item;
   const preview = item.contentType === "URL" ? item.url : item.content;
-  const showLanguage = LANGUAGE_TYPES.includes(itemType.name);
-  const showMarkdown = MARKDOWN_TYPES.includes(itemType.name);
-  const showFile = FILE_TYPES.includes(itemType.name);
+  const showLanguage = isLanguageType(itemType.name);
+  const showMarkdown = isMarkdownType(itemType.name);
+  const showFile = isFileType(itemType.name);
   const isImageType = itemType.name === "image";
   const createdDate = formatDate(new Date(item.createdAt));
   const updatedDate = formatDate(new Date(item.updatedAt));
@@ -142,15 +141,15 @@ export function ItemDrawerView({
       {/* ── Scrollable body ── */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
         {item.description && (
-          <Section label="Description">
+          <SectionLabel label="Description">
             <p className="text-[15px] text-foreground/70 leading-relaxed">
               {item.description}
             </p>
-          </Section>
+          </SectionLabel>
         )}
 
         {preview && (
-          <Section label="Content">
+          <SectionLabel label="Content">
             {showLanguage ? (
               <CodeEditor
                 value={item.content ?? ""}
@@ -178,8 +177,8 @@ export function ItemDrawerView({
               <div
                 className="rounded-md border p-3"
                 style={{
-                  borderColor: `${itemType.color}30`,
-                  backgroundColor: `${itemType.color}06`,
+                  borderColor: colorBorderSubtle(itemType.color),
+                  backgroundColor: colorBgSubtle(itemType.color),
                 }}
               >
                 <pre className="text-sm text-foreground/80 font-mono leading-relaxed whitespace-pre-wrap wrap-break-word">
@@ -187,11 +186,11 @@ export function ItemDrawerView({
                 </pre>
               </div>
             )}
-          </Section>
+          </SectionLabel>
         )}
 
         {showFile && item.fileUrl && (
-          <Section label={isImageType ? "Image" : "File"}>
+          <SectionLabel label={isImageType ? "Image" : "File"}>
             {isImageType ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -203,8 +202,8 @@ export function ItemDrawerView({
               <div
                 className="flex items-center gap-3 rounded-md border p-3"
                 style={{
-                  borderColor: `${itemType.color}30`,
-                  backgroundColor: `${itemType.color}06`,
+                  borderColor: colorBorderSubtle(itemType.color),
+                  backgroundColor: colorBgSubtle(itemType.color),
                 }}
               >
                 <File className="h-5 w-5 shrink-0 text-muted-foreground" />
@@ -220,11 +219,11 @@ export function ItemDrawerView({
                 </div>
               </div>
             )}
-          </Section>
+          </SectionLabel>
         )}
 
         {item.tags.length > 0 && (
-          <Section label="Tags" icon={<Tag className="h-3.5 w-3.5" />}>
+          <SectionLabel label="Tags" icon={<Tag className="h-3.5 w-3.5" />}>
             <div className="flex flex-wrap gap-1.5">
               {item.tags.map((tag) => (
                 <Badge
@@ -236,11 +235,11 @@ export function ItemDrawerView({
                 </Badge>
               ))}
             </div>
-          </Section>
+          </SectionLabel>
         )}
 
         {item.collections.length > 0 && (
-          <Section
+          <SectionLabel
             label="Collections"
             icon={<FolderOpen className="h-3.5 w-3.5" />}
           >
@@ -255,10 +254,10 @@ export function ItemDrawerView({
                 </Badge>
               ))}
             </div>
-          </Section>
+          </SectionLabel>
         )}
 
-        <Section label="Details" icon={<Calendar className="h-3.5 w-3.5" />}>
+        <SectionLabel label="Details" icon={<Calendar className="h-3.5 w-3.5" />}>
           <div className="space-y-1.5 text-[15px]">
             <div className="flex justify-between">
               <span className="text-foreground/45">Created</span>
@@ -273,31 +272,12 @@ export function ItemDrawerView({
               </span>
             </div>
           </div>
-        </Section>
+        </SectionLabel>
       </div>
     </>
   );
 }
 
-function Section({
-  label,
-  icon,
-  children,
-}: {
-  label: string
-  icon?: React.ReactNode
-  children: React.ReactNode
-}) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-1.5 text-foreground/40">
-        {icon}
-        <span className="text-[11px] font-semibold uppercase tracking-wider">{label}</span>
-      </div>
-      {children}
-    </div>
-  )
-}
 
 function ActionButton({
   icon,
@@ -320,12 +300,3 @@ function ActionButton({
   )
 }
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
-}

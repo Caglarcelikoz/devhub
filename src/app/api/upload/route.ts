@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { auth } from '@/auth'
+import { requireSession } from '@/lib/api/require-session'
 import { s3, S3_BUCKET } from '@/lib/s3'
 import { prisma } from "@/lib/prisma";
 import { randomUUID } from 'crypto'
@@ -24,10 +24,8 @@ const IMAGE_MAX_BYTES = 5 * 1024 * 1024  // 5 MB
 const FILE_MAX_BYTES  = 10 * 1024 * 1024 // 10 MB
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const { session, error } = await requireSession()
+  if (error) return error
 
   // Query isPro directly from DB — enriched JWT may not reflect latest subscription state
   const user = await prisma.user.findUnique({

@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { ImageThumbnailCard } from "@/components/dashboard/ImageThumbnailCard";
 import { toggleFavorite, togglePin } from "@/actions/items";
 import type { ItemWithMeta } from "@/lib/db/items";
+import { formatTimeAgo } from "@/lib/utils/time";
+import { colorBorder, colorBg, colorBorderStrong } from "@/lib/utils/color";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface ItemsGridProps {
   items: ItemWithMeta[];
@@ -22,20 +25,7 @@ interface ItemsGridProps {
 
 export function ItemsGrid({ items, columns = "auto", onItemClick, thumbnailUrls, emptyMessage = "No items yet.", onEmptyAction, emptyActionLabel, hideTypeBadge = false }: ItemsGridProps) {
   if (items.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
-        <p className="text-base text-foreground/40">{emptyMessage}</p>
-        {onEmptyAction && emptyActionLabel && (
-          <button
-            type="button"
-            onClick={onEmptyAction}
-            className="text-sm px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
-            {emptyActionLabel}
-          </button>
-        )}
-      </div>
-    );
+    return <EmptyState title={emptyMessage} action={onEmptyAction} actionLabel={emptyActionLabel} />
   }
 
   const gridClass =
@@ -111,7 +101,7 @@ function ItemCard({ item, onItemClick, hideTypeBadge }: { item: ItemWithMeta; on
     <div
       onClick={() => onItemClick?.(item.id)}
       className="group relative rounded-lg border bg-card p-5 flex flex-col gap-3 cursor-pointer transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md"
-      style={{ borderColor: `${itemType.color}40` }}
+      style={{ borderColor: colorBorder(itemType.color) }}
     >
       {/* Top accent bar */}
       <div
@@ -125,7 +115,7 @@ function ItemCard({ item, onItemClick, hideTypeBadge }: { item: ItemWithMeta; on
           <span
             className="inline-flex items-center px-2.5 py-1 rounded text-sm font-medium"
             style={{
-              backgroundColor: `${itemType.color}18`,
+              backgroundColor: colorBg(itemType.color),
               color: itemType.color,
             }}
           >
@@ -191,7 +181,7 @@ function ItemCard({ item, onItemClick, hideTypeBadge }: { item: ItemWithMeta; on
       {preview && (
         <div
           className="flex min-w-0"
-          style={{ borderLeft: `2px solid ${itemType.color}50` }}
+          style={{ borderLeft: `2px solid ${colorBorderStrong(itemType.color)}` }}
         >
           <pre className="text-sm text-foreground/50 overflow-hidden line-clamp-3 font-mono leading-relaxed whitespace-pre-wrap pl-2.5">
             {preview}
@@ -220,14 +210,3 @@ function ItemCard({ item, onItemClick, hideTypeBadge }: { item: ItemWithMeta; on
   );
 }
 
-function formatTimeAgo(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return "today";
-  if (diffDays === 1) return "1d ago";
-  if (diffDays < 30) return `${diffDays}d ago`;
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
-  return `${Math.floor(diffDays / 365)}y ago`;
-}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { Readable } from 'stream'
-import { auth } from '@/auth'
+import { requireSession } from '@/lib/api/require-session'
 import { getItemById } from '@/lib/db/items'
 import { s3, S3_BUCKET } from '@/lib/s3'
 
@@ -11,10 +11,8 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const { session, error } = await requireSession()
+  if (error) return error
 
   const { id } = await params
   const item = await getItemById(id, session.user.id)

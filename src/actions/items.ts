@@ -1,7 +1,8 @@
 'use server'
 
 import { z } from 'zod'
-import { auth } from '@/auth'
+import { requireAuth } from '@/lib/auth-helpers'
+import { formatZodError, optionalString } from '@/lib/zod-helpers'
 import { canCreateItem } from "@/lib/usage";
 import {
   createItem as dbCreateItem,
@@ -11,27 +12,22 @@ import {
   togglePinnedItem as dbTogglePinnedItem,
 } from "@/lib/db/items";
 import type { ItemDetail } from '@/lib/db/items'
+import type { ActionResult } from '@/types/actions'
 
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image'] as const
 
 const createItemSchema = z.object({
   title: z.string().trim().min(1, 'Title is required'),
   itemTypeName: z.enum(CREATABLE_TYPES, { error: 'Invalid item type' }),
-  description: z.string().trim().nullable().optional().transform((v) => v ?? null),
-  content: z.string().nullable().optional().transform((v) => v ?? null),
-  fileUrl: z.string().nullable().optional().transform((v) => v ?? null),
-  fileName: z.string().nullable().optional().transform((v) => v ?? null),
+  description: optionalString,
+  content: optionalString,
+  fileUrl: optionalString,
+  fileName: optionalString,
   fileSize: z.number().nullable().optional().transform((v) => v ?? null),
-  url: z
-    .string()
-    .trim()
-    .nullable()
-    .optional()
-    .transform((v) => v ?? null)
-    .refine((v) => !v || z.string().url().safeParse(v).success, {
-      message: 'Must be a valid URL',
-    }),
-  language: z.string().trim().nullable().optional().transform((v) => v ?? null),
+  url: optionalString.refine((v) => !v || z.string().url().safeParse(v).success, {
+    message: 'Must be a valid URL',
+  }),
+  language: optionalString,
   tags: z.array(z.string().trim().min(1)).default([]),
   collectionIds: z.array(z.string()).default([]),
 })
@@ -41,10 +37,8 @@ type CreateItemInput = z.input<typeof createItemSchema>
 export async function createItem(
   input: CreateItemInput,
 ): Promise<ActionResult<ItemDetail>> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const session = await requireAuth()
+  if (!session) return { success: false, error: 'Unauthorized' }
 
   // Feature gating for free users
   if (["file", "image"].includes(input.itemTypeName) && !session.user.isPro) {
@@ -66,11 +60,8 @@ export async function createItem(
     };
   }
 
-  const parsed = createItemSchema.safeParse(input);
-  if (!parsed.success) {
-    const message = parsed.error.issues.map((e) => e.message).join(", ");
-    return { success: false, error: message };
-  }
+  const parsed = createItemSchema.safeParse(input)
+  if (!parsed.success) return { success: false, error: formatZodError(parsed.error) }
 
   const data = parsed.data;
 
@@ -112,44 +103,27 @@ export async function createItem(
 
 const updateItemSchema = z.object({
   title: z.string().trim().min(1, 'Title is required'),
-  description: z.string().trim().nullable().optional().transform((v) => v ?? null),
-  content: z.string().nullable().optional().transform((v) => v ?? null),
-  url: z
-    .string()
-    .trim()
-    .nullable()
-    .optional()
-    .transform((v) => v ?? null)
-    .refine((v) => !v || z.string().url().safeParse(v).success, {
-      message: 'Must be a valid URL',
-    }),
-  language: z.string().trim().nullable().optional().transform((v) => v ?? null),
-  tags: z
-    .array(z.string().trim().min(1))
-    .default([]),
+  description: optionalString,
+  content: optionalString,
+  url: optionalString.refine((v) => !v || z.string().url().safeParse(v).success, {
+    message: 'Must be a valid URL',
+  }),
+  language: optionalString,
+  tags: z.array(z.string().trim().min(1)).default([]),
   collectionIds: z.array(z.string()).default([]),
 })
 
 type UpdateItemInput = z.input<typeof updateItemSchema>
 
-type ActionResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string }
-
 export async function updateItem(
   itemId: string,
   input: UpdateItemInput,
 ): Promise<ActionResult<ItemDetail>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+  const session = await requireAuth()
+  if (!session) return { success: false, error: 'Unauthorized' }
 
   const parsed = updateItemSchema.safeParse(input)
-  if (!parsed.success) {
-    const message = parsed.error.issues.map((e) => e.message).join(', ')
-    return { success: false, error: message }
-  }
+  if (!parsed.success) return { success: false, error: formatZodError(parsed.error) }
 
   const data = parsed.data
 
@@ -177,10 +151,8 @@ export async function updateItem(
 export async function deleteItem(
   itemId: string,
 ): Promise<ActionResult<null>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+  const session = await requireAuth()
+  if (!session) return { success: false, error: 'Unauthorized' }
 
   try {
     const deleted = await dbDeleteItem(itemId, session.user.id)
@@ -196,10 +168,8 @@ export async function deleteItem(
 export async function toggleFavorite(
   itemId: string,
 ): Promise<ActionResult<null>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+  const session = await requireAuth()
+  if (!session) return { success: false, error: 'Unauthorized' }
 
   try {
     const toggled = await dbToggleFavoriteItem(itemId, session.user.id)
@@ -213,10 +183,8 @@ export async function toggleFavorite(
 }
 
 export async function togglePin(itemId: string): Promise<ActionResult<null>> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const session = await requireAuth()
+  if (!session) return { success: false, error: 'Unauthorized' }
 
   try {
     const toggled = await dbTogglePinnedItem(itemId, session.user.id);

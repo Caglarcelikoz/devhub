@@ -1,7 +1,8 @@
 'use server'
 
 import { z } from 'zod'
-import { auth } from '@/auth'
+import { requireAuth } from '@/lib/auth-helpers'
+import { formatZodError, optionalString } from '@/lib/zod-helpers'
 import { canCreateCollection } from "@/lib/usage";
 import {
   createCollection as dbCreateCollection,
@@ -10,30 +11,21 @@ import {
   toggleFavoriteCollection as dbToggleFavoriteCollection,
 } from '@/lib/db/collections'
 import type { CreatedCollection, CollectionById } from '@/lib/db/collections'
+import type { ActionResult } from '@/types/actions'
 
-type ActionResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string }
-
-const createCollectionSchema = z.object({
+const collectionSchema = z.object({
   name: z.string().trim().min(1, 'Name is required'),
-  description: z
-    .string()
-    .trim()
-    .nullable()
-    .optional()
-    .transform((v) => v ?? null),
+  description: optionalString,
 })
 
-type CreateCollectionInput = z.input<typeof createCollectionSchema>
+type CreateCollectionInput = z.input<typeof collectionSchema>
+type UpdateCollectionInput = z.input<typeof collectionSchema>
 
 export async function createCollection(
   input: CreateCollectionInput,
 ): Promise<ActionResult<CreatedCollection>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+  const session = await requireAuth()
+  if (!session) return { success: false, error: 'Unauthorized' }
 
   const allowed = await canCreateCollection(
     session.user.id,
@@ -47,11 +39,8 @@ export async function createCollection(
     };
   }
 
-  const parsed = createCollectionSchema.safeParse(input)
-  if (!parsed.success) {
-    const message = parsed.error.issues.map((e) => e.message).join(', ')
-    return { success: false, error: message }
-  }
+  const parsed = collectionSchema.safeParse(input)
+  if (!parsed.success) return { success: false, error: formatZodError(parsed.error) }
 
   try {
     const created = await dbCreateCollection(session.user.id, {
@@ -64,32 +53,15 @@ export async function createCollection(
   }
 }
 
-const updateCollectionSchema = z.object({
-  name: z.string().trim().min(1, 'Name is required'),
-  description: z
-    .string()
-    .trim()
-    .nullable()
-    .optional()
-    .transform((v) => v ?? null),
-})
-
-type UpdateCollectionInput = z.input<typeof updateCollectionSchema>
-
 export async function updateCollection(
   collectionId: string,
   input: UpdateCollectionInput,
 ): Promise<ActionResult<CollectionById>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+  const session = await requireAuth()
+  if (!session) return { success: false, error: 'Unauthorized' }
 
-  const parsed = updateCollectionSchema.safeParse(input)
-  if (!parsed.success) {
-    const message = parsed.error.issues.map((e) => e.message).join(', ')
-    return { success: false, error: message }
-  }
+  const parsed = collectionSchema.safeParse(input)
+  if (!parsed.success) return { success: false, error: formatZodError(parsed.error) }
 
   try {
     const updated = await dbUpdateCollection(session.user.id, collectionId, {
@@ -106,10 +78,8 @@ export async function updateCollection(
 export async function deleteCollection(
   collectionId: string,
 ): Promise<ActionResult<null>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+  const session = await requireAuth()
+  if (!session) return { success: false, error: 'Unauthorized' }
 
   try {
     const deleted = await dbDeleteCollection(session.user.id, collectionId)
@@ -123,10 +93,8 @@ export async function deleteCollection(
 export async function toggleFavoriteCollection(
   collectionId: string,
 ): Promise<ActionResult<null>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+  const session = await requireAuth()
+  if (!session) return { success: false, error: 'Unauthorized' }
 
   try {
     const toggled = await dbToggleFavoriteCollection(session.user.id, collectionId)

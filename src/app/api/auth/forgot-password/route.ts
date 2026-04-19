@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { randomBytes } from 'crypto'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendPasswordResetEmail } from '@/lib/resend'
 import { checkForgotPasswordRateLimit } from '@/lib/rate-limit'
+import { apiError, apiSuccess } from '@/lib/api/responses'
+import { rotateVerificationToken } from '@/lib/db/verification-tokens'
 
 export async function POST(request: NextRequest) {
   const rl = await checkForgotPasswordRateLimit(request)
@@ -11,33 +12,18 @@ export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json()
 
-    if (!email) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
-    }
+    if (!email) return apiError('Email is required', 400)
 
     const user = await prisma.user.findUnique({ where: { email } })
 
     // Always return success to avoid user enumeration
-    if (!user || !user.password) {
-      return NextResponse.json({ success: true })
-    }
+    if (!user || !user.password) return apiSuccess({ success: true })
 
-    // Delete any existing reset token for this email
-    await prisma.verificationToken.deleteMany({
-      where: { identifier: `password-reset:${email}` },
-    })
-
-    const token = randomBytes(32).toString('hex')
-    const expires = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
-
-    await prisma.verificationToken.create({
-      data: { identifier: `password-reset:${email}`, token, expires },
-    })
-
+    const token = await rotateVerificationToken(`password-reset:${email}`, 60 * 60 * 1000)
     await sendPasswordResetEmail(email, token)
 
-    return NextResponse.json({ success: true })
+    return apiSuccess({ success: true })
   } catch {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return apiError('Internal server error')
   }
 }

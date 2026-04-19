@@ -1,6 +1,7 @@
 'use client'
 
 import { Check, X, Calendar } from 'lucide-react'
+import { SectionLabel } from '@/components/ui/section-label'
 import { CodeEditor } from '@/components/ui/code-editor'
 import { MarkdownEditor } from '@/components/ui/markdown-editor'
 import { CollectionSelector } from '@/components/ui/collection-selector'
@@ -9,10 +10,8 @@ import { DescriptionField } from '@/components/ui/description-field'
 import { useUsageLimits } from '@/context/UsageLimitsContext'
 import type { ItemDetail } from '@/lib/db/items'
 import type { CollectionOption } from '@/lib/db/collections'
-
-const LANGUAGE_TYPES = ['snippet', 'command']
-const MARKDOWN_TYPES = ['note', 'prompt']
-const TEXT_TYPES = ['snippet', 'prompt', 'command', 'note']
+import { isTextType, isLanguageType, isMarkdownType } from '@/lib/constants/item-types'
+import { formatDate } from '@/lib/utils/format'
 
 interface ItemDrawerEditProps {
   item: ItemDetail
@@ -59,9 +58,9 @@ export function ItemDrawerEdit({
 }: ItemDrawerEditProps) {
   const { isPro } = useUsageLimits()
   const { itemType } = item
-  const showContent = TEXT_TYPES.includes(itemType.name)
-  const showLanguage = LANGUAGE_TYPES.includes(itemType.name)
-  const showMarkdown = MARKDOWN_TYPES.includes(itemType.name)
+  const showContent = isTextType(itemType.name)
+  const showLanguage = isLanguageType(itemType.name)
+  const showMarkdown = isMarkdownType(itemType.name)
   const showUrl = itemType.name === 'link'
   const createdDate = formatDate(new Date(item.createdAt))
   const updatedDate = formatDate(new Date(item.updatedAt))
@@ -105,7 +104,7 @@ export function ItemDrawerEdit({
         />
 
         {showUrl && (
-          <EditSection label="URL">
+          <SectionLabel label="URL">
             <input
               type="url"
               value={url}
@@ -113,11 +112,11 @@ export function ItemDrawerEdit({
               placeholder="https://…"
               className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-ring"
             />
-          </EditSection>
+          </SectionLabel>
         )}
 
         {showContent && (
-          <EditSection label="Content">
+          <SectionLabel label="Content">
             {showLanguage ? (
               <CodeEditor value={content} onChange={onContentChange} language={language} onLanguageChange={onLanguageChange} minHeight={300} />
             ) : showMarkdown ? (
@@ -131,7 +130,7 @@ export function ItemDrawerEdit({
                 className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-mono text-foreground outline-none focus:ring-1 focus:ring-ring resize-y"
               />
             )}
-          </EditSection>
+          </SectionLabel>
         )}
 
         <TagsField
@@ -143,15 +142,15 @@ export function ItemDrawerEdit({
           itemType={item.itemType.name}
         />
 
-        <EditSection label="Collections">
+        <SectionLabel label="Collections">
           <CollectionSelector
             collections={collections}
             selected={selectedCollections}
             onChange={onSelectedCollectionsChange}
           />
-        </EditSection>
+        </SectionLabel>
 
-        <Section label="Details" icon={<Calendar className="h-3.5 w-3.5" />}>
+        <SectionLabel label="Details" icon={<Calendar className="h-3.5 w-3.5" />}>
           <div className="space-y-1.5 text-sm">
             <div className="flex justify-between">
               <span className="text-foreground/45">Created</span>
@@ -162,41 +161,10 @@ export function ItemDrawerEdit({
               <span className="text-foreground/70 tabular-nums">{updatedDate}</span>
             </div>
           </div>
-        </Section>
+        </SectionLabel>
       </div>
     </>
   )
 }
 
-function Section({
-  label,
-  icon,
-  children,
-}: {
-  label: string
-  icon?: React.ReactNode
-  children: React.ReactNode
-}) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-1.5 text-foreground/40">
-        {icon}
-        <span className="text-xs font-semibold uppercase tracking-wider">{label}</span>
-      </div>
-      {children}
-    </div>
-  )
-}
 
-function EditSection({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-1.5">
-      <span className="text-xs font-semibold uppercase tracking-wider text-foreground/40">{label}</span>
-      {children}
-    </div>
-  )
-}
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-}

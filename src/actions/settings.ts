@@ -1,17 +1,17 @@
 'use server'
 
 import { auth } from '@/auth'
+import { requireAuth } from '@/lib/auth-helpers'
 import { prisma } from '@/lib/prisma'
 import { DEFAULT_EDITOR_PREFERENCES, type EditorPreferences } from '@/context/EditorPreferencesContext'
 import { editorPreferencesSchema } from '@/lib/editor-preferences'
+import type { ActionResult } from '@/types/actions'
 
 export async function updateEditorPreferences(
   preferences: EditorPreferences
-): Promise<{ success: boolean; error?: string }> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+): Promise<ActionResult<null>> {
+  const session = await requireAuth()
+  if (!session) return { success: false, error: 'Unauthorized' }
 
   const parsed = editorPreferencesSchema.safeParse(preferences)
   if (!parsed.success) {
@@ -23,7 +23,7 @@ export async function updateEditorPreferences(
     data: { editorPreferences: parsed.data },
   })
 
-  return { success: true }
+  return { success: true, data: null }
 }
 
 export async function getEditorPreferences(): Promise<EditorPreferences> {

@@ -16,8 +16,10 @@ import {
 } from "lucide-react";
 import { ItemsGridClient } from "@/components/dashboard/ItemsGridClient";
 import { NewItemButton } from "@/components/dashboard/NewItemButton";
+import { SortControls } from "@/components/dashboard/SortControls";
 import { Pagination } from "@/components/ui/Pagination";
 import type { CreatableType } from "@/components/dashboard/CreateItemDialog";
+import type { ItemSortOption } from "@/lib/db/items";
 
 const VALID_TYPES = [
   "snippet",
@@ -67,9 +69,18 @@ function typeSlugToName(slug: string): ValidType | undefined {
   return SLUG_TO_TYPE[slug];
 }
 
+const VALID_SORTS: ItemSortOption[] = [
+  "pinned",
+  "newest",
+  "oldest",
+  "updated",
+  "title_asc",
+  "title_desc",
+];
+
 interface ItemsPageProps {
   params: Promise<{ type: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; sort?: string }>;
 }
 
 export default async function ItemsPage({
@@ -93,11 +104,15 @@ export default async function ItemsPage({
     redirect("/upgrade");
   }
 
-  const { page: pageParam } = await searchParams;
+  const { page: pageParam, sort: sortParam } = await searchParams;
   const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+  const currentSort: ItemSortOption =
+    VALID_SORTS.includes(sortParam as ItemSortOption)
+      ? (sortParam as ItemSortOption)
+      : "pinned";
 
   const [{ items, totalCount }, collectionOptions] = await Promise.all([
-    getItemsByType(session.user.id, typeName, currentPage, ITEMS_PER_PAGE),
+    getItemsByType(session.user.id, typeName, currentPage, ITEMS_PER_PAGE, currentSort),
     getCollections(session.user.id),
   ]);
 
@@ -141,6 +156,7 @@ export default async function ItemsPage({
             {totalCount} {totalCount === 1 ? "item" : "items"}
           </p>
         </div>
+        {totalCount > 0 && <SortControls currentSort={currentSort} />}
         {CREATABLE_TYPES.includes(typeName) && (
           <NewItemButton
             defaultType={typeName as CreatableType}
@@ -182,7 +198,9 @@ export default async function ItemsPage({
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            buildHref={(page) => `/items/${slug}?page=${page}`}
+            buildHref={(page) =>
+              `/items/${slug}?page=${page}${currentSort !== "pinned" ? `&sort=${currentSort}` : ""}`
+            }
           />
         </>
       )}

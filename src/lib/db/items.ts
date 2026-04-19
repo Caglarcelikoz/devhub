@@ -150,17 +150,43 @@ export interface PaginatedItems {
   totalCount: number;
 }
 
+export type ItemSortOption =
+  | 'pinned'
+  | 'newest'
+  | 'oldest'
+  | 'title_asc'
+  | 'title_desc'
+  | 'updated'
+
+function buildOrderBy(sort: ItemSortOption) {
+  switch (sort) {
+    case 'pinned':
+      return [{ isPinned: 'desc' as const }, { updatedAt: 'desc' as const }]
+    case 'newest':
+      return [{ createdAt: 'desc' as const }]
+    case 'oldest':
+      return [{ createdAt: 'asc' as const }]
+    case 'title_asc':
+      return [{ title: 'asc' as const }]
+    case 'title_desc':
+      return [{ title: 'desc' as const }]
+    case 'updated':
+      return [{ updatedAt: 'desc' as const }]
+  }
+}
+
 export async function getItemsByType(
   userId: string,
   typeName: string,
   page = 1,
   pageSize = 21,
+  sort: ItemSortOption = 'pinned',
 ): Promise<PaginatedItems> {
   const where = { userId, itemType: { name: typeName } };
   const [rows, totalCount] = await Promise.all([
     prisma.item.findMany({
       where,
-      orderBy: [{ isPinned: "desc" }, { updatedAt: "desc" }],
+      orderBy: buildOrderBy(sort),
       skip: (page - 1) * pageSize,
       take: pageSize,
       select: itemSelect,
